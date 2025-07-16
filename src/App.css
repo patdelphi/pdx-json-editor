@@ -1,0 +1,25 @@
+/* App-specific styles */
+.App {
+  text-align: center;
+}
+
+/* Custom component styles that extend Tailwind */
+.editor-container {
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1),
+    0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.dark .editor-container {
+  box-shadow:
+    0 1px 3px 0 rgba(0, 0, 0, 0.3),
+    0 1px 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* Smooth transitions for theme switching */
+* {
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
