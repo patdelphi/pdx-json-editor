@@ -115,10 +115,10 @@ const FileOperations: React.FC<FileOperationsProps> = ({
         onClick={handleNewClick}
         className={buttonBaseClass}
         disabled={disabled}
-        title="Create new file (Ctrl+N)"
+        title="创建新文件 (Ctrl+N)"
       >
         <span>📄</span>
-        <span>New</span>
+        <span>新建</span>
       </button>
 
       {/* Open File Button */}
@@ -126,10 +126,10 @@ const FileOperations: React.FC<FileOperationsProps> = ({
         onClick={handleOpenClick}
         className={buttonBaseClass}
         disabled={disabled}
-        title="Open file (Ctrl+O)"
+        title="打开文件 (Ctrl+O)"
       >
         <span>📁</span>
-        <span>Open</span>
+        <span>打开</span>
       </button>
 
       {/* Save File Button */}
@@ -137,12 +137,12 @@ const FileOperations: React.FC<FileOperationsProps> = ({
         onClick={handleSaveClick}
         className={isDirty ? primaryButtonClass : buttonBaseClass}
         disabled={disabled}
-        title="Save file (Ctrl+S)"
+        title="保存文件 (Ctrl+S)"
       >
         <span>💾</span>
-        <span>Save</span>
+        <span>保存</span>
         {isDirty && (
-          <span className="w-2 h-2 bg-orange-500 rounded-full ml-1" title="Unsaved changes" />
+          <span className="w-2 h-2 bg-orange-500 rounded-full ml-1" title="未保存的更改" />
         )}
       </button>
 

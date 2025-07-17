@@ -25,12 +25,12 @@ const useModal = () => {
   });
 
   const openModal = useCallback((newOptions: ModalOptions) => {
-    setOptions({
-      ...options,
+    setOptions(prevOptions => ({
+      ...prevOptions,
       ...newOptions
-    });
+    }));
     setIsOpen(true);
-  }, [options]);
+  }, []);
 
   const closeModal = useCallback(() => {
     setIsOpen(false);

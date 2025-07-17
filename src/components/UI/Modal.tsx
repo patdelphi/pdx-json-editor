@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import Z_INDEX from '../../constants/zIndex';
 
 interface ModalProps {
   isOpen: boolean;
@@ -18,14 +19,45 @@ const Modal: React.FC<ModalProps> = ({
   actions
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const modalRef = useRef<HTMLDivElement>(null);
 
+  // Handle ESC key press to close modal
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener('keydown', handleEscKey);
+      document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+      document.body.style.overflow = ''; // Restore scrolling
+    };
+  }, [isOpen, onClose]);
+
+  // Animation handling
   useEffect(() => {
     if (isOpen) {
-      // Small delay to trigger animation
-      const timer = setTimeout(() => setIsVisible(true), 10);
-      return () => clearTimeout(timer);
+      // Ensure DOM is updated before animation
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setIsVisible(true);
+        });
+      });
     } else {
       setIsVisible(false);
+    }
+  }, [isOpen]);
+
+  // Focus trap inside modal
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      modalRef.current.focus();
     }
   }, [isOpen]);
 
@@ -70,49 +102,107 @@ const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        {/* Background overlay */}
-        <div 
-          className={`fixed inset-0 bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75 transition-opacity ${
-            isVisible ? 'opacity-100' : 'opacity-0'
-          }`} 
-          aria-hidden="true"
-          onClick={onClose}
-        ></div>
-
-        {/* Modal panel */}
-        <div 
-          className={`inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full ${
-            isVisible ? 'opacity-100 translate-y-0 sm:scale-100' : 'opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95'
-          }`}
-        >
-          <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="sm:flex sm:items-start">
-              {getIconByType()}
-              <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                <h3 className="text-lg leading-6 font-medium text-gray-900 dark:text-gray-100" id="modal-title">
-                  {title}
-                </h3>
-                <div className="mt-2">
-                  <div className="text-sm text-gray-700 dark:text-gray-300">
-                    {children}
-                  </div>
-                </div>
+    <div 
+      className="fixed inset-0 overflow-y-auto" 
+      style={{ 
+        zIndex: Z_INDEX.MODAL_OVERLAY,
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+      aria-labelledby="modal-title" 
+      role="dialog" 
+      aria-modal="true"
+    >
+      {/* 背景遮罩 */}
+      <div 
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          opacity: isVisible ? 1 : 0,
+          transition: 'opacity 0.2s ease-in-out'
+        }} 
+        aria-hidden="true"
+        onClick={onClose}
+      ></div>
+      
+      {/* 模态框面板 */}
+      <div 
+        ref={modalRef}
+        tabIndex={-1}
+        style={{
+          backgroundColor: 'white',
+          borderRadius: '0.5rem',
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)',
+          width: '100%',
+          maxWidth: '500px',
+          margin: '0 1rem',
+          opacity: isVisible ? 1 : 0,
+          transform: isVisible ? 'scale(1)' : 'scale(0.95)',
+          transition: 'opacity 0.2s ease-in-out, transform 0.2s ease-in-out',
+          zIndex: Z_INDEX.MODAL_CONTENT,
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+        onClick={(e) => e.stopPropagation()} // 防止点击事件冒泡到背景层
+      >
+        <div style={{ padding: '1.5rem 1.5rem 1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start' }}>
+            {getIconByType()}
+            <div style={{ marginLeft: '1rem', width: '100%' }}>
+              <h3 
+                style={{ 
+                  fontSize: '1.125rem', 
+                  fontWeight: 600, 
+                  marginTop: 0,
+                  marginBottom: '0.5rem',
+                  color: '#111827'
+                }}
+                id="modal-title"
+              >
+                {title}
+              </h3>
+              <div style={{ fontSize: '0.875rem', color: '#4B5563' }}>
+                {children}
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-            {actions || (
-              <button
-                type="button"
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
-                onClick={onClose}
-              >
-                确定
-              </button>
-            )}
-          </div>
+        </div>
+        <div 
+          style={{ 
+            backgroundColor: '#F9FAFB', 
+            padding: '0.75rem 1.5rem',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            borderTop: '1px solid #E5E7EB'
+          }}
+        >
+          {actions || (
+            <button
+              type="button"
+              style={{
+                backgroundColor: '#3B82F6',
+                color: 'white',
+                fontWeight: 500,
+                padding: '0.5rem 1rem',
+                borderRadius: '0.375rem',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+              onClick={onClose}
+            >
+              确定
+            </button>
+          )}
         </div>
       </div>
     </div>
