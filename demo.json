@@ -1,7 +1,7 @@
 {
-  "name": "JSON Editor Demo",
+  "name": "PDX JSON Editor Demo",
   "version": "1.0.0",
-  "description": "这是一个示例 JSON 文件，用于测试 JSON 编辑器的功能",
+  "description": "这是一个示例 JSON 文件，用于测试 PDX JSON 编辑器的功能",
   "features": [
     "语法高亮",
     "实时验证",
@@ -57,8 +57,8 @@
   },
   "metadata": {
     "createdAt": "2025-07-17T12:00:00Z",
-    "author": "JSON Editor Team",
+    "author": "PDX JSON Editor Team",
     "license": "MIT",
-    "repository": "https://github.com/example/json-editor"
+    "repository": "https://github.com/example/pdx-json-editor"
   }
 }

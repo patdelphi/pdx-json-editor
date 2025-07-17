@@ -9,7 +9,7 @@
 
 ### 新增
 
-- 基于 Monaco Editor 的 JSON 编辑器核心功能
+- 基于 Monaco Editor 的 PDX JSON 编辑器核心功能
 - 语法高亮和实时验证
 - 格式化和压缩功能
 - 搜索和替换功能

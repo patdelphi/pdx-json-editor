@@ -1,6 +1,6 @@
-# JSON Editor 部署指南
+# PDX JSON Editor 部署指南
 
-本文档提供了部署 JSON Editor 应用程序的详细说明。
+本文档提供了部署 PDX JSON Editor 应用程序的详细说明。
 
 ## 构建应用程序
 
@@ -29,14 +29,14 @@ npm run build
 
 ### 选项 1：静态网站托管
 
-JSON Editor 是一个纯前端应用程序，可以部署到任何静态网站托管服务上。
+PDX JSON Editor 是一个纯前端应用程序，可以部署到任何静态网站托管服务上。
 
 #### Netlify
 
 1. 创建一个 Netlify 账户并登录
 2. 点击 "New site from Git"
 3. 选择您的 Git 提供商并授权 Netlify
-4. 选择包含 JSON Editor 的仓库
+4. 选择包含 PDX JSON Editor 的仓库
 5. 构建设置：
    - 构建命令：`npm run build`
    - 发布目录：`dist`
@@ -121,13 +121,13 @@ server {
 3. 构建 Docker 镜像：
 
 ```bash
-docker build -t json-editor .
+docker build -t pdx-json-editor .
 ```
 
 4. 运行 Docker 容器：
 
 ```bash
-docker run -p 8080:80 json-editor
+docker run -p 8080:80 pdx-json-editor
 ```
 
 应用程序将在 http://localhost:8080 上可用。
@@ -213,7 +213,7 @@ cp -r dist/* /var/www/html/
 
 ## 环境变量配置
 
-JSON Editor 支持以下环境变量：
+PDX JSON Editor 支持以下环境变量：
 
 - `VITE_APP_TITLE`: 应用程序标题
 - `VITE_API_URL`: API URL（如果将来添加后端服务）
@@ -221,13 +221,13 @@ JSON Editor 支持以下环境变量：
 您可以通过创建 `.env.production` 文件来设置这些变量：
 
 ```
-VITE_APP_TITLE=JSON Editor
+VITE_APP_TITLE=PDX JSON Editor
 VITE_API_URL=https://api.example.com
 ```
 
 ## PWA 支持
 
-JSON Editor 包含 PWA（渐进式 Web 应用程序）支持，允许用户将其安装到设备上并离线使用。确保您的 Web 服务器正确提供 `manifest.json` 和 Service Worker 文件。
+PDX JSON Editor 包含 PWA（渐进式 Web 应用程序）支持，允许用户将其安装到设备上并离线使用。确保您的 Web 服务器正确提供 `manifest.json` 和 Service Worker 文件。
 
 ## 性能优化
 

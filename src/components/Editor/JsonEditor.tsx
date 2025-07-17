@@ -41,13 +41,124 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
 
   const find = useCallback(() => {
     if (editorRef.current) {
-      editorRef.current.trigger('editor', 'actions.find', {});
+      try {
+        // 确保编辑器获得焦点
+        editorRef.current.focus();
+        
+        // 使用Monaco编辑器的内置命令
+        const editor = editorRef.current;
+        const monaco = monacoRef.current;
+        
+        // 方法1: 使用actions.find命令ID (这是Monaco推荐的方式)
+        try {
+          editor.trigger('keyboard', 'actions.find', null);
+          return;
+        } catch (e) {
+          console.log('Method 1 failed:', e);
+        }
+        
+        // 方法2: 使用editor.action.startFindAction命令ID (备用方式)
+        try {
+          editor.trigger('keyboard', 'editor.action.startFindAction', null);
+          return;
+        } catch (e) {
+          console.log('Method 2 failed:', e);
+        }
+        
+        // 方法3: 使用编辑器的内置操作
+        try {
+          const actions = editor.getActions();
+          // 尝试查找任何与搜索相关的操作
+          const findAction = actions.find(a => 
+            a.id === 'actions.find' || 
+            a.id === 'editor.action.startFindAction' ||
+            a.id.toLowerCase().includes('find')
+          );
+          if (findAction) {
+            findAction.run();
+            return;
+          }
+        } catch (e) {
+          console.log('Method 3 failed:', e);
+        }
+        
+        // 方法4: 使用Monaco的键盘命令
+        try {
+          if (monaco) {
+            editor.trigger('keyboard', monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, null);
+            return;
+          }
+        } catch (e) {
+          console.log('Method 4 failed:', e);
+        }
+        
+        // 方法5: 使用浏览器的原生搜索 (最后的备选方案)
+        try {
+          window.find();
+        } catch (e) {
+          console.log('Method 5 failed:', e);
+        }
+      } catch (error) {
+        console.error('Error in find function:', error);
+      }
     }
   }, []);
 
   const replace = useCallback(() => {
     if (editorRef.current) {
-      editorRef.current.trigger('editor', 'editor.action.startFindReplaceAction', {});
+      try {
+        // 确保编辑器获得焦点
+        editorRef.current.focus();
+        
+        // 使用Monaco编辑器的内置命令
+        const editor = editorRef.current;
+        const monaco = monacoRef.current;
+        
+        // 方法1: 使用editor.action.startFindReplaceAction命令ID (主要方式)
+        try {
+          editor.trigger('keyboard', 'editor.action.startFindReplaceAction', null);
+          return;
+        } catch (e) {
+          console.log('Method 1 failed:', e);
+        }
+        
+        // 方法2: 使用actions.findWithReplace命令ID (备用方式)
+        try {
+          editor.trigger('keyboard', 'actions.findWithReplace', null);
+          return;
+        } catch (e) {
+          console.log('Method 2 failed:', e);
+        }
+        
+        // 方法3: 使用编辑器的内置操作
+        try {
+          const actions = editor.getActions();
+          // 尝试查找任何与替换相关的操作
+          const replaceAction = actions.find(a => 
+            a.id === 'editor.action.startFindReplaceAction' || 
+            a.id === 'actions.findWithReplace' ||
+            a.id.toLowerCase().includes('replace')
+          );
+          if (replaceAction) {
+            replaceAction.run();
+            return;
+          }
+        } catch (e) {
+          console.log('Method 3 failed:', e);
+        }
+        
+        // 方法4: 使用Monaco的键盘命令
+        try {
+          if (monaco) {
+            editor.trigger('keyboard', monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyH, null);
+            return;
+          }
+        } catch (e) {
+          console.log('Method 4 failed:', e);
+        }
+      } catch (error) {
+        console.error('Error in replace function:', error);
+      }
     }
   }, []);
 
@@ -128,6 +239,17 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
     editorRef.current = editor;
     monacoRef.current = monaco;
     
+    // 配置搜索控件，防止自动关闭
+    editor.updateOptions({
+      find: {
+        addExtraSpaceOnTop: true,
+        autoFindInSelection: 'never',
+        seedSearchStringFromSelection: 'always',
+        loop: true,
+        closeOnFocusLost: false // 防止搜索窗口在失去焦点时自动关闭
+      }
+    });
+    
     // Configure JSON language settings with enhanced validation
     monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
       validate: true,
@@ -157,6 +279,63 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
       ]
     });
 
+    // 添加搜索窗口状态监听器
+    const findController = editor.getContribution('editor.contrib.findController');
+    if (findController && typeof findController.getState === 'function') {
+      // 监听搜索控制器状态变化
+      editor.onDidBlurEditorWidget(() => {
+        // 当编辑器失去焦点时，尝试保持搜索窗口打开
+        setTimeout(() => {
+          try {
+            const state = findController.getState();
+            if (state && state.isRevealed) {
+              // 如果搜索窗口已经打开，尝试保持它打开
+              findController.focus();
+            }
+          } catch (e) {
+            console.log('Error keeping find widget open:', e);
+          }
+        }, 100);
+      });
+    }
+
+    // Add keyboard shortcut for search (Ctrl+F)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {
+      // This will open the search widget
+      const actions = editor.getActions();
+      
+      // Try to find the search action
+      const findAction = actions.find(a => 
+        a.id === 'actions.find' || 
+        a.id === 'editor.action.startFindAction'
+      );
+      
+      if (findAction) {
+        findAction.run();
+      } else {
+        // Fallback to trigger method
+        editor.trigger('keyboard', 'actions.find', null);
+      }
+    });
+    
+    // Add keyboard shortcut for replace (Ctrl+H)
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyH, () => {
+      // This will open the replace widget
+      const actions = editor.getActions();
+      
+      // Try to find the replace action
+      const replaceAction = actions.find(a => 
+        a.id === 'editor.action.startFindReplaceAction'
+      );
+      
+      if (replaceAction) {
+        replaceAction.run();
+      } else {
+        // Fallback to trigger method
+        editor.trigger('keyboard', 'editor.action.startFindReplaceAction', null);
+      }
+    });
+    
     const model = editor.getModel();
     if (model) {
       // Set up validation change listener with enhanced error reporting
@@ -325,7 +504,9 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
     find: {
       addExtraSpaceOnTop: true,
       autoFindInSelection: 'never',
-      seedSearchStringFromSelection: 'always'
+      seedSearchStringFromSelection: 'always',
+      loop: true,
+      closeOnFocusLost: false // 防止搜索窗口在失去焦点时自动关闭
     },
     
     // Enhanced error and warning display
@@ -341,7 +522,7 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
     
     // Accessibility features
     accessibilitySupport: 'auto',
-    ariaLabel: 'JSON Editor',
+    ariaLabel: 'PDX JSON Editor',
     
     // Selection and cursor enhancements
     cursorBlinking: 'blink',

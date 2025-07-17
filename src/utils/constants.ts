@@ -1,5 +1,5 @@
 // Application constants
-export const APP_NAME = 'JSON Editor';
+export const APP_NAME = 'PDX JSON Editor';
 export const APP_VERSION = '1.0.0';
 
 // Default editor settings

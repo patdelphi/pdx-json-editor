@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './App.css';
 import JsonEditor from './components/Editor/JsonEditor';
 import { SettingsPanel } from './components/Settings';
@@ -11,6 +11,11 @@ import useModal from './hooks/useModal';
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import type { EditorSettings, JsonError, FileInfo, EditorMethods } from './types/editor.types';
 
+// 开发环境下加载测试脚本
+if (process.env.NODE_ENV === 'development') {
+  import('./test/modalTest');
+}
+
 function App() {
   const [content, setContent] = useState('{\n  "example": "JSON content",\n  "number": 42,\n  "boolean": true\n}');
   const [errors, setErrors] = useState<JsonError[]>([]);
@@ -18,16 +23,18 @@ function App() {
   const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 });
   const [selection, setSelection] = useState({ startLine: 1, startColumn: 1, endLine: 1, endColumn: 1 });
   const [showSettings, setShowSettings] = useState(false);
+  // We still keep this state for the fallback search panel, but it's rarely used now
   const [showSearch, setShowSearch] = useState(false);
   const [currentFile, setCurrentFile] = useState<FileInfo | null>(null);
   const [isDirty, setIsDirty] = useState(false);
   const [originalContent, setOriginalContent] = useState('{\n  "example": "JSON content",\n  "number": 42,\n  "boolean": true\n}');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
-  const [currentResultIndex, setCurrentResultIndex] = useState(0);
+  // 移除自定义搜索状态，使用Monaco内置搜索功能
   
   const editorRef = useRef<EditorMethods>(null);
   const { toasts, removeToast, showSuccess } = useToast();
   const { isOpen, options, closeModal, showError, showSuccess: showModalSuccess, showWarning, showConfirm } = useModal();
+  
+  // 移除useEffect，改为直接在导航函数中处理
   
   const [settings, setSettings] = useState<EditorSettings>({
     indentSize: 2,
@@ -101,7 +108,7 @@ function App() {
     
     setOriginalContent(content);
     setIsDirty(false);
-    showSuccess('File Saved', `Successfully saved ${filename}`);
+    showModalSuccess('文件已保存', `成功保存文件 ${filename}`);
   };
 
   const handleFileNew = () => {
@@ -128,7 +135,7 @@ function App() {
   };
 
   const handleFileError = (error: string) => {
-    showError('File Error', error);
+    showError('文件错误', error);
   };
 
   // Track content changes for dirty state
@@ -144,9 +151,9 @@ function App() {
       const formatted = JSON.stringify(parsed, null, settings.indentSize);
       setContent(formatted);
       setIsDirty(formatted !== originalContent);
-      showSuccess('JSON Formatted', 'Your JSON has been formatted successfully');
+      showModalSuccess('JSON 格式化成功', '您的 JSON 已成功格式化。');
     } catch (error) {
-      showError('Format Error', 'Cannot format invalid JSON. Please fix syntax errors first.');
+      showError('格式化错误', '无法格式化无效的 JSON。请先修复语法错误。');
     }
   };
 
@@ -156,71 +163,199 @@ function App() {
       const minified = JSON.stringify(parsed);
       setContent(minified);
       setIsDirty(minified !== originalContent);
-      showSuccess('JSON Minified', 'Your JSON has been minified successfully');
+      showModalSuccess('JSON 压缩成功', '您的 JSON 已成功压缩。');
     } catch (error) {
-      showError('Minify Error', 'Cannot minify invalid JSON. Please fix syntax errors first.');
+      showError('压缩错误', '无法压缩无效的 JSON。请先修复语法错误。');
     }
   };
 
   const handleValidate = () => {
     try {
       JSON.parse(content);
-      showSuccess('JSON Valid', 'Your JSON syntax is valid!');
+      showModalSuccess('JSON 验证通过', '您的 JSON 语法有效！');
     } catch (error) {
-      showError('JSON Invalid', `JSON syntax error: ${(error as Error).message}`);
+      showError('JSON 验证失败', `JSON 语法错误: ${(error as Error).message}`);
     }
   };
 
+  // 不再需要自定义装饰器处理，使用Monaco内置的搜索高亮
+  
   // Search and replace handlers
   const toggleSearch = () => {
+    // 使用Monaco编辑器内置的搜索功能
+    if (editorRef.current) {
+      try {
+        // 确保编辑器获得焦点
+        editorRef.current.focus && editorRef.current.focus();
+        
+        // 直接调用编辑器的find方法
+        // 确保编辑器已经完全初始化
+        setTimeout(() => {
+          editorRef.current.find();
+        }, 0);
+        
+        return;
+      } catch (error) {
+        console.error('Error triggering search:', error);
+      }
+    }
+    
+    // 如果Monaco编辑器不可用，回退到原来的搜索面板
     setShowSearch(prev => !prev);
   };
-
-  const handleSearch = (query: string, options: any) => {
-    if (!editorRef.current) return;
-    
-    // Use Monaco Editor's built-in search functionality
-    const editor = editorRef.current.getEditor();
-    if (editor) {
-      editor.trigger('search', 'actions.find', {});
+  
+  // 添加替换功能触发器
+  const toggleReplace = () => {
+    if (editorRef.current) {
+      try {
+        // 确保编辑器获得焦点
+        editorRef.current.focus && editorRef.current.focus();
+        
+        // 直接调用JsonEditor组件中的replace方法
+        // 确保编辑器已经完全初始化
+        setTimeout(() => {
+          editorRef.current.replace();
+        }, 0);
+      } catch (error) {
+        console.error('Error triggering replace:', error);
+      }
     }
   };
 
+  // 使用Monaco编辑器的搜索功能，但通过自定义搜索面板控制
+  const handleSearch = (query: string, options: any) => {
+    if (editorRef.current && query.trim()) {
+      const editor = editorRef.current.getEditor();
+      if (editor) {
+        // 获取Monaco的搜索控制器
+        const findController = editor.getContribution('editor.contrib.findController');
+        if (findController && typeof findController.getState === 'function') {
+          try {
+            // 设置搜索选项
+            const findState = findController.getState();
+            findState.change({
+              searchString: query,
+              isRegex: options.useRegex,
+              matchCase: options.caseSensitive,
+              wholeWord: options.wholeWord,
+              searchScope: null,
+              matchesPosition: null,
+              matchesCount: null,
+            }, false);
+            
+            // 执行搜索
+            findController.start({
+              forceRevealReplace: false,
+              seedSearchStringFromSelection: false,
+              seedSearchStringFromGlobalClipboard: false,
+              shouldFocus: 0,
+              shouldAnimate: true,
+              updateSearchScope: false,
+              loop: true
+            });
+          } catch (e) {
+            console.error('Error in custom search:', e);
+            // 回退到基本搜索方法
+            editor.trigger('keyboard', 'actions.find', {});
+          }
+        } else {
+          // 回退到基本搜索方法
+          editor.trigger('keyboard', 'actions.find', {});
+        }
+      }
+    }
+  };
+
+  // 使用Monaco编辑器的替换功能，但通过自定义搜索面板控制
   const handleReplace = (searchQuery: string, replaceText: string, options: any) => {
-    if (!editorRef.current) return;
-    
-    // Use Monaco Editor's built-in replace functionality
-    const editor = editorRef.current.getEditor();
-    if (editor) {
-      editor.trigger('replace', 'editor.action.startFindReplaceAction', {});
+    if (editorRef.current && searchQuery.trim()) {
+      const editor = editorRef.current.getEditor();
+      if (editor) {
+        // 获取Monaco的搜索控制器
+        const findController = editor.getContribution('editor.contrib.findController');
+        if (findController && typeof findController.getState === 'function') {
+          try {
+            // 设置搜索和替换选项
+            const findState = findController.getState();
+            findState.change({
+              searchString: searchQuery,
+              replaceString: replaceText,
+              isRegex: options.useRegex,
+              matchCase: options.caseSensitive,
+              wholeWord: options.wholeWord,
+              searchScope: null,
+              matchesPosition: null,
+              matchesCount: null,
+            }, false);
+            
+            // 执行替换
+            findController.replace();
+          } catch (e) {
+            console.error('Error in custom replace:', e);
+            // 回退到基本替换方法
+            editor.trigger('keyboard', 'editor.action.startFindReplaceAction', {});
+          }
+        } else {
+          // 回退到基本替换方法
+          editor.trigger('keyboard', 'editor.action.startFindReplaceAction', {});
+        }
+      }
     }
   };
 
   const handleReplaceAll = (searchQuery: string, replaceText: string, options: any) => {
-    if (!editorRef.current) return;
-    
-    // Use Monaco Editor's built-in replace all functionality
-    const editor = editorRef.current.getEditor();
-    if (editor) {
-      editor.trigger('replaceAll', 'editor.action.startFindReplaceAction', {});
+    if (editorRef.current && searchQuery.trim()) {
+      const editor = editorRef.current.getEditor();
+      if (editor) {
+        // 获取Monaco的搜索控制器
+        const findController = editor.getContribution('editor.contrib.findController');
+        if (findController && typeof findController.getState === 'function') {
+          try {
+            // 设置搜索和替换选项
+            const findState = findController.getState();
+            findState.change({
+              searchString: searchQuery,
+              replaceString: replaceText,
+              isRegex: options.useRegex,
+              matchCase: options.caseSensitive,
+              wholeWord: options.wholeWord,
+              searchScope: null,
+              matchesPosition: null,
+              matchesCount: null,
+            }, false);
+            
+            // 执行全部替换
+            findController.replaceAll();
+          } catch (e) {
+            console.error('Error in custom replace all:', e);
+            // 回退到基本替换方法
+            editor.trigger('keyboard', 'editor.action.startFindReplaceAction', {});
+          }
+        } else {
+          // 回退到基本替换方法
+          editor.trigger('keyboard', 'editor.action.startFindReplaceAction', {});
+        }
+      }
     }
   };
 
   const handleFindNext = () => {
-    if (!editorRef.current) return;
-    
-    const editor = editorRef.current.getEditor();
-    if (editor) {
-      editor.trigger('findNext', 'editor.action.nextMatchFindAction', {});
+    // 使用Monaco编辑器内置的查找下一个功能
+    if (editorRef.current) {
+      const editor = editorRef.current.getEditor();
+      if (editor) {
+        editor.trigger('keyboard', 'editor.action.nextMatchFindAction', {});
+      }
     }
   };
 
   const handleFindPrevious = () => {
-    if (!editorRef.current) return;
-    
-    const editor = editorRef.current.getEditor();
-    if (editor) {
-      editor.trigger('findPrevious', 'editor.action.previousMatchFindAction', {});
+    // 使用Monaco编辑器内置的查找上一个功能
+    if (editorRef.current) {
+      const editor = editorRef.current.getEditor();
+      if (editor) {
+        editor.trigger('keyboard', 'editor.action.previousMatchFindAction', {});
+      }
     }
   };
 
@@ -253,6 +388,12 @@ function App() {
       ctrlKey: true,
       action: toggleSearch,
       description: 'Find/Search'
+    },
+    {
+      key: 'h',
+      ctrlKey: true,
+      action: toggleReplace,
+      description: 'Find and Replace'
     },
     {
       key: ',',
@@ -296,31 +437,48 @@ function App() {
       <div className="h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       {/* Header */}
       <header className="h-12 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 flex-shrink-0">
-        <h1 className="text-lg font-semibold">JSON Editor</h1>
+        <h1 className="text-lg font-semibold">PDX JSON 编辑器</h1>
         <div className="ml-auto flex items-center space-x-2">
           <button className="btn-secondary text-sm" onClick={toggleTheme}>
-            {theme === 'light' ? 'Dark' : 'Light'}
+            {theme === 'light' ? '深色' : '浅色'}
           </button>
         </div>
       </header>
 
       {/* Toolbar */}
-      <div className="h-12 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 space-x-2 flex-shrink-0">
-        <FileOperations
-          onOpen={handleFileOpen}
-          onSave={handleFileSave}
-          onNew={handleFileNew}
-          isDirty={isDirty}
-          currentFile={currentFile}
-          theme={theme}
-        />
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-        <button className="btn-secondary text-sm" onClick={handleFormat}>Format</button>
-        <button className="btn-secondary text-sm" onClick={handleMinify}>Minify</button>
-        <button className="btn-secondary text-sm" onClick={handleValidate}>Validate</button>
-        <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-        <button className="btn-secondary text-sm" onClick={toggleSearch}>Search</button>
-        <button className="btn-secondary text-sm" onClick={toggleSettings}>Settings</button>
+      <div className="h-12 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 flex-shrink-0 relative">
+        <div className="flex items-center space-x-2">
+          <FileOperations
+            onOpen={handleFileOpen}
+            onSave={handleFileSave}
+            onNew={handleFileNew}
+            isDirty={isDirty}
+            currentFile={currentFile}
+            theme={theme}
+          />
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+          <button className="btn-secondary text-sm" onClick={handleFormat}>格式化</button>
+          <button className="btn-secondary text-sm" onClick={handleMinify}>压缩</button>
+          <button className="btn-secondary text-sm" onClick={handleValidate}>验证</button>
+          <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
+          <button className="btn-secondary text-sm" onClick={toggleSettings}>设置</button>
+        </div>
+        
+        {/* 固定在工具栏最右侧的搜索面板 */}
+        <div className="ml-auto">
+          <SearchPanel
+            isVisible={true}
+            onClose={() => {}}
+            onSearch={handleSearch}
+            onReplace={handleReplace}
+            onReplaceAll={handleReplaceAll}
+            onFindNext={handleFindNext}
+            onFindPrevious={handleFindPrevious}
+            searchResults={[]}
+            currentResultIndex={0}
+            theme={theme}
+          />
+        </div>
       </div>
 
       {/* Main Content */}
@@ -346,46 +504,32 @@ function App() {
             </div>
           </FileDropZone>
         </div>
-
-        {/* Search Panel */}
-        <SearchPanel
-          isVisible={showSearch}
-          onClose={() => setShowSearch(false)}
-          onSearch={handleSearch}
-          onReplace={handleReplace}
-          onReplaceAll={handleReplaceAll}
-          onFindNext={handleFindNext}
-          onFindPrevious={handleFindPrevious}
-          searchResults={searchResults}
-          currentResultIndex={currentResultIndex}
-          theme={theme}
-        />
       </main>
 
       {/* Status Bar */}
       <footer className="h-6 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center px-4 text-xs text-gray-600 dark:text-gray-400 flex-shrink-0">
         <span>
           {errors.length === 0 ? (
-            <span className="text-green-600 dark:text-green-400">✓ Valid JSON</span>
+            <span className="text-green-600 dark:text-green-400">✓ JSON 有效</span>
           ) : (
             <span className="text-red-600 dark:text-red-400">
-              ✗ {errors.length} error{errors.length > 1 ? 's' : ''}
+              ✗ {errors.length} 个错误
             </span>
           )}
         </span>
         <span className="ml-4">
-          Ln {cursorPosition.line}, Col {cursorPosition.column}
+          行 {cursorPosition.line}, 列 {cursorPosition.column}
         </span>
         {selection.startLine !== selection.endLine || selection.startColumn !== selection.endColumn ? (
           <span className="ml-4">
-            ({Math.abs(selection.endLine - selection.startLine) + 1} lines, {
+            (已选择 {Math.abs(selection.endLine - selection.startLine) + 1} 行, {
               selection.startLine === selection.endLine 
                 ? Math.abs(selection.endColumn - selection.startColumn)
-                : 'multiple'
-            } chars selected)
+                : '多个'
+            } 字符)
           </span>
         ) : null}
-        <span className="ml-auto">Characters: {content.length}</span>
+        <span className="ml-auto">字符数: {content.length}</span>
       </footer>
 
       {/* Settings Panel */}
@@ -449,7 +593,7 @@ function App() {
           )
         }
       >
-        <p>{options.message}</p>
+        <p className="text-gray-700 dark:text-gray-300">{options.message}</p>
       </Modal>
     </div>
     </ErrorBoundary>

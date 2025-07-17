@@ -12,7 +12,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'JSON Editor',
+        name: 'PDX JSON Editor',
         short_name: 'JSONEdit',
         description: '现代化JSON编辑器，提供语法高亮、实时验证、格式化等功能',
         theme_color: '#ffffff',
