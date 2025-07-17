@@ -4,9 +4,10 @@ import JsonEditor from './components/Editor/JsonEditor';
 import { SettingsPanel } from './components/Settings';
 import { FileOperations, FileDropZone } from './components/FileManager';
 import { SearchPanel } from './components/SearchReplace';
-import { ErrorBoundary, ToastContainer } from './components/UI';
+import { ErrorBoundary, ToastContainer, Modal } from './components/UI';
 // import { ErrorService } from './services/errorService';
 import useToast from './hooks/useToast';
+import useModal from './hooks/useModal';
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
 import type { EditorSettings, JsonError, FileInfo, EditorMethods } from './types/editor.types';
 
@@ -25,7 +26,8 @@ function App() {
   const [currentResultIndex, setCurrentResultIndex] = useState(0);
   
   const editorRef = useRef<EditorMethods>(null);
-  const { toasts, removeToast, showSuccess, showError } = useToast();
+  const { toasts, removeToast, showSuccess } = useToast();
+  const { isOpen, options, closeModal, showError, showSuccess: showModalSuccess, showWarning, showConfirm } = useModal();
   
   const [settings, setSettings] = useState<EditorSettings>({
     indentSize: 2,
@@ -66,8 +68,17 @@ function App() {
   // File operations handlers
   const handleFileOpen = (file: FileInfo) => {
     if (isDirty) {
-      const shouldDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
-      if (!shouldDiscard) return;
+      showConfirm(
+        '未保存的更改',
+        '您有未保存的更改。是否要放弃这些更改？',
+        () => {
+          setCurrentFile(file);
+          setContent(file.content);
+          setOriginalContent(file.content);
+          setIsDirty(false);
+        }
+      );
+      return;
     }
     
     setCurrentFile(file);
@@ -95,8 +106,18 @@ function App() {
 
   const handleFileNew = () => {
     if (isDirty) {
-      const shouldDiscard = window.confirm('You have unsaved changes. Do you want to discard them?');
-      if (!shouldDiscard) return;
+      showConfirm(
+        '未保存的更改',
+        '您有未保存的更改。是否要放弃这些更改？',
+        () => {
+          const newContent = '{\n  \n}';
+          setCurrentFile(null);
+          setContent(newContent);
+          setOriginalContent(newContent);
+          setIsDirty(false);
+        }
+      );
+      return;
     }
     
     const newContent = '{\n  \n}';
@@ -383,6 +404,53 @@ function App() {
         onRemoveToast={removeToast}
         position="top-right"
       />
+      
+      {/* Modal Dialog */}
+      <Modal
+        isOpen={isOpen}
+        onClose={closeModal}
+        title={options.title}
+        type={options.type}
+        actions={
+          options.showCancel ? (
+            <>
+              <button
+                type="button"
+                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+                onClick={() => {
+                  options.onConfirm?.();
+                  closeModal();
+                }}
+              >
+                {options.confirmText || '确定'}
+              </button>
+              <button
+                type="button"
+                className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600"
+                onClick={() => {
+                  options.onCancel?.();
+                  closeModal();
+                }}
+              >
+                {options.cancelText || '取消'}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm"
+              onClick={() => {
+                options.onConfirm?.();
+                closeModal();
+              }}
+            >
+              {options.confirmText || '确定'}
+            </button>
+          )
+        }
+      >
+        <p>{options.message}</p>
+      </Modal>
     </div>
     </ErrorBoundary>
   );
