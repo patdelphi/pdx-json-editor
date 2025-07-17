@@ -48,6 +48,7 @@ export default defineConfig({
     include: ['monaco-editor']
   },
   build: {
+    outDir: 'docs',
     target: 'esnext',
     minify: 'terser',
     terserOptions: {

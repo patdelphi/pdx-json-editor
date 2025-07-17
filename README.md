@@ -142,12 +142,13 @@ src/
 
 [https://patdelphi.github.io/pdx-json-editor/](https://patdelphi.github.io/pdx-json-editor/)
 
-要更新 GitHub Pages 部署，请运行：
+项目使用 `docs` 目录作为 GitHub Pages 的源目录。要更新 GitHub Pages 部署，只需运行：
 
 ```bash
-npm run build
 npm run deploy
 ```
+
+这将构建项目并将输出文件放置在 `docs` 目录中。然后，将更改提交并推送到 GitHub 仓库即可。
 
 ## 浏览器兼容性
 
