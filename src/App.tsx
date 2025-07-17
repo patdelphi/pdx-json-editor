@@ -13,7 +13,16 @@ import type { EditorSettings, JsonError, FileInfo, EditorMethods } from './types
 
 // 开发环境下加载测试脚本
 if (process.env.NODE_ENV === 'development') {
-  import('./test/modalTest');
+  // Use a more direct approach to avoid TypeScript errors with dynamic imports
+  const importModalTest = async () => {
+    try {
+      // @ts-ignore - Ignore TypeScript error for this development-only import
+      await import('./test/modalTest');
+    } catch (error) {
+      console.error('Error loading modalTest:', error);
+    }
+  };
+  importModalTest();
 }
 
 function App() {
@@ -191,7 +200,7 @@ function App() {
         // 直接调用编辑器的find方法
         // 确保编辑器已经完全初始化
         setTimeout(() => {
-          editorRef.current.find();
+          editorRef.current?.find();
         }, 0);
         
         return;
@@ -214,7 +223,7 @@ function App() {
         // 直接调用JsonEditor组件中的replace方法
         // 确保编辑器已经完全初始化
         setTimeout(() => {
-          editorRef.current.replace();
+          editorRef.current?.replace();
         }, 0);
       } catch (error) {
         console.error('Error triggering replace:', error);
@@ -228,7 +237,7 @@ function App() {
       const editor = editorRef.current.getEditor();
       if (editor) {
         // 获取Monaco的搜索控制器
-        const findController = editor.getContribution('editor.contrib.findController');
+        const findController = editor.getContribution('editor.contrib.findController') as any;
         if (findController && typeof findController.getState === 'function') {
           try {
             // 设置搜索选项
@@ -272,7 +281,7 @@ function App() {
       const editor = editorRef.current.getEditor();
       if (editor) {
         // 获取Monaco的搜索控制器
-        const findController = editor.getContribution('editor.contrib.findController');
+        const findController = editor.getContribution('editor.contrib.findController') as any;
         if (findController && typeof findController.getState === 'function') {
           try {
             // 设置搜索和替换选项
@@ -289,7 +298,7 @@ function App() {
             }, false);
             
             // 执行替换
-            findController.replace();
+            findController.replace && findController.replace();
           } catch (e) {
             console.error('Error in custom replace:', e);
             // 回退到基本替换方法
@@ -308,7 +317,7 @@ function App() {
       const editor = editorRef.current.getEditor();
       if (editor) {
         // 获取Monaco的搜索控制器
-        const findController = editor.getContribution('editor.contrib.findController');
+        const findController = editor.getContribution('editor.contrib.findController') as any;
         if (findController && typeof findController.getState === 'function') {
           try {
             // 设置搜索和替换选项
@@ -325,7 +334,7 @@ function App() {
             }, false);
             
             // 执行全部替换
-            findController.replaceAll();
+            findController.replaceAll && findController.replaceAll();
           } catch (e) {
             console.error('Error in custom replace all:', e);
             // 回退到基本替换方法

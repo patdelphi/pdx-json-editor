@@ -5,6 +5,22 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.0.1] - 2025-07-17
+
+### 修复
+
+- 修复了多个 TypeScript 类型错误，确保项目能够成功构建
+- 修复了 Monaco Editor 的 getActions 方法类型错误
+- 修复了 findController 相关的类型错误
+- 修复了 modalTest.js 的导入类型错误
+- 修复了编辑器 find 和 replace 方法的空引用错误
+- 更新了 EditorMethods 接口和相关类型定义
+
+### 新增
+
+- 添加了 GitHub Pages 部署支持
+- 添加了 gh-pages 依赖和部署脚本
+
 ## [1.0.0] - 2025-07-17
 
 ### 新增

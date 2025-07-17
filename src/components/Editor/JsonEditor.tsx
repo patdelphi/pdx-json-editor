@@ -67,9 +67,15 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
         
         // 方法3: 使用编辑器的内置操作
         try {
-          const actions = editor.getActions();
-          // 尝试查找任何与搜索相关的操作
-          const findAction = actions.find(a => 
+          // Use getAction for specific actions instead of getActions
+          const actions = [];
+          const findAction1 = (editor as any).getAction('actions.find');
+          const findAction2 = (editor as any).getAction('editor.action.startFindAction');
+          if (findAction1) actions.push(findAction1);
+          if (findAction2) actions.push(findAction2);
+          
+          // Try to find any action with 'find' in its ID
+          const findAction = actions.find((a: { id: string; run: () => void }) => 
             a.id === 'actions.find' || 
             a.id === 'editor.action.startFindAction' ||
             a.id.toLowerCase().includes('find')
@@ -94,7 +100,8 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
         
         // 方法5: 使用浏览器的原生搜索 (最后的备选方案)
         try {
-          window.find();
+          // Use window.find as a fallback, but need to declare it properly for TypeScript
+          (window as any).find();
         } catch (e) {
           console.log('Method 5 failed:', e);
         }
@@ -132,9 +139,15 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
         
         // 方法3: 使用编辑器的内置操作
         try {
-          const actions = editor.getActions();
-          // 尝试查找任何与替换相关的操作
-          const replaceAction = actions.find(a => 
+          // Use getAction for specific actions instead of getActions
+          const actions = [];
+          const replaceAction1 = (editor as any).getAction('editor.action.startFindReplaceAction');
+          const replaceAction2 = (editor as any).getAction('actions.findWithReplace');
+          if (replaceAction1) actions.push(replaceAction1);
+          if (replaceAction2) actions.push(replaceAction2);
+          
+          // Try to find any action with 'replace' in its ID
+          const replaceAction = actions.find((a: { id: string; run: () => void }) => 
             a.id === 'editor.action.startFindReplaceAction' || 
             a.id === 'actions.findWithReplace' ||
             a.id.toLowerCase().includes('replace')
@@ -245,8 +258,8 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
         addExtraSpaceOnTop: true,
         autoFindInSelection: 'never',
         seedSearchStringFromSelection: 'always',
-        loop: true,
-        closeOnFocusLost: false // 防止搜索窗口在失去焦点时自动关闭
+        loop: true
+        // Removed closeOnFocusLost as it's not in IEditorFindOptions
       }
     });
     
@@ -280,7 +293,7 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
     });
 
     // 添加搜索窗口状态监听器
-    const findController = editor.getContribution('editor.contrib.findController');
+    const findController = editor.getContribution('editor.contrib.findController') as any;
     if (findController && typeof findController.getState === 'function') {
       // 监听搜索控制器状态变化
       editor.onDidBlurEditorWidget(() => {
@@ -290,7 +303,7 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
             const state = findController.getState();
             if (state && state.isRevealed) {
               // 如果搜索窗口已经打开，尝试保持它打开
-              findController.focus();
+              findController.focus && findController.focus();
             }
           } catch (e) {
             console.log('Error keeping find widget open:', e);
@@ -302,10 +315,15 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
     // Add keyboard shortcut for search (Ctrl+F)
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {
       // This will open the search widget
-      const actions = editor.getActions();
+      // Use getAction for each action ID instead of getActions
+      const actions = [];
+      const findAction1 = editor.getAction('actions.find');
+      const findAction2 = editor.getAction('editor.action.startFindAction');
+      if (findAction1) actions.push(findAction1);
+      if (findAction2) actions.push(findAction2);
       
       // Try to find the search action
-      const findAction = actions.find(a => 
+      const findAction = actions.find((a: { id: string; run: () => void }) => 
         a.id === 'actions.find' || 
         a.id === 'editor.action.startFindAction'
       );
@@ -321,10 +339,15 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
     // Add keyboard shortcut for replace (Ctrl+H)
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyH, () => {
       // This will open the replace widget
-      const actions = editor.getActions();
+      // Use getAction for each action ID instead of getActions
+      const actions = [];
+      const replaceAction1 = editor.getAction('editor.action.startFindReplaceAction');
+      const replaceAction2 = editor.getAction('actions.findWithReplace');
+      if (replaceAction1) actions.push(replaceAction1);
+      if (replaceAction2) actions.push(replaceAction2);
       
       // Try to find the replace action
-      const replaceAction = actions.find(a => 
+      const replaceAction = actions.find((a: { id: string; run: () => void }) => 
         a.id === 'editor.action.startFindReplaceAction'
       );
       
@@ -505,8 +528,8 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(({
       addExtraSpaceOnTop: true,
       autoFindInSelection: 'never',
       seedSearchStringFromSelection: 'always',
-      loop: true,
-      closeOnFocusLost: false // 防止搜索窗口在失去焦点时自动关闭
+      loop: true
+      // Removed closeOnFocusLost as it's not in IEditorFindOptions
     },
     
     // Enhanced error and warning display

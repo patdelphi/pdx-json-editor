@@ -106,8 +106,42 @@ export interface EditorMethods {
   canUndo: () => boolean;
   canRedo: () => boolean;
   focus: () => void;
-  getEditor: () => any;
+  getEditor: () => IStandaloneCodeEditor;
   getMonaco: () => any;
+}
+
+// Monaco Editor interfaces
+export interface IStandaloneCodeEditor {
+  getAction: (id: string) => IEditorAction | null;
+  getActions: () => IEditorAction[];
+  trigger: (source: string, handlerId: string, payload?: any) => void;
+  focus: () => void;
+  getModel: () => any;
+  getSelection: () => any;
+  executeEdits: (source: string, edits: any[], endCursorState?: any) => boolean;
+  revealLineInCenter: (lineNumber: number) => void;
+  setPosition: (position: { lineNumber: number; column: number }) => void;
+  updateOptions: (options: any) => void;
+  onDidChangeCursorPosition: (listener: (e: any) => void) => { dispose: () => void };
+  onDidChangeCursorSelection: (listener: (e: any) => void) => { dispose: () => void };
+  onDidBlurEditorWidget: (listener: () => void) => { dispose: () => void };
+  addCommand: (keybinding: number, handler: () => void) => void;
+  getContribution: (id: string) => IEditorContribution;
+}
+
+export interface IEditorAction {
+  id: string;
+  label: string;
+  run: () => Promise<void>;
+}
+
+export interface IEditorContribution {
+  getId: () => string;
+  getState?: () => any;
+  focus?: () => void;
+  start?: (options: any) => void;
+  replace?: () => void;
+  replaceAll?: () => void;
 }
 
 // Cursor and selection types

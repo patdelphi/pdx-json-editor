@@ -136,6 +136,19 @@ src/
 - 性能优化
 - 故障排除
 
+### GitHub Pages 部署
+
+项目已部署到 GitHub Pages，可通过以下链接访问：
+
+[https://patdelphi.github.io/pdx-json-editor/](https://patdelphi.github.io/pdx-json-editor/)
+
+要更新 GitHub Pages 部署，请运行：
+
+```bash
+npm run build
+npm run deploy
+```
+
 ## 浏览器兼容性
 
 JSON Editor支持所有现代浏览器：
