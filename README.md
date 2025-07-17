@@ -1,69 +1,159 @@
-# React + TypeScript + Vite
+# PDX JSON Editor
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+一个功能强大的在线JSON编辑器，基于React + TypeScript + Vite构建，使用Monaco Editor提供专业的代码编辑体验。支持PWA，可安装为本地应用并离线使用。
 
-Currently, two official plugins are available:
+## 功能特性
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🎨 **语法高亮** - 基于Monaco Editor的专业JSON语法高亮
+- ✅ **实时验证** - 实时JSON语法验证和错误提示
+- 🔍 **搜索替换** - 强大的搜索和替换功能
+- 📁 **文件操作** - 支持打开、保存、新建JSON文件
+- 🎯 **拖拽支持** - 支持拖拽文件到编辑器
+- 🌓 **主题切换** - 支持明暗主题切换
+- ⚙️ **自定义设置** - 可配置缩进、换行等编辑器选项
+- ⌨️ **快捷键** - 丰富的键盘快捷键支持
+- 📊 **状态栏** - 显示光标位置、字符数、验证状态等信息
+- 📱 **响应式设计** - 适配桌面端、平板端和移动端
+- 🚀 **性能优化** - 大文件处理优化，虚拟滚动支持
+- 📦 **PWA支持** - 可安装为本地应用并离线使用
+- 🔄 **代码分割** - 优化加载性能，按需加载组件
 
-## Expanding the ESLint configuration
+## 快捷键
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- `Ctrl+N` - 新建文件
+- `Ctrl+O` - 打开文件
+- `Ctrl+S` - 保存文件
+- `Ctrl+F` - 搜索
+- `Ctrl+,` - 打开设置
+- `Ctrl+Shift+Enter` - 格式化JSON
+- `Ctrl+Alt+Enter` - 压缩JSON
+- `Ctrl+Enter` - 验证JSON
+- `Ctrl+D` - 切换主题
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 技术栈
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+- **React 19** - 用户界面框架
+- **TypeScript** - 类型安全的JavaScript
+- **Vite** - 快速的构建工具
+- **Monaco Editor** - 专业的代码编辑器
+- **Tailwind CSS** - 实用优先的CSS框架
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 开发指南
+
+### 安装依赖
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 开发模式
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+### 构建项目
+
+```bash
+npm run build
+```
+
+### 运行测试
+
+```bash
+# 运行单元测试
+npm run test
+
+# 运行单元测试（UI模式）
+npm run test:ui
+
+# 运行端到端测试
+npm run test:e2e
+
+# 运行端到端测试（UI模式）
+npm run test:e2e:ui
+```
+
+### 代码格式化和检查
+
+```bash
+# 格式化代码
+npm run format
+
+# 检查代码格式
+npm run format:check
+
+# 运行 ESLint
+npm run lint
+
+# 修复 ESLint 问题
+npm run lint:fix
+
+# 类型检查
+npm run type-check
+```
+
+### 预览构建结果
+
+```bash
+npm run preview
+```
+
+## 项目结构
+
+```
+src/
+├── components/          # React组件
+│   ├── Editor/         # 编辑器相关组件
+│   ├── FileManager/    # 文件管理组件
+│   ├── SearchReplace/  # 搜索替换组件
+│   ├── Settings/       # 设置面板组件
+│   └── UI/            # 通用UI组件
+├── hooks/              # 自定义React Hooks
+├── services/           # 业务逻辑服务
+├── types/              # TypeScript类型定义
+├── utils/              # 工具函数
+├── context/            # React Context
+└── styles/             # 样式文件
+```
+
+## 示例文件
+
+项目包含两个示例JSON文件，可用于测试编辑器功能：
+
+- `demo.json` - 包含各种JSON数据类型的示例文件
+- `large.json` - 大型JSON文件，用于测试编辑器处理大文件的性能
+
+## 部署
+
+详细的部署指南请参阅 [DEPLOYMENT.md](./DEPLOYMENT.md) 文件，其中包含：
+
+- 静态网站托管（Netlify、Vercel、GitHub Pages）
+- Docker部署
+- 传统Web服务器（Nginx、Apache）
+- 环境变量配置
+- PWA支持
+- 性能优化
+- 故障排除
+
+## 浏览器兼容性
+
+JSON Editor支持所有现代浏览器：
+
+- Chrome / Edge（最新版本）
+- Firefox（最新版本）
+- Safari（最新版本）
+- 移动浏览器（iOS Safari、Android Chrome）
+
+## 贡献指南
+
+欢迎贡献代码、报告问题或提出新功能建议。请确保：
+
+1. 遵循现有的代码风格和命名约定
+2. 为新功能添加适当的测试
+3. 更新相关文档
+4. 提交前运行测试和代码检查
+
+## 许可证
+
+MIT
