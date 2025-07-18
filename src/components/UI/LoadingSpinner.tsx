@@ -13,7 +13,7 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   color = 'primary',
   text,
   overlay = false,
-  className = ''
+  className = '',
 }) => {
   const getSizeStyles = () => {
     switch (size) {

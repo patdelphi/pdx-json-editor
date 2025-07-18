@@ -26,11 +26,11 @@ class ErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     // Update state with error info
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
 
     // Call optional error handler
@@ -86,7 +86,8 @@ class ErrorBoundary extends Component<Props, State> {
 
             <div className="mb-4">
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                The JSON Editor encountered an unexpected error. You can try to recover by clicking the buttons below.
+                The JSON Editor encountered an unexpected error. You can try to
+                recover by clicking the buttons below.
               </p>
             </div>
 
@@ -125,7 +126,8 @@ class ErrorBoundary extends Component<Props, State> {
 
             <div className="mt-4 text-center">
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                If the problem persists, please refresh the page or contact support.
+                If the problem persists, please refresh the page or contact
+                support.
               </p>
             </div>
           </div>

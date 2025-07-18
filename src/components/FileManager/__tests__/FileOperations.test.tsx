@@ -9,7 +9,7 @@ const mockFileReader = {
   readAsText: vi.fn(),
   onload: null as any,
   onerror: null as any,
-  result: null as any
+  result: null as any,
 };
 
 global.FileReader = vi.fn(() => mockFileReader) as any;
@@ -23,7 +23,7 @@ describe('FileOperations', () => {
     name: 'test.json',
     size: 1024,
     lastModified: new Date('2023-01-01'),
-    content: '{"test": "value"}'
+    content: '{"test": "value"}',
   };
 
   beforeEach(() => {
@@ -42,9 +42,9 @@ describe('FileOperations', () => {
       />
     );
 
-    expect(screen.getByTitle('Create new file (Ctrl+N)')).toBeInTheDocument();
-    expect(screen.getByTitle('Open file (Ctrl+O)')).toBeInTheDocument();
-    expect(screen.getByTitle('Save file (Ctrl+S)')).toBeInTheDocument();
+    expect(screen.getByTitle('创建新文件 (Ctrl+N)')).toBeInTheDocument();
+    expect(screen.getByTitle('打开文件 (Ctrl+O)')).toBeInTheDocument();
+    expect(screen.getByTitle('保存文件 (Ctrl+S)')).toBeInTheDocument();
   });
 
   it('should call onNew when New button is clicked', () => {
@@ -59,7 +59,7 @@ describe('FileOperations', () => {
       />
     );
 
-    fireEvent.click(screen.getByTitle('Create new file (Ctrl+N)'));
+    fireEvent.click(screen.getByTitle('创建新文件 (Ctrl+N)'));
     expect(mockOnNew).toHaveBeenCalled();
   });
 
@@ -75,7 +75,7 @@ describe('FileOperations', () => {
       />
     );
 
-    fireEvent.click(screen.getByTitle('Save file (Ctrl+S)'));
+    fireEvent.click(screen.getByTitle('保存文件 (Ctrl+S)'));
     expect(mockOnSave).toHaveBeenCalled();
   });
 
@@ -94,7 +94,7 @@ describe('FileOperations', () => {
     const fileInput = screen.getByLabelText('Select JSON file');
     const clickSpy = vi.spyOn(fileInput, 'click');
 
-    fireEvent.click(screen.getByTitle('Open file (Ctrl+O)'));
+    fireEvent.click(screen.getByTitle('打开文件 (Ctrl+O)'));
     expect(clickSpy).toHaveBeenCalled();
   });
 
@@ -111,7 +111,9 @@ describe('FileOperations', () => {
     );
 
     const fileContent = '{"name": "test"}';
-    const file = new File([fileContent], 'test.json', { type: 'application/json' });
+    const file = new File([fileContent], 'test.json', {
+      type: 'application/json',
+    });
     const fileInput = screen.getByLabelText('Select JSON file');
 
     // Simulate file selection
@@ -132,7 +134,7 @@ describe('FileOperations', () => {
         name: 'test.json',
         size: file.size,
         lastModified: expect.any(Date),
-        content: fileContent
+        content: fileContent,
       });
     });
   });
@@ -166,7 +168,7 @@ describe('FileOperations', () => {
     );
 
     // Should show dirty indicator in save button
-    const saveButton = screen.getByTitle('Save file (Ctrl+S)');
+    const saveButton = screen.getByTitle('保存文件 (Ctrl+S)');
     expect(saveButton.querySelector('.bg-orange-500')).toBeInTheDocument();
 
     // Should show dirty indicator in file info
@@ -186,9 +188,9 @@ describe('FileOperations', () => {
       />
     );
 
-    expect(screen.getByTitle('Create new file (Ctrl+N)')).toBeDisabled();
-    expect(screen.getByTitle('Open file (Ctrl+O)')).toBeDisabled();
-    expect(screen.getByTitle('Save file (Ctrl+S)')).toBeDisabled();
+    expect(screen.getByTitle('创建新文件 (Ctrl+N)')).toBeDisabled();
+    expect(screen.getByTitle('打开文件 (Ctrl+O)')).toBeDisabled();
+    expect(screen.getByTitle('保存文件 (Ctrl+S)')).toBeDisabled();
   });
 
   it('should apply dark theme styles', () => {
@@ -211,7 +213,7 @@ describe('FileOperations', () => {
   it('should format file sizes correctly', () => {
     const largeFile: FileInfo = {
       ...mockCurrentFile,
-      size: 2097152 // 2MB
+      size: 2097152, // 2MB
     };
 
     render(
@@ -240,7 +242,9 @@ describe('FileOperations', () => {
       />
     );
 
-    const fileInput = screen.getByLabelText('Select JSON file') as HTMLInputElement;
+    const fileInput = screen.getByLabelText(
+      'Select JSON file'
+    ) as HTMLInputElement;
     const file = new File(['{}'], 'test.json', { type: 'application/json' });
 
     Object.defineProperty(fileInput, 'files', {

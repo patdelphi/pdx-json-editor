@@ -11,36 +11,21 @@ describe('ThemeSelector', () => {
   });
 
   it('should render with light theme', () => {
-    render(
-      <ThemeSelector
-        theme="light"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    render(<ThemeSelector theme="light" onThemeChange={mockOnThemeChange} />);
 
     expect(screen.getByText('Light')).toBeInTheDocument();
     expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'false');
   });
 
   it('should render with dark theme', () => {
-    render(
-      <ThemeSelector
-        theme="dark"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    render(<ThemeSelector theme="dark" onThemeChange={mockOnThemeChange} />);
 
     expect(screen.getByText('Dark')).toBeInTheDocument();
     expect(screen.getByRole('switch')).toHaveAttribute('aria-checked', 'true');
   });
 
   it('should call onThemeChange when clicked', () => {
-    render(
-      <ThemeSelector
-        theme="light"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    render(<ThemeSelector theme="light" onThemeChange={mockOnThemeChange} />);
 
     const toggleButton = screen.getByRole('switch');
     fireEvent.click(toggleButton);
@@ -49,12 +34,7 @@ describe('ThemeSelector', () => {
   });
 
   it('should toggle from dark to light', () => {
-    render(
-      <ThemeSelector
-        theme="dark"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    render(<ThemeSelector theme="dark" onThemeChange={mockOnThemeChange} />);
 
     const toggleButton = screen.getByRole('switch');
     fireEvent.click(toggleButton);
@@ -92,12 +72,7 @@ describe('ThemeSelector', () => {
   });
 
   it('should have proper accessibility attributes', () => {
-    render(
-      <ThemeSelector
-        theme="light"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    render(<ThemeSelector theme="light" onThemeChange={mockOnThemeChange} />);
 
     const toggleButton = screen.getByRole('switch');
     expect(toggleButton).toHaveAttribute('aria-label', 'Switch to dark theme');
@@ -106,33 +81,20 @@ describe('ThemeSelector', () => {
 
   it('should update aria-label based on current theme', () => {
     const { rerender } = render(
-      <ThemeSelector
-        theme="light"
-        onThemeChange={mockOnThemeChange}
-      />
+      <ThemeSelector theme="light" onThemeChange={mockOnThemeChange} />
     );
 
     let toggleButton = screen.getByRole('switch');
     expect(toggleButton).toHaveAttribute('aria-label', 'Switch to dark theme');
 
-    rerender(
-      <ThemeSelector
-        theme="dark"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    rerender(<ThemeSelector theme="dark" onThemeChange={mockOnThemeChange} />);
 
     toggleButton = screen.getByRole('switch');
     expect(toggleButton).toHaveAttribute('aria-label', 'Switch to light theme');
   });
 
   it('should show theme icons', () => {
-    render(
-      <ThemeSelector
-        theme="light"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    render(<ThemeSelector theme="light" onThemeChange={mockOnThemeChange} />);
 
     expect(screen.getByTitle('Light theme')).toBeInTheDocument();
     expect(screen.getByTitle('Dark theme')).toBeInTheDocument();
@@ -140,10 +102,7 @@ describe('ThemeSelector', () => {
 
   it('should highlight active theme icon', () => {
     const { rerender } = render(
-      <ThemeSelector
-        theme="light"
-        onThemeChange={mockOnThemeChange}
-      />
+      <ThemeSelector theme="light" onThemeChange={mockOnThemeChange} />
     );
 
     const lightIcon = screen.getByTitle('Light theme');
@@ -152,12 +111,7 @@ describe('ThemeSelector', () => {
     expect(lightIcon).toHaveClass('text-yellow-500');
     expect(darkIcon).toHaveClass('text-gray-400');
 
-    rerender(
-      <ThemeSelector
-        theme="dark"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    rerender(<ThemeSelector theme="dark" onThemeChange={mockOnThemeChange} />);
 
     expect(lightIcon).toHaveClass('text-gray-400');
     expect(darkIcon).toHaveClass('text-blue-400');
@@ -165,21 +119,13 @@ describe('ThemeSelector', () => {
 
   it('should apply correct switch position styles', () => {
     const { rerender } = render(
-      <ThemeSelector
-        theme="light"
-        onThemeChange={mockOnThemeChange}
-      />
+      <ThemeSelector theme="light" onThemeChange={mockOnThemeChange} />
     );
 
     let switchElement = screen.getByRole('switch').querySelector('span');
     expect(switchElement).toHaveClass('translate-x-1');
 
-    rerender(
-      <ThemeSelector
-        theme="dark"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    rerender(<ThemeSelector theme="dark" onThemeChange={mockOnThemeChange} />);
 
     switchElement = screen.getByRole('switch').querySelector('span');
     expect(switchElement).toHaveClass('translate-x-6');
@@ -187,21 +133,13 @@ describe('ThemeSelector', () => {
 
   it('should apply correct background colors', () => {
     const { rerender } = render(
-      <ThemeSelector
-        theme="light"
-        onThemeChange={mockOnThemeChange}
-      />
+      <ThemeSelector theme="light" onThemeChange={mockOnThemeChange} />
     );
 
     let toggleButton = screen.getByRole('switch');
     expect(toggleButton).toHaveClass('bg-gray-200');
 
-    rerender(
-      <ThemeSelector
-        theme="dark"
-        onThemeChange={mockOnThemeChange}
-      />
-    );
+    rerender(<ThemeSelector theme="dark" onThemeChange={mockOnThemeChange} />);
 
     toggleButton = screen.getByRole('switch');
     expect(toggleButton).toHaveClass('bg-blue-600');

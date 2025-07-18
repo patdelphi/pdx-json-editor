@@ -22,22 +22,22 @@ export default defineConfig({
           {
             src: 'pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
-          },
-          {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
           },
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
-          }
-        ]
-      }
-    })
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
+      },
+    }),
   ],
   resolve: {
     alias: {
@@ -45,7 +45,7 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['monaco-editor']
+    include: ['monaco-editor'],
   },
   build: {
     outDir: 'docs',
@@ -62,15 +62,13 @@ export default defineConfig({
         manualChunks: {
           monaco: ['monaco-editor'],
           react: ['react', 'react-dom'],
-          ui: [
-            '@monaco-editor/react',
-          ],
+          ui: ['@monaco-editor/react'],
         },
         // 确保生成的文件名包含内容哈希，以便进行长期缓存
         entryFileNames: 'assets/[name].[hash].js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]',
-      }
+      },
     },
     // 启用源码映射，以便在生产环境中进行调试
     sourcemap: true,
@@ -82,5 +80,5 @@ export default defineConfig({
     reportCompressedSize: true,
     // 设置警告阈值为 1MB
     chunkSizeWarningLimit: 1024,
-  }
+  },
 });

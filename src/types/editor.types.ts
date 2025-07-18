@@ -122,8 +122,12 @@ export interface IStandaloneCodeEditor {
   revealLineInCenter: (lineNumber: number) => void;
   setPosition: (position: { lineNumber: number; column: number }) => void;
   updateOptions: (options: any) => void;
-  onDidChangeCursorPosition: (listener: (e: any) => void) => { dispose: () => void };
-  onDidChangeCursorSelection: (listener: (e: any) => void) => { dispose: () => void };
+  onDidChangeCursorPosition: (listener: (e: any) => void) => {
+    dispose: () => void;
+  };
+  onDidChangeCursorSelection: (listener: (e: any) => void) => {
+    dispose: () => void;
+  };
   onDidBlurEditorWidget: (listener: () => void) => { dispose: () => void };
   addCommand: (keybinding: number, handler: () => void) => void;
   getContribution: (id: string) => IEditorContribution;
@@ -185,6 +189,44 @@ export interface StatusBarProps {
 export interface ThemeSelectorProps {
   theme: 'light' | 'dark';
   onThemeChange: (theme: 'light' | 'dark') => void;
+}
+
+// Toast types
+export interface ToastData {
+  id: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+  title: string;
+  message?: string;
+  duration?: number;
+  autoClose?: boolean;
+}
+
+export interface ToastProps {
+  toast: ToastData;
+  onClose: (id: string) => void;
+  theme?: 'light' | 'dark';
+}
+
+// SearchPanel types
+export interface SearchPanelProps {
+  isVisible: boolean;
+  onClose: () => void;
+  onSearch: (query: string, options: SearchOptions) => void;
+  onReplace: (
+    searchQuery: string,
+    replaceText: string,
+    options: SearchOptions
+  ) => void;
+  onReplaceAll: (
+    searchQuery: string,
+    replaceText: string,
+    options: SearchOptions
+  ) => void;
+  onFindNext: () => void;
+  onFindPrevious: () => void;
+  searchResults: SearchResult[];
+  currentResultIndex: number;
+  theme: 'light' | 'dark';
 }
 
 // Utility types

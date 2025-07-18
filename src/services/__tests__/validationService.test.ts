@@ -44,7 +44,7 @@ describe('ValidationService', () => {
         line: expect.any(Number),
         column: expect.any(Number),
         message: expect.any(String),
-        severity: 'error'
+        severity: 'error',
       });
     });
 
@@ -186,8 +186,8 @@ describe('ValidationService', () => {
           line: 1,
           column: 5,
           message: 'Syntax error',
-          severity: 'error' as const
-        }
+          severity: 'error' as const,
+        },
       ];
       const result = ValidationService.getErrorSummary(errors);
       expect(result).toBe('1 error');
@@ -199,14 +199,14 @@ describe('ValidationService', () => {
           line: 1,
           column: 5,
           message: 'Syntax error',
-          severity: 'error' as const
+          severity: 'error' as const,
         },
         {
           line: 2,
           column: 10,
           message: 'Another error',
-          severity: 'error' as const
-        }
+          severity: 'error' as const,
+        },
       ];
       const result = ValidationService.getErrorSummary(errors);
       expect(result).toBe('2 errors');
@@ -218,8 +218,8 @@ describe('ValidationService', () => {
           line: 1,
           column: 5,
           message: 'Style warning',
-          severity: 'warning' as const
-        }
+          severity: 'warning' as const,
+        },
       ];
       const result = ValidationService.getErrorSummary(errors);
       expect(result).toBe('1 warning');
@@ -231,14 +231,14 @@ describe('ValidationService', () => {
           line: 1,
           column: 5,
           message: 'Style warning',
-          severity: 'warning' as const
+          severity: 'warning' as const,
         },
         {
           line: 2,
           column: 10,
           message: 'Another warning',
-          severity: 'warning' as const
-        }
+          severity: 'warning' as const,
+        },
       ];
       const result = ValidationService.getErrorSummary(errors);
       expect(result).toBe('2 warnings');
@@ -250,20 +250,20 @@ describe('ValidationService', () => {
           line: 1,
           column: 5,
           message: 'Syntax error',
-          severity: 'error' as const
+          severity: 'error' as const,
         },
         {
           line: 2,
           column: 10,
           message: 'Style warning',
-          severity: 'warning' as const
+          severity: 'warning' as const,
         },
         {
           line: 3,
           column: 15,
           message: 'Another error',
-          severity: 'error' as const
-        }
+          severity: 'error' as const,
+        },
       ];
       const result = ValidationService.getErrorSummary(errors);
       expect(result).toBe('2 errors, 1 warning');
@@ -275,26 +275,26 @@ describe('ValidationService', () => {
           line: 1,
           column: 5,
           message: 'Error 1',
-          severity: 'error' as const
+          severity: 'error' as const,
         },
         {
           line: 2,
           column: 10,
           message: 'Warning 1',
-          severity: 'warning' as const
+          severity: 'warning' as const,
         },
         {
           line: 3,
           column: 15,
           message: 'Error 2',
-          severity: 'error' as const
+          severity: 'error' as const,
         },
         {
           line: 4,
           column: 20,
           message: 'Warning 2',
-          severity: 'warning' as const
-        }
+          severity: 'warning' as const,
+        },
       ];
       const result = ValidationService.getErrorSummary(errors);
       expect(result).toBe('2 errors, 2 warnings');
@@ -323,7 +323,8 @@ describe('ValidationService', () => {
     });
 
     it('should handle JSON with special characters', () => {
-      const specialJson = '{"text": "Hello\\nWorld\\t\\"Test\\"", "emoji": "🚀"}';
+      const specialJson =
+        '{"text": "Hello\\nWorld\\t\\"Test\\"", "emoji": "🚀"}';
       const result = ValidationService.validateJson(specialJson);
       expect(result).toEqual([]);
     });
@@ -355,7 +356,7 @@ describe('ValidationService', () => {
   ]
 }`;
       const result = ValidationService.validateJson(complexJson);
-      
+
       expect(result).toHaveLength(1);
       expect(result[0].line).toBeGreaterThanOrEqual(1); // Error position may vary based on JSON parser
       expect(result[0].column).toBeGreaterThan(0);

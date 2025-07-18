@@ -8,7 +8,7 @@ import { StorageService } from '../services/storageService';
 // Initialize state with data from localStorage
 const getInitialState = (): AppState => {
   const storedData = StorageService.getAllStoredData();
-  
+
   return {
     editor: {
       content: storedData.lastContent,

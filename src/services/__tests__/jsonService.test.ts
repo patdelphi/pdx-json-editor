@@ -33,7 +33,9 @@ describe('JsonService', () => {
     it('should throw error for malformed JSON', () => {
       const malformedJson = '{name: test}';
 
-      expect(() => JsonService.parse(malformedJson)).toThrow('JSON Parse Error:');
+      expect(() => JsonService.parse(malformedJson)).toThrow(
+        'JSON Parse Error:'
+      );
     });
   });
 
@@ -71,8 +73,8 @@ describe('JsonService', () => {
         user: {
           name: 'John',
           age: 30,
-          hobbies: ['reading', 'coding']
-        }
+          hobbies: ['reading', 'coding'],
+        },
       };
       const result = JsonService.stringify(obj);
 
@@ -105,7 +107,7 @@ describe('JsonService', () => {
       expect(result[0]).toMatchObject({
         line: 1,
         column: 1,
-        severity: 'error'
+        severity: 'error',
       });
       expect(result[0].message).toContain('Unexpected token');
     });
@@ -159,13 +161,17 @@ describe('JsonService', () => {
       const compactNested = '{"user":{"name":"John","age":30}}';
       const result = JsonService.format(compactNested);
 
-      expect(result).toContain('{\n  "user": {\n    "name": "John",\n    "age": 30\n  }\n}');
+      expect(result).toContain(
+        '{\n  "user": {\n    "name": "John",\n    "age": 30\n  }\n}'
+      );
     });
 
     it('should throw error for invalid JSON', () => {
       const invalidJson = '{"name": "test", "value":}';
 
-      expect(() => JsonService.format(invalidJson)).toThrow('JSON Parse Error:');
+      expect(() => JsonService.format(invalidJson)).toThrow(
+        'JSON Parse Error:'
+      );
     });
 
     it('should handle already formatted JSON', () => {
@@ -192,7 +198,8 @@ describe('JsonService', () => {
     });
 
     it('should minify nested objects', () => {
-      const formattedNested = '{\n  "user": {\n    "name": "John",\n    "age": 30\n  }\n}';
+      const formattedNested =
+        '{\n  "user": {\n    "name": "John",\n    "age": 30\n  }\n}';
       const result = JsonService.minify(formattedNested);
 
       expect(result).toBe('{"user":{"name":"John","age":30}}');
@@ -208,7 +215,9 @@ describe('JsonService', () => {
     it('should throw error for invalid JSON', () => {
       const invalidJson = '{"name": "test", "value":}';
 
-      expect(() => JsonService.minify(invalidJson)).toThrow('JSON Parse Error:');
+      expect(() => JsonService.minify(invalidJson)).toThrow(
+        'JSON Parse Error:'
+      );
     });
 
     it('should minify primitive values', () => {

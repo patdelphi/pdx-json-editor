@@ -80,8 +80,8 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div 
-      style={{ 
+    <div
+      style={{
         position: 'fixed',
         top: 0,
         left: 0,
@@ -91,23 +91,24 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        zIndex: Z_INDEX.MODAL_OVERLAY
+        zIndex: Z_INDEX.MODAL_OVERLAY,
       }}
     >
-      <div 
+      <div
         ref={modalRef}
         tabIndex={-1}
         style={{
           backgroundColor: theme === 'dark' ? '#1f2937' : 'white',
           borderRadius: '0.5rem',
           padding: '1.5rem',
-          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)',
+          boxShadow:
+            '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)',
           maxHeight: '80vh',
           overflowY: 'auto',
           width: '95%',
           maxWidth: '450px',
           position: 'relative',
-          zIndex: Z_INDEX.MODAL_CONTENT
+          zIndex: Z_INDEX.MODAL_CONTENT,
         }}
       >
         {/* Header */}
@@ -131,10 +132,7 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
               外观
             </h3>
             <div className="pl-4">
-              <ThemeSelector
-                theme={theme}
-                onThemeChange={onThemeChange}
-              />
+              <ThemeSelector theme={theme} onThemeChange={onThemeChange} />
             </div>
           </div>
 
@@ -151,7 +149,12 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                 </label>
                 <select
                   value={localSettings.indentSize}
-                  onChange={(e) => handleSettingChange('indentSize', Number(e.target.value) as 2 | 4)}
+                  onChange={(e) =>
+                    handleSettingChange(
+                      'indentSize',
+                      Number(e.target.value) as 2 | 4
+                    )
+                  }
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value={2}>2 个空格</option>
@@ -171,10 +174,17 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                       name="indentType"
                       value="spaces"
                       checked={localSettings.indentType === 'spaces'}
-                      onChange={(e) => handleSettingChange('indentType', e.target.value as 'spaces' | 'tabs')}
+                      onChange={(e) =>
+                        handleSettingChange(
+                          'indentType',
+                          e.target.value as 'spaces' | 'tabs'
+                        )
+                      }
                       className="mr-2 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">空格</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      空格
+                    </span>
                   </label>
                   <label className="flex items-center">
                     <input
@@ -182,10 +192,17 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                       name="indentType"
                       value="tabs"
                       checked={localSettings.indentType === 'tabs'}
-                      onChange={(e) => handleSettingChange('indentType', e.target.value as 'spaces' | 'tabs')}
+                      onChange={(e) =>
+                        handleSettingChange(
+                          'indentType',
+                          e.target.value as 'spaces' | 'tabs'
+                        )
+                      }
                       className="mr-2 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">制表符</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      制表符
+                    </span>
                   </label>
                 </div>
               </div>
@@ -196,7 +213,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <input
                     type="checkbox"
                     checked={localSettings.wordWrap}
-                    onChange={(e) => handleSettingChange('wordWrap', e.target.checked)}
+                    onChange={(e) =>
+                      handleSettingChange('wordWrap', e.target.checked)
+                    }
                     className="mr-3 text-blue-600 focus:ring-blue-500 rounded"
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -214,7 +233,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <input
                     type="checkbox"
                     checked={localSettings.lineNumbers}
-                    onChange={(e) => handleSettingChange('lineNumbers', e.target.checked)}
+                    onChange={(e) =>
+                      handleSettingChange('lineNumbers', e.target.checked)
+                    }
                     className="mr-3 text-blue-600 focus:ring-blue-500 rounded"
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -232,7 +253,9 @@ const SettingsPanel: React.FC<SettingsPanelProps> = ({
                   <input
                     type="checkbox"
                     checked={localSettings.minimap}
-                    onChange={(e) => handleSettingChange('minimap', e.target.checked)}
+                    onChange={(e) =>
+                      handleSettingChange('minimap', e.target.checked)
+                    }
                     className="mr-3 text-blue-600 focus:ring-blue-500 rounded"
                   />
                   <span className="text-sm font-medium text-gray-700 dark:text-gray-300">

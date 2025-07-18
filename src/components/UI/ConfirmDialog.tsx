@@ -21,7 +21,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   onConfirm,
   onCancel,
   theme = 'light',
-  variant = 'default'
+  variant = 'default',
 }) => {
   if (!isOpen) return null;
 
@@ -31,13 +31,15 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     }
   };
 
-  const confirmButtonClass = variant === 'danger'
-    ? 'bg-red-600 hover:bg-red-700 text-white'
-    : 'bg-blue-600 hover:bg-blue-700 text-white';
+  const confirmButtonClass =
+    variant === 'danger'
+      ? 'bg-red-600 hover:bg-red-700 text-white'
+      : 'bg-blue-600 hover:bg-blue-700 text-white';
 
-  const cancelButtonClass = theme === 'dark'
-    ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600'
-    : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300';
+  const cancelButtonClass =
+    theme === 'dark'
+      ? 'bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600'
+      : 'bg-white hover:bg-gray-50 text-gray-700 border-gray-300';
 
   return (
     <div
@@ -47,9 +49,10 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       <div
         className={`
           max-w-md w-full mx-4 p-6 rounded-lg shadow-xl
-          ${theme === 'dark' 
-            ? 'bg-gray-800 text-gray-100' 
-            : 'bg-white text-gray-900'
+          ${
+            theme === 'dark'
+              ? 'bg-gray-800 text-gray-100'
+              : 'bg-white text-gray-900'
           }
         `}
         role="dialog"
@@ -59,10 +62,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       >
         {/* Header */}
         <div className="mb-4">
-          <h3
-            id="dialog-title"
-            className="text-lg font-semibold"
-          >
+          <h3 id="dialog-title" className="text-lg font-semibold">
             {title}
           </h3>
         </div>

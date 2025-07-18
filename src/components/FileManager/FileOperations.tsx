@@ -18,11 +18,13 @@ const FileOperations: React.FC<FileOperationsProps> = ({
   isDirty,
   currentFile,
   theme,
-  disabled = false
+  disabled = false,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -32,7 +34,7 @@ const FileOperations: React.FC<FileOperationsProps> = ({
         name: file.name,
         size: file.size,
         lastModified: new Date(file.lastModified),
-        content
+        content,
       };
       onOpen(fileInfo);
     } catch (error) {
@@ -72,9 +74,10 @@ const FileOperations: React.FC<FileOperationsProps> = ({
 
   const buttonBaseClass = `
     px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-2
-    ${theme === 'dark' 
-      ? 'text-gray-300 hover:text-white hover:bg-gray-700 border-gray-600' 
-      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-gray-300'
+    ${
+      theme === 'dark'
+        ? 'text-gray-300 hover:text-white hover:bg-gray-700 border-gray-600'
+        : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-gray-300'
     }
     ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
     border
@@ -82,18 +85,20 @@ const FileOperations: React.FC<FileOperationsProps> = ({
 
   const primaryButtonClass = `
     px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-2
-    ${theme === 'dark' 
-      ? 'bg-blue-600 hover:bg-blue-700 text-white' 
-      : 'bg-blue-600 hover:bg-blue-700 text-white'
+    ${
+      theme === 'dark'
+        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+        : 'bg-blue-600 hover:bg-blue-700 text-white'
     }
     ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
   `;
 
   const dangerButtonClass = `
     px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-2
-    ${theme === 'dark' 
-      ? 'bg-red-600 hover:bg-red-700 text-white' 
-      : 'bg-red-600 hover:bg-red-700 text-white'
+    ${
+      theme === 'dark'
+        ? 'bg-red-600 hover:bg-red-700 text-white'
+        : 'bg-red-600 hover:bg-red-700 text-white'
     }
     ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
   `;
@@ -142,27 +147,31 @@ const FileOperations: React.FC<FileOperationsProps> = ({
         <span>💾</span>
         <span>保存</span>
         {isDirty && (
-          <span className="w-2 h-2 bg-orange-500 rounded-full ml-1" title="未保存的更改" />
+          <span
+            className="w-2 h-2 bg-orange-500 rounded-full ml-1"
+            title="未保存的更改"
+          />
         )}
       </button>
 
       {/* File Info */}
       {currentFile && (
-        <div className={`
+        <div
+          className={`
           px-3 py-2 text-sm rounded-md border
-          ${theme === 'dark' 
-            ? 'bg-gray-800 border-gray-600 text-gray-300' 
-            : 'bg-gray-50 border-gray-300 text-gray-600'
+          ${
+            theme === 'dark'
+              ? 'bg-gray-800 border-gray-600 text-gray-300'
+              : 'bg-gray-50 border-gray-300 text-gray-600'
           }
-        `}>
+        `}
+        >
           <div className="flex items-center space-x-2">
             <span className="font-medium">{currentFile.name}</span>
             <span className="text-xs opacity-75">
               ({formatFileSize(currentFile.size)})
             </span>
-            {isDirty && (
-              <span className="text-orange-500 text-xs">●</span>
-            )}
+            {isDirty && <span className="text-orange-500 text-xs">●</span>}
           </div>
         </div>
       )}

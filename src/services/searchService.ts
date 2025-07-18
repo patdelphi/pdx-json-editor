@@ -19,7 +19,11 @@ export class SearchService {
    * @param options Search options
    * @returns Array of search results
    */
-  static search(content: string, query: string, options: SearchOptions): SearchResult[] {
+  static search(
+    content: string,
+    query: string,
+    options: SearchOptions
+  ): SearchResult[] {
     if (!query.trim() || !content) {
       return [];
     }
@@ -29,19 +33,19 @@ export class SearchService {
 
     try {
       const searchRegex = this.createSearchRegex(query, options);
-      
+
       lines.forEach((line, lineIndex) => {
         let match;
         const regex = new RegExp(searchRegex.source, searchRegex.flags + 'g');
-        
+
         while ((match = regex.exec(line)) !== null) {
           results.push({
             line: lineIndex + 1, // 1-based line numbers
             column: match.index + 1, // 1-based column numbers
             length: match[0].length,
-            text: match[0]
+            text: match[0],
           });
-          
+
           // Prevent infinite loop for zero-length matches
           if (match[0].length === 0) {
             regex.lastIndex++;
@@ -67,9 +71,9 @@ export class SearchService {
    * @returns Object with new content and number of replacements
    */
   static replace(
-    content: string, 
-    searchQuery: string, 
-    replaceText: string, 
+    content: string,
+    searchQuery: string,
+    replaceText: string,
     options: SearchOptions,
     replaceAll: boolean = false
   ): { content: string; replacements: number } {
@@ -81,7 +85,7 @@ export class SearchService {
       const searchRegex = this.createSearchRegex(searchQuery, options);
       const flags = searchRegex.flags + (replaceAll ? 'g' : '');
       const regex = new RegExp(searchRegex.source, flags);
-      
+
       let replacements = 0;
       const newContent = content.replace(regex, (match) => {
         replacements++;
@@ -112,7 +116,7 @@ export class SearchService {
     replaceText: string
   ): string {
     const lines = content.split('\n');
-    
+
     if (line < 1 || line > lines.length) {
       return content;
     }
@@ -125,10 +129,11 @@ export class SearchService {
       return content;
     }
 
-    const newLine = targetLine.substring(0, startIndex) + 
-                   replaceText + 
-                   targetLine.substring(endIndex);
-    
+    const newLine =
+      targetLine.substring(0, startIndex) +
+      replaceText +
+      targetLine.substring(endIndex);
+
     lines[line - 1] = newLine;
     return lines.join('\n');
   }
@@ -139,9 +144,12 @@ export class SearchService {
    * @param options Search options
    * @returns RegExp object
    */
-  private static createSearchRegex(query: string, options: SearchOptions): RegExp {
+  private static createSearchRegex(
+    query: string,
+    options: SearchOptions
+  ): RegExp {
     let pattern = query;
-    let flags = options.caseSensitive ? '' : 'i';
+    const flags = options.caseSensitive ? '' : 'i';
 
     if (!options.useRegex) {
       // Escape special regex characters
@@ -184,13 +192,16 @@ export class SearchService {
    * @param index Character index
    * @returns Line and column numbers (1-based)
    */
-  static getLineColumnFromIndex(content: string, index: number): { line: number; column: number } {
+  static getLineColumnFromIndex(
+    content: string,
+    index: number
+  ): { line: number; column: number } {
     const beforeIndex = content.substring(0, index);
     const lines = beforeIndex.split('\n');
-    
+
     return {
       line: lines.length,
-      column: lines[lines.length - 1].length + 1
+      column: lines[lines.length - 1].length + 1,
     };
   }
 
@@ -201,9 +212,13 @@ export class SearchService {
    * @param column Column number (1-based)
    * @returns Character index
    */
-  static getIndexFromLineColumn(content: string, line: number, column: number): number {
+  static getIndexFromLineColumn(
+    content: string,
+    line: number,
+    column: number
+  ): number {
     const lines = content.split('\n');
-    
+
     if (line < 1 || line > lines.length) {
       return -1;
     }
@@ -212,7 +227,7 @@ export class SearchService {
     for (let i = 0; i < line - 1; i++) {
       index += lines[i].length + 1; // +1 for newline character
     }
-    
+
     index += Math.max(0, Math.min(column - 1, lines[line - 1].length));
     return index;
   }

@@ -21,13 +21,13 @@ const useModal = () => {
     type: 'info',
     confirmText: '确定',
     cancelText: '取消',
-    showCancel: false
+    showCancel: false,
   });
 
   const openModal = useCallback((newOptions: ModalOptions) => {
-    setOptions(prevOptions => ({
+    setOptions((prevOptions) => ({
       ...prevOptions,
-      ...newOptions
+      ...newOptions,
     }));
     setIsOpen(true);
   }, []);
@@ -36,47 +36,69 @@ const useModal = () => {
     setIsOpen(false);
   }, []);
 
-  const showSuccess = useCallback((title: string, message: string, onConfirm?: () => void) => {
-    openModal({
-      title,
-      message,
-      type: 'success',
-      onConfirm,
-      showCancel: false
-    });
-  }, [openModal]);
+  const showSuccess = useCallback(
+    (title: string, message: string, onConfirm?: () => void) => {
+      openModal({
+        title,
+        message,
+        type: 'success',
+        onConfirm,
+        showCancel: false,
+      });
+    },
+    [openModal]
+  );
 
-  const showError = useCallback((title: string, message: string, onConfirm?: () => void) => {
-    openModal({
-      title,
-      message,
-      type: 'error',
-      onConfirm,
-      showCancel: false
-    });
-  }, [openModal]);
+  const showError = useCallback(
+    (title: string, message: string, onConfirm?: () => void) => {
+      openModal({
+        title,
+        message,
+        type: 'error',
+        onConfirm,
+        showCancel: false,
+      });
+    },
+    [openModal]
+  );
 
-  const showWarning = useCallback((title: string, message: string, onConfirm?: () => void, onCancel?: () => void) => {
-    openModal({
-      title,
-      message,
-      type: 'warning',
-      onConfirm,
-      onCancel,
-      showCancel: true
-    });
-  }, [openModal]);
+  const showWarning = useCallback(
+    (
+      title: string,
+      message: string,
+      onConfirm?: () => void,
+      onCancel?: () => void
+    ) => {
+      openModal({
+        title,
+        message,
+        type: 'warning',
+        onConfirm,
+        onCancel,
+        showCancel: true,
+      });
+    },
+    [openModal]
+  );
 
-  const showConfirm = useCallback((title: string, message: string, onConfirm?: () => void, onCancel?: () => void) => {
-    openModal({
-      title,
-      message,
-      type: 'info',
-      onConfirm,
-      onCancel,
-      showCancel: true
-    });
-  }, [openModal]);
+  const showConfirm = useCallback(
+    (
+      title: string,
+      message: string,
+      onConfirm?: () => void,
+      onCancel?: () => void
+    ) => {
+      openModal({
+        title,
+        message,
+        type: 'info',
+        onConfirm,
+        onCancel,
+        showCancel: true,
+      });
+    },
+    [openModal]
+  );
 
   return {
     isOpen,
@@ -86,7 +108,7 @@ const useModal = () => {
     showSuccess,
     showError,
     showWarning,
-    showConfirm
+    showConfirm,
   };
 };
 

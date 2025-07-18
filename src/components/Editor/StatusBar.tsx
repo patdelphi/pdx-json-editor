@@ -1,5 +1,9 @@
 import React from 'react';
-import type { JsonError, CursorPosition, Selection } from '../../types/editor.types';
+import type {
+  JsonError,
+  CursorPosition,
+  Selection,
+} from '../../types/editor.types';
 
 interface StatusBarProps {
   errors: JsonError[];
@@ -20,30 +24,33 @@ const StatusBar: React.FC<StatusBarProps> = ({
   wordCount,
   fileSize,
   isModified,
-  theme
+  theme,
 }) => {
-  const hasSelection = selection && (
-    selection.startLine !== selection.endLine || 
-    selection.startColumn !== selection.endColumn
-  );
+  const hasSelection =
+    selection &&
+    (selection.startLine !== selection.endLine ||
+      selection.startColumn !== selection.endColumn);
 
   const getValidationStatus = () => {
     if (errors.length === 0) {
-      return { text: 'Valid JSON', className: 'text-green-600 dark:text-green-400' };
+      return {
+        text: 'Valid JSON',
+        className: 'text-green-600 dark:text-green-400',
+      };
     }
-    
-    const errorCount = errors.filter(e => e.severity === 'error').length;
-    const warningCount = errors.filter(e => e.severity === 'warning').length;
-    
+
+    const errorCount = errors.filter((e) => e.severity === 'error').length;
+    const warningCount = errors.filter((e) => e.severity === 'warning').length;
+
     if (errorCount > 0) {
-      return { 
-        text: `${errorCount} error${errorCount > 1 ? 's' : ''}${warningCount > 0 ? `, ${warningCount} warning${warningCount > 1 ? 's' : ''}` : ''}`, 
-        className: 'text-red-600 dark:text-red-400' 
+      return {
+        text: `${errorCount} error${errorCount > 1 ? 's' : ''}${warningCount > 0 ? `, ${warningCount} warning${warningCount > 1 ? 's' : ''}` : ''}`,
+        className: 'text-red-600 dark:text-red-400',
       };
     } else {
-      return { 
-        text: `${warningCount} warning${warningCount > 1 ? 's' : ''}`, 
-        className: 'text-yellow-600 dark:text-yellow-400' 
+      return {
+        text: `${warningCount} warning${warningCount > 1 ? 's' : ''}`,
+        className: 'text-yellow-600 dark:text-yellow-400',
       };
     }
   };
@@ -56,12 +63,13 @@ const StatusBar: React.FC<StatusBarProps> = ({
 
   const getSelectionInfo = () => {
     if (!hasSelection) return null;
-    
+
     const lines = Math.abs(selection!.endLine - selection!.startLine) + 1;
-    const chars = selection!.endLine === selection!.startLine 
-      ? Math.abs(selection!.endColumn - selection!.startColumn)
-      : 0; // For multi-line selections, character count is more complex
-    
+    const chars =
+      selection!.endLine === selection!.startLine
+        ? Math.abs(selection!.endColumn - selection!.startColumn)
+        : 0; // For multi-line selections, character count is more complex
+
     if (lines === 1) {
       return `${chars} chars selected`;
     } else {
@@ -72,13 +80,16 @@ const StatusBar: React.FC<StatusBarProps> = ({
   const validationStatus = getValidationStatus();
 
   return (
-    <div className={`
+    <div
+      className={`
       h-6 px-3 flex items-center justify-between text-xs border-t
-      ${theme === 'dark' 
-        ? 'bg-gray-800 border-gray-700 text-gray-300' 
-        : 'bg-gray-100 border-gray-200 text-gray-600'
+      ${
+        theme === 'dark'
+          ? 'bg-gray-800 border-gray-700 text-gray-300'
+          : 'bg-gray-100 border-gray-200 text-gray-600'
       }
-    `}>
+    `}
+    >
       {/* Left section - Cursor position and selection */}
       <div className="flex items-center space-x-4">
         <span>
@@ -93,21 +104,11 @@ const StatusBar: React.FC<StatusBarProps> = ({
 
       {/* Center section - Document stats */}
       <div className="flex items-center space-x-4">
-        <span>
-          {characterCount.toLocaleString()} chars
-        </span>
-        <span>
-          {wordCount.toLocaleString()} words
-        </span>
-        {fileSize !== undefined && (
-          <span>
-            {formatFileSize(fileSize)}
-          </span>
-        )}
+        <span>{characterCount.toLocaleString()} chars</span>
+        <span>{wordCount.toLocaleString()} words</span>
+        {fileSize !== undefined && <span>{formatFileSize(fileSize)}</span>}
         {isModified && (
-          <span className="text-orange-600 dark:text-orange-400">
-            Modified
-          </span>
+          <span className="text-orange-600 dark:text-orange-400">Modified</span>
         )}
       </div>
 
@@ -122,8 +123,8 @@ const StatusBar: React.FC<StatusBarProps> = ({
             onClick={() => {
               // Scroll to first error
               const firstError = errors[0];
-              const event = new CustomEvent('goto-line', { 
-                detail: { line: firstError.line, column: firstError.column } 
+              const event = new CustomEvent('goto-line', {
+                detail: { line: firstError.line, column: firstError.column },
               });
               window.dispatchEvent(event);
             }}

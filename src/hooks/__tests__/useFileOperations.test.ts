@@ -7,7 +7,7 @@ vi.mock('../../services/fileService', () => {
   const mockReadFile = vi.fn();
   const mockDownloadFile = vi.fn();
   const mockValidateFileType = vi.fn();
-  
+
   return {
     FileService: {
       readFile: mockReadFile,
@@ -108,7 +108,10 @@ describe('useFileOperations', () => {
     expect(result.current.currentFile).toBeNull();
     expect(result.current.isLoading).toBe(false);
     expect(fileInfo).toBeNull();
-    expect(consoleSpy).toHaveBeenCalledWith('Error opening file:', expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error opening file:',
+      expect.any(Error)
+    );
 
     consoleSpy.mockRestore();
   });
@@ -189,7 +192,10 @@ describe('useFileOperations', () => {
     });
 
     expect(success!).toBe(false);
-    expect(consoleSpy).toHaveBeenCalledWith('Error saving file:', expect.any(Error));
+    expect(consoleSpy).toHaveBeenCalledWith(
+      'Error saving file:',
+      expect.any(Error)
+    );
 
     consoleSpy.mockRestore();
   });

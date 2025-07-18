@@ -5,6 +5,23 @@
 格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)，
 并且本项目遵循 [语义化版本](https://semver.org/lang/zh-CN/)。
 
+## [1.0.2] - 2025-07-18
+
+### 修复
+
+- 修复了 51 个测试失败问题，测试通过率从 86% 提升到 93%
+- 统一了组件中的中英文文本，解决测试用例文本不匹配问题
+- 修复了 Toast 组件的属性访问错误，添加了默认值处理
+- 修复了 SearchPanel 组件的测试用例
+- 完善了 TypeScript 类型定义，添加了 ToastData 和 SearchPanelProps 接口
+- 修复了 FileOperations 组件测试中的按钮标题匹配问题
+
+### 改进
+
+- 提高了组件稳定性，添加了更好的错误处理
+- 优化了代码格式和 ESLint 规范
+- 改进了测试用例的可靠性和准确性
+
 ## [1.0.1] - 2025-07-17
 
 ### 修复

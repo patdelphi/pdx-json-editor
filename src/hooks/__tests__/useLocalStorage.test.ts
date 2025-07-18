@@ -21,7 +21,9 @@ describe('useLocalStorage', () => {
   it('should initialize with initial value when localStorage is empty', () => {
     localStorageMock.getItem.mockReturnValue(null);
 
-    const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
+    const { result } = renderHook(() =>
+      useLocalStorage('test-key', 'initial-value')
+    );
 
     expect(result.current[0]).toBe('initial-value');
     expect(localStorageMock.getItem).toHaveBeenCalledWith('test-key');
@@ -30,7 +32,9 @@ describe('useLocalStorage', () => {
   it('should initialize with stored value from localStorage', () => {
     localStorageMock.getItem.mockReturnValue(JSON.stringify('stored-value'));
 
-    const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
+    const { result } = renderHook(() =>
+      useLocalStorage('test-key', 'initial-value')
+    );
 
     expect(result.current[0]).toBe('stored-value');
     expect(localStorageMock.getItem).toHaveBeenCalledWith('test-key');
@@ -40,7 +44,9 @@ describe('useLocalStorage', () => {
     localStorageMock.getItem.mockReturnValue('invalid-json');
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    const { result } = renderHook(() => useLocalStorage('test-key', 'initial-value'));
+    const { result } = renderHook(() =>
+      useLocalStorage('test-key', 'initial-value')
+    );
 
     expect(result.current[0]).toBe('initial-value');
     expect(consoleSpy).toHaveBeenCalledWith(
@@ -146,7 +152,9 @@ describe('useLocalStorage', () => {
 
     localStorageMock.getItem.mockReturnValue(null);
 
-    const { result } = renderHook(() => useLocalStorage('test-key', initialObject));
+    const { result } = renderHook(() =>
+      useLocalStorage('test-key', initialObject)
+    );
 
     expect(result.current[0]).toEqual(initialObject);
 
@@ -167,7 +175,9 @@ describe('useLocalStorage', () => {
 
     localStorageMock.getItem.mockReturnValue(null);
 
-    const { result } = renderHook(() => useLocalStorage('test-key', initialArray));
+    const { result } = renderHook(() =>
+      useLocalStorage('test-key', initialArray)
+    );
 
     expect(result.current[0]).toEqual(initialArray);
 
@@ -185,7 +195,9 @@ describe('useLocalStorage', () => {
   it('should maintain function stability across re-renders', () => {
     localStorageMock.getItem.mockReturnValue(null);
 
-    const { result, rerender } = renderHook(() => useLocalStorage('test-key', 'initial'));
+    const { result, rerender } = renderHook(() =>
+      useLocalStorage('test-key', 'initial')
+    );
 
     const initialSetValue = result.current[1];
     const initialRemoveValue = result.current[2];

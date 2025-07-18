@@ -6,7 +6,7 @@ import useTheme from '../useTheme';
 vi.mock('../../services/storageService', () => {
   const mockGetTheme = vi.fn();
   const mockSaveTheme = vi.fn();
-  
+
   return {
     StorageService: {
       getTheme: mockGetTheme,

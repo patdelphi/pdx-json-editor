@@ -184,7 +184,7 @@ describe('EditorToolbar', () => {
     );
 
     const buttons = screen.getAllByRole('button');
-    buttons.forEach(button => {
+    buttons.forEach((button) => {
       expect(button).toBeDisabled();
       expect(button).toHaveClass('opacity-50', 'cursor-not-allowed');
     });

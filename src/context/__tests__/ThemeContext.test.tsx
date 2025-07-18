@@ -9,7 +9,7 @@ vi.mock('../../services/storageService', () => ({
   StorageService: {
     getTheme: vi.fn(),
     saveTheme: vi.fn(),
-  }
+  },
 }));
 
 // Mock window.matchMedia
@@ -22,7 +22,7 @@ Object.defineProperty(window, 'matchMedia', {
 // Test component that uses the theme context
 const TestComponent: React.FC = () => {
   const { theme, setTheme, toggleTheme } = useTheme();
-  
+
   return (
     <div>
       <div data-testid="current-theme">{theme}</div>
@@ -42,10 +42,10 @@ const TestComponent: React.FC = () => {
 describe('ThemeContext', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Reset document classes
     document.documentElement.className = '';
-    
+
     // Mock matchMedia to return light theme preference
     mockMatchMedia.mockReturnValue({
       matches: false,
@@ -56,7 +56,7 @@ describe('ThemeContext', () => {
 
   it('should provide theme context to children', () => {
     (StorageService.getTheme as any).mockReturnValue('light');
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
@@ -68,7 +68,7 @@ describe('ThemeContext', () => {
 
   it('should initialize with stored theme', () => {
     (StorageService.getTheme as any).mockReturnValue('dark');
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
@@ -85,7 +85,7 @@ describe('ThemeContext', () => {
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
     });
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
@@ -97,13 +97,13 @@ describe('ThemeContext', () => {
 
   it('should default to light theme when no storage or system preference', () => {
     (StorageService.getTheme as any).mockReturnValue(null);
-    
+
     // Mock matchMedia to be undefined (no system preference support)
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
       value: undefined,
     });
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
@@ -115,7 +115,7 @@ describe('ThemeContext', () => {
 
   it('should update theme when setTheme is called', () => {
     (StorageService.getTheme as any).mockReturnValue('light');
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
@@ -132,7 +132,7 @@ describe('ThemeContext', () => {
 
   it('should toggle theme correctly', () => {
     (StorageService.getTheme as any).mockReturnValue('light');
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
@@ -158,7 +158,7 @@ describe('ThemeContext', () => {
 
   it('should apply dark class to document when theme is dark', () => {
     (StorageService.getTheme as any).mockReturnValue('light');
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
@@ -185,7 +185,7 @@ describe('ThemeContext', () => {
 
   it('should set CSS custom properties for theme colors', () => {
     (StorageService.getTheme as any).mockReturnValue('light');
-    
+
     render(
       <ThemeProvider>
         <TestComponent />
@@ -201,20 +201,20 @@ describe('ThemeContext', () => {
   it('should throw error when useTheme is used outside provider', () => {
     // Suppress console.error for this test
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    
+
     expect(() => {
       render(<TestComponent />);
     }).toThrow('useTheme must be used within a ThemeProvider');
-    
+
     consoleSpy.mockRestore();
   });
 
   it('should listen for system theme changes', () => {
     (StorageService.getTheme as any).mockReturnValue(null); // No stored theme
-    
+
     const mockAddEventListener = vi.fn();
     const mockRemoveEventListener = vi.fn();
-    
+
     // Reset matchMedia mock to ensure it's called
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -224,30 +224,36 @@ describe('ThemeContext', () => {
         removeEventListener: mockRemoveEventListener,
       })),
     });
-    
+
     const { unmount } = render(
       <ThemeProvider>
         <TestComponent />
       </ThemeProvider>
     );
 
-    expect(mockAddEventListener).toHaveBeenCalledWith('change', expect.any(Function));
-    
+    expect(mockAddEventListener).toHaveBeenCalledWith(
+      'change',
+      expect.any(Function)
+    );
+
     unmount();
-    
-    expect(mockRemoveEventListener).toHaveBeenCalledWith('change', expect.any(Function));
+
+    expect(mockRemoveEventListener).toHaveBeenCalledWith(
+      'change',
+      expect.any(Function)
+    );
   });
 
   it('should not auto-switch theme if user has manually set one', () => {
     (StorageService.getTheme as any).mockReturnValue('light'); // User has set theme
-    
+
     let changeHandler: (e: MediaQueryListEvent) => void;
     const mockAddEventListener = vi.fn((event, handler) => {
       if (event === 'change') {
         changeHandler = handler;
       }
     });
-    
+
     // Reset matchMedia mock to ensure it's called
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
@@ -257,7 +263,7 @@ describe('ThemeContext', () => {
         removeEventListener: vi.fn(),
       })),
     });
-    
+
     render(
       <ThemeProvider>
         <TestComponent />

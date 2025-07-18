@@ -15,7 +15,7 @@ vi.mock('@monaco-editor/react', () => ({
         canUndo: vi.fn(() => true),
         canRedo: vi.fn(() => false),
         onDidChangeContent: vi.fn(() => ({ dispose: vi.fn() })),
-        uri: { toString: () => 'mock-uri' }
+        uri: { toString: () => 'mock-uri' },
       })),
       onDidChangeCursorPosition: vi.fn(() => ({ dispose: vi.fn() })),
       onDidChangeCursorSelection: vi.fn(() => ({ dispose: vi.fn() })),
@@ -23,42 +23,42 @@ vi.mock('@monaco-editor/react', () => ({
         startLineNumber: 1,
         startColumn: 1,
         endLineNumber: 1,
-        endColumn: 5
+        endColumn: 5,
       })),
       setPosition: vi.fn(),
       revealLineInCenter: vi.fn(),
       focus: vi.fn(),
-      executeEdits: vi.fn()
+      executeEdits: vi.fn(),
     };
 
     const mockMonaco = {
       languages: {
         json: {
           jsonDefaults: {
-            setDiagnosticsOptions: vi.fn()
-          }
+            setDiagnosticsOptions: vi.fn(),
+          },
         },
-        setLanguageConfiguration: vi.fn()
+        setLanguageConfiguration: vi.fn(),
       },
       editor: {
         onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
         getModelMarkers: vi.fn(() => []),
-        setModelMarkers: vi.fn()
+        setModelMarkers: vi.fn(),
       },
       KeyMod: {
         CtrlCmd: 1,
-        Shift: 2
+        Shift: 2,
       },
       KeyCode: {
         KeyD: 1,
         KeyK: 2,
-        Slash: 3
+        Slash: 3,
       },
       MarkerSeverity: {
         Error: 8,
-        Warning: 4
+        Warning: 4,
       },
-      Range: vi.fn()
+      Range: vi.fn(),
     };
 
     React.useEffect(() => {
@@ -76,7 +76,7 @@ vi.mock('@monaco-editor/react', () => ({
         />
       </div>
     );
-  }
+  },
 }));
 
 describe('JsonEditor', () => {
@@ -85,7 +85,7 @@ describe('JsonEditor', () => {
     indentType: 'spaces',
     wordWrap: true,
     lineNumbers: true,
-    minimap: false
+    minimap: false,
   };
 
   const mockOnChange = vi.fn();
@@ -216,7 +216,7 @@ describe('JsonEditor', () => {
     const newSettings: EditorSettings = {
       ...defaultSettings,
       indentSize: 4,
-      wordWrap: false
+      wordWrap: false,
     };
 
     rerender(
@@ -235,7 +235,7 @@ describe('JsonEditor', () => {
 
   it('should handle ref methods', () => {
     const ref = React.createRef<any>();
-    
+
     render(
       <JsonEditor
         ref={ref}

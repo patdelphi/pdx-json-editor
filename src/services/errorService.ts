@@ -7,7 +7,7 @@ export enum ErrorType {
   FILE_WRITE = 'FILE_WRITE',
   VALIDATION = 'VALIDATION',
   NETWORK = 'NETWORK',
-  UNKNOWN = 'UNKNOWN'
+  UNKNOWN = 'UNKNOWN',
 }
 
 export interface AppError {
@@ -27,7 +27,7 @@ export class ErrorService {
       type: ErrorType.JSON_PARSE,
       message: error.message,
       timestamp: new Date(),
-      stack: error.stack
+      stack: error.stack,
     };
 
     this.logError(appError);
@@ -36,21 +36,27 @@ export class ErrorService {
     const match = error.message.match(/at position (\d+)/);
     const position = match ? parseInt(match[1], 10) : 0;
 
-    return [{
-      line: 1, // TODO: Calculate actual line from position
-      column: position,
-      message: error.message,
-      severity: 'error' as const
-    }];
+    return [
+      {
+        line: 1, // TODO: Calculate actual line from position
+        column: position,
+        message: error.message,
+        severity: 'error' as const,
+      },
+    ];
   }
 
-  static handleFileError(error: Error, operation: 'read' | 'write' = 'read'): string {
-    const errorType = operation === 'read' ? ErrorType.FILE_READ : ErrorType.FILE_WRITE;
+  static handleFileError(
+    error: Error,
+    operation: 'read' | 'write' = 'read'
+  ): string {
+    const errorType =
+      operation === 'read' ? ErrorType.FILE_READ : ErrorType.FILE_WRITE;
     const appError: AppError = {
       type: errorType,
       message: error.message,
       timestamp: new Date(),
-      stack: error.stack
+      stack: error.stack,
     };
 
     this.logError(appError);
@@ -70,8 +76,10 @@ export class ErrorService {
     const appError: AppError = {
       type: ErrorType.VALIDATION,
       message: `JSON validation failed with ${errors.length} error(s)`,
-      details: errors.map(e => `Line ${e.line}, Column ${e.column}: ${e.message}`).join('\n'),
-      timestamp: new Date()
+      details: errors
+        .map((e) => `Line ${e.line}, Column ${e.column}: ${e.message}`)
+        .join('\n'),
+      timestamp: new Date(),
     };
 
     this.logError(appError);
@@ -87,7 +95,7 @@ export class ErrorService {
       type: ErrorType.UNKNOWN,
       message: error.message,
       timestamp: new Date(),
-      stack: error.stack
+      stack: error.stack,
     };
 
     this.logError(appError);
@@ -101,7 +109,7 @@ export class ErrorService {
       type: ErrorType.NETWORK,
       message: error.message,
       timestamp: new Date(),
-      stack: error.stack
+      stack: error.stack,
     };
 
     this.logError(appError);
@@ -138,12 +146,15 @@ export class ErrorService {
   }
 
   static getErrorStats(): { [key in ErrorType]: number } {
-    const stats = Object.values(ErrorType).reduce((acc, type) => {
-      acc[type] = 0;
-      return acc;
-    }, {} as { [key in ErrorType]: number });
+    const stats = Object.values(ErrorType).reduce(
+      (acc, type) => {
+        acc[type] = 0;
+        return acc;
+      },
+      {} as { [key in ErrorType]: number }
+    );
 
-    this.errorLog.forEach(error => {
+    this.errorLog.forEach((error) => {
       stats[error.type]++;
     });
 

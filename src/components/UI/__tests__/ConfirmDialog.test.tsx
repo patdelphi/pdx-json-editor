@@ -206,7 +206,13 @@ describe('ConfirmDialog', () => {
     expect(dialog).toHaveAttribute('aria-labelledby', 'dialog-title');
     expect(dialog).toHaveAttribute('aria-describedby', 'dialog-message');
 
-    expect(screen.getByText('Test Title')).toHaveAttribute('id', 'dialog-title');
-    expect(screen.getByText('Test message')).toHaveAttribute('id', 'dialog-message');
+    expect(screen.getByText('Test Title')).toHaveAttribute(
+      'id',
+      'dialog-title'
+    );
+    expect(screen.getByText('Test message')).toHaveAttribute(
+      'id',
+      'dialog-message'
+    );
   });
 });

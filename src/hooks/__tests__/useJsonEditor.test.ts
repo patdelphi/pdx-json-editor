@@ -113,7 +113,9 @@ describe('useJsonEditor', () => {
   });
 
   it('should minify JSON content', () => {
-    const { result } = renderHook(() => useJsonEditor('{\n  "test": "value"\n}'));
+    const { result } = renderHook(() =>
+      useJsonEditor('{\n  "test": "value"\n}')
+    );
 
     act(() => {
       result.current.minifyJson();
@@ -182,7 +184,9 @@ describe('useJsonEditor', () => {
   });
 
   it('should maintain content stability across re-renders', () => {
-    const { result, rerender } = renderHook(() => useJsonEditor('{"initial": "content"}'));
+    const { result, rerender } = renderHook(() =>
+      useJsonEditor('{"initial": "content"}')
+    );
 
     const initialUpdateContent = result.current.updateContent;
     const initialFormatJson = result.current.formatJson;

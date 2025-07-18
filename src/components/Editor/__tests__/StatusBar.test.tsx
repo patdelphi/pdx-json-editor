@@ -2,7 +2,11 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import StatusBar from '../StatusBar';
-import type { JsonError, CursorPosition, Selection } from '../../../types/editor.types';
+import type {
+  JsonError,
+  CursorPosition,
+  Selection,
+} from '../../../types/editor.types';
 
 // Mock window.dispatchEvent
 const mockDispatchEvent = vi.fn();
@@ -16,7 +20,7 @@ describe('StatusBar', () => {
     startLine: 1,
     startColumn: 1,
     endLine: 1,
-    endColumn: 5
+    endColumn: 5,
   };
 
   beforeEach(() => {
@@ -110,7 +114,7 @@ describe('StatusBar', () => {
       startLine: 1,
       startColumn: 1,
       endLine: 3,
-      endColumn: 5
+      endColumn: 5,
     };
 
     render(
@@ -147,7 +151,7 @@ describe('StatusBar', () => {
   it('should show error count and status', () => {
     const errors: JsonError[] = [
       { line: 1, column: 5, message: 'Error 1', severity: 'error' },
-      { line: 2, column: 3, message: 'Error 2', severity: 'error' }
+      { line: 2, column: 3, message: 'Error 2', severity: 'error' },
     ];
 
     render(
@@ -168,7 +172,7 @@ describe('StatusBar', () => {
   it('should show warning count and status', () => {
     const errors: JsonError[] = [
       { line: 1, column: 5, message: 'Warning 1', severity: 'warning' },
-      { line: 2, column: 3, message: 'Warning 2', severity: 'warning' }
+      { line: 2, column: 3, message: 'Warning 2', severity: 'warning' },
     ];
 
     render(
@@ -190,7 +194,7 @@ describe('StatusBar', () => {
     const errors: JsonError[] = [
       { line: 1, column: 5, message: 'Error 1', severity: 'error' },
       { line: 2, column: 3, message: 'Warning 1', severity: 'warning' },
-      { line: 3, column: 1, message: 'Error 2', severity: 'error' }
+      { line: 3, column: 1, message: 'Error 2', severity: 'error' },
     ];
 
     render(
@@ -210,7 +214,7 @@ describe('StatusBar', () => {
 
   it('should dispatch goto-line event when "Go to error" is clicked', () => {
     const errors: JsonError[] = [
-      { line: 5, column: 10, message: 'Syntax error', severity: 'error' }
+      { line: 5, column: 10, message: 'Syntax error', severity: 'error' },
     ];
 
     render(
@@ -231,7 +235,7 @@ describe('StatusBar', () => {
     expect(mockDispatchEvent).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'goto-line',
-        detail: { line: 5, column: 10 }
+        detail: { line: 5, column: 10 },
       })
     );
   });
@@ -250,7 +254,11 @@ describe('StatusBar', () => {
     );
 
     const statusBar = container.firstChild as HTMLElement;
-    expect(statusBar).toHaveClass('bg-gray-800', 'border-gray-700', 'text-gray-300');
+    expect(statusBar).toHaveClass(
+      'bg-gray-800',
+      'border-gray-700',
+      'text-gray-300'
+    );
   });
 
   it('should apply light theme styles', () => {
@@ -267,7 +275,11 @@ describe('StatusBar', () => {
     );
 
     const statusBar = container.firstChild as HTMLElement;
-    expect(statusBar).toHaveClass('bg-gray-100', 'border-gray-200', 'text-gray-600');
+    expect(statusBar).toHaveClass(
+      'bg-gray-100',
+      'border-gray-200',
+      'text-gray-600'
+    );
   });
 
   it('should format file sizes correctly', () => {

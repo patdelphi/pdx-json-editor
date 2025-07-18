@@ -31,7 +31,10 @@ Object.defineProperty(global, 'URL', {
 // Mock Blob
 Object.defineProperty(global, 'Blob', {
   value: class MockBlob {
-    constructor(public content: any[], public options: any) {}
+    constructor(
+      public content: any[],
+      public options: any
+    ) {}
   },
 });
 
@@ -91,7 +94,9 @@ describe('FileService', () => {
     });
 
     it('should handle different file types', async () => {
-      const jsonFile = new File(['{}'], 'data.json', { type: 'application/json' });
+      const jsonFile = new File(['{}'], 'data.json', {
+        type: 'application/json',
+      });
       const txtFile = new File(['text'], 'data.txt', { type: 'text/plain' });
 
       const jsonResult = await FileService.readFile(jsonFile);
@@ -120,7 +125,9 @@ describe('FileService', () => {
         type: 'application/json',
       });
 
-      await expect(FileService.readFile(errorFile)).rejects.toThrow('Failed to read file');
+      await expect(FileService.readFile(errorFile)).rejects.toThrow(
+        'Failed to read file'
+      );
     });
 
     it('should handle empty files', async () => {
@@ -157,9 +164,13 @@ describe('FileService', () => {
     });
 
     it('should handle files with unicode content', async () => {
-      const unicodeFile = new File(['{"emoji": "🚀", "chinese": "测试"}'], 'unicode.json', {
-        type: 'application/json',
-      });
+      const unicodeFile = new File(
+        ['{"emoji": "🚀", "chinese": "测试"}'],
+        'unicode.json',
+        {
+          type: 'application/json',
+        }
+      );
 
       const result = await FileService.readFile(unicodeFile);
 
@@ -376,9 +387,13 @@ describe('FileService', () => {
     });
 
     it('should handle files with complex names', () => {
-      const complexNameFile = new File(['{}'], 'my-file_name (1) [backup].json', {
-        type: '',
-      });
+      const complexNameFile = new File(
+        ['{}'],
+        'my-file_name (1) [backup].json',
+        {
+          type: '',
+        }
+      );
 
       const result = FileService.validateFileType(complexNameFile);
 
@@ -390,7 +405,9 @@ describe('FileService', () => {
     it('should handle null or undefined file gracefully', () => {
       // This would be a TypeScript error, but testing runtime behavior
       expect(() => FileService.validateFileType(null as any)).not.toThrow();
-      expect(() => FileService.validateFileType(undefined as any)).not.toThrow();
+      expect(() =>
+        FileService.validateFileType(undefined as any)
+      ).not.toThrow();
     });
 
     it('should handle file with empty name', () => {

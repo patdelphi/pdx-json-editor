@@ -9,7 +9,7 @@ interface ThemeSelectorProps {
 const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   theme,
   onThemeChange,
-  disabled = false
+  disabled = false,
 }) => {
   const handleToggle = () => {
     if (disabled) return;
@@ -19,10 +19,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   const buttonClass = `
     relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out
     ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-    ${theme === 'dark' 
-      ? 'bg-blue-600' 
-      : 'bg-gray-200'
-    }
+    ${theme === 'dark' ? 'bg-blue-600' : 'bg-gray-200'}
     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
   `;
 
@@ -34,7 +31,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
   return (
     <div className="flex items-center space-x-3">
       {/* Light theme icon */}
-      <span 
+      <span
         className={`text-sm ${theme === 'light' ? 'text-yellow-500' : 'text-gray-400'}`}
         title="Light theme"
       >
@@ -55,7 +52,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
       </button>
 
       {/* Dark theme icon */}
-      <span 
+      <span
         className={`text-sm ${theme === 'dark' ? 'text-blue-400' : 'text-gray-400'}`}
         title="Dark theme"
       >
@@ -63,9 +60,11 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
       </span>
 
       {/* Theme label */}
-      <span className={`text-sm font-medium ${
-        theme === 'dark' ? 'text-gray-200' : 'text-gray-700'
-      }`}>
+      <span
+        className={`text-sm font-medium ${
+          theme === 'dark' ? 'text-gray-200' : 'text-gray-700'
+        }`}
+      >
         {theme === 'light' ? 'Light' : 'Dark'}
       </span>
     </div>

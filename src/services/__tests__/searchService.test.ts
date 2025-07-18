@@ -13,7 +13,7 @@ describe('SearchService', () => {
       const results = SearchService.search(sampleContent, 'test', {
         caseSensitive: false,
         useRegex: false,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(3);
@@ -21,7 +21,7 @@ describe('SearchService', () => {
         line: 2,
         column: 12,
         length: 4,
-        text: 'test'
+        text: 'test',
       });
     });
 
@@ -29,27 +29,31 @@ describe('SearchService', () => {
       const results = SearchService.search(sampleContent, 'TEST', {
         caseSensitive: true,
         useRegex: false,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(0);
 
-      const caseInsensitiveResults = SearchService.search(sampleContent, 'TEST', {
-        caseSensitive: false,
-        useRegex: false,
-        wholeWord: false
-      });
+      const caseInsensitiveResults = SearchService.search(
+        sampleContent,
+        'TEST',
+        {
+          caseSensitive: false,
+          useRegex: false,
+          wholeWord: false,
+        }
+      );
 
       expect(caseInsensitiveResults).toHaveLength(3);
     });
 
     it('should match whole words only', () => {
       const content = 'test testing tested';
-      
+
       const results = SearchService.search(content, 'test', {
         caseSensitive: false,
         useRegex: false,
-        wholeWord: true
+        wholeWord: true,
       });
 
       expect(results).toHaveLength(1);
@@ -57,7 +61,7 @@ describe('SearchService', () => {
         line: 1,
         column: 1,
         length: 4,
-        text: 'test'
+        text: 'test',
       });
     });
 
@@ -65,7 +69,7 @@ describe('SearchService', () => {
       const results = SearchService.search(sampleContent, '\\d+', {
         caseSensitive: false,
         useRegex: true,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(1);
@@ -73,7 +77,7 @@ describe('SearchService', () => {
         line: 3,
         column: 12,
         length: 3,
-        text: '123'
+        text: '123',
       });
     });
 
@@ -81,7 +85,7 @@ describe('SearchService', () => {
       const results = SearchService.search(sampleContent, '[invalid', {
         caseSensitive: false,
         useRegex: true,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(0);
@@ -91,7 +95,7 @@ describe('SearchService', () => {
       const results = SearchService.search(sampleContent, '', {
         caseSensitive: false,
         useRegex: false,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(0);
@@ -101,7 +105,7 @@ describe('SearchService', () => {
       const results = SearchService.search('', 'test', {
         caseSensitive: false,
         useRegex: false,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(0);
@@ -112,7 +116,7 @@ describe('SearchService', () => {
       const results = SearchService.search(multilineContent, 'test', {
         caseSensitive: false,
         useRegex: false,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(2);
@@ -123,11 +127,17 @@ describe('SearchService', () => {
 
   describe('replace', () => {
     it('should replace single occurrence', () => {
-      const result = SearchService.replace(sampleContent, 'test', 'replacement', {
-        caseSensitive: false,
-        useRegex: false,
-        wholeWord: false
-      }, false);
+      const result = SearchService.replace(
+        sampleContent,
+        'test',
+        'replacement',
+        {
+          caseSensitive: false,
+          useRegex: false,
+          wholeWord: false,
+        },
+        false
+      );
 
       expect(result.replacements).toBe(1);
       expect(result.content).toContain('replacement');
@@ -135,55 +145,85 @@ describe('SearchService', () => {
     });
 
     it('should replace all occurrences', () => {
-      const result = SearchService.replace(sampleContent, 'test', 'replacement', {
-        caseSensitive: false,
-        useRegex: false,
-        wholeWord: false
-      }, true);
+      const result = SearchService.replace(
+        sampleContent,
+        'test',
+        'replacement',
+        {
+          caseSensitive: false,
+          useRegex: false,
+          wholeWord: false,
+        },
+        true
+      );
 
       expect(result.replacements).toBe(3);
       expect(result.content.split('replacement')).toHaveLength(4); // Three replacements
     });
 
     it('should respect case sensitivity in replacement', () => {
-      const result = SearchService.replace(sampleContent, 'TEST', 'replacement', {
-        caseSensitive: true,
-        useRegex: false,
-        wholeWord: false
-      }, true);
+      const result = SearchService.replace(
+        sampleContent,
+        'TEST',
+        'replacement',
+        {
+          caseSensitive: true,
+          useRegex: false,
+          wholeWord: false,
+        },
+        true
+      );
 
       expect(result.replacements).toBe(0);
       expect(result.content).toBe(sampleContent);
     });
 
     it('should support regex replacement', () => {
-      const result = SearchService.replace(sampleContent, '\\d+', 'NUMBER', {
-        caseSensitive: false,
-        useRegex: true,
-        wholeWord: false
-      }, true);
+      const result = SearchService.replace(
+        sampleContent,
+        '\\d+',
+        'NUMBER',
+        {
+          caseSensitive: false,
+          useRegex: true,
+          wholeWord: false,
+        },
+        true
+      );
 
       expect(result.replacements).toBe(1);
       expect(result.content).toContain('NUMBER');
     });
 
     it('should handle empty query', () => {
-      const result = SearchService.replace(sampleContent, '', 'replacement', {
-        caseSensitive: false,
-        useRegex: false,
-        wholeWord: false
-      }, true);
+      const result = SearchService.replace(
+        sampleContent,
+        '',
+        'replacement',
+        {
+          caseSensitive: false,
+          useRegex: false,
+          wholeWord: false,
+        },
+        true
+      );
 
       expect(result.replacements).toBe(0);
       expect(result.content).toBe(sampleContent);
     });
 
     it('should handle invalid regex in replacement', () => {
-      const result = SearchService.replace(sampleContent, '[invalid', 'replacement', {
-        caseSensitive: false,
-        useRegex: true,
-        wholeWord: false
-      }, true);
+      const result = SearchService.replace(
+        sampleContent,
+        '[invalid',
+        'replacement',
+        {
+          caseSensitive: false,
+          useRegex: true,
+          wholeWord: false,
+        },
+        true
+      );
 
       expect(result.replacements).toBe(0);
       expect(result.content).toBe(sampleContent);
@@ -261,7 +301,7 @@ describe('SearchService', () => {
       const results = SearchService.search(content, '(?=a)', {
         caseSensitive: false,
         useRegex: true,
-        wholeWord: false
+        wholeWord: false,
       });
 
       // Should not cause infinite loop
@@ -273,7 +313,7 @@ describe('SearchService', () => {
       const results = SearchService.search(content, '.+*', {
         caseSensitive: false,
         useRegex: false,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(1);
@@ -284,7 +324,7 @@ describe('SearchService', () => {
       const results = SearchService.search(content, 'line', {
         caseSensitive: false,
         useRegex: false,
-        wholeWord: false
+        wholeWord: false,
       });
 
       expect(results).toHaveLength(2);

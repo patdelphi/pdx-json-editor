@@ -11,76 +11,94 @@ interface UseJsonValidationOptions {
   customDebounceDelay?: number;
 }
 
-const useJsonValidation = (content: string, options: UseJsonValidationOptions = {}) => {
+const useJsonValidation = (
+  content: string,
+  options: UseJsonValidationOptions = {}
+) => {
   const {
     enableRealTimeValidation = true,
     largeFileThreshold = 1024 * 1024, // 1MB
-    customDebounceDelay
+    customDebounceDelay,
   } = options;
 
   const [errors, setErrors] = useState<JsonError[]>([]);
   const [isValidating, setIsValidating] = useState(false);
   const [lastValidatedContent, setLastValidatedContent] = useState('');
   const [validationTime, setValidationTime] = useState(0);
-  
+
   const validationTimerRef = useRef<number | null>(null);
 
   // Analyze content size and determine optimization strategy
-  const analyzeContent = useCallback((jsonContent: string) => {
-    const size = new Blob([jsonContent]).size;
-    const isLarge = size > largeFileThreshold;
-    
-    return {
-      size,
-      isLarge,
-      shouldOptimize: isLarge,
-      recommendedDebounceDelay: isLarge ? VALIDATION_SETTINGS.DEBOUNCE_DELAY * 2 : VALIDATION_SETTINGS.DEBOUNCE_DELAY
-    };
-  }, [largeFileThreshold]);
+  const analyzeContent = useCallback(
+    (jsonContent: string) => {
+      const size = new Blob([jsonContent]).size;
+      const isLarge = size > largeFileThreshold;
 
-  const validateContent = useCallback((jsonContent: string) => {
-    // Skip validation if content hasn't changed
-    if (jsonContent === lastValidatedContent) {
-      return;
-    }
+      return {
+        size,
+        isLarge,
+        shouldOptimize: isLarge,
+        recommendedDebounceDelay: isLarge
+          ? VALIDATION_SETTINGS.DEBOUNCE_DELAY * 2
+          : VALIDATION_SETTINGS.DEBOUNCE_DELAY,
+      };
+    },
+    [largeFileThreshold]
+  );
 
-    setIsValidating(true);
-    validationTimerRef.current = performance.now();
-
-    try {
-      const validationErrors = ValidationService.validateJson(jsonContent);
-      setErrors(validationErrors);
-      setLastValidatedContent(jsonContent);
-      
-      // Record validation time for performance monitoring
-      const duration = performance.now() - (validationTimerRef.current || 0);
-      setValidationTime(duration);
-      
-      // Log performance in development
-      if (import.meta.env.DEV) {
-        const analysis = analyzeContent(jsonContent);
-        console.log(`JSON Validation: ${duration.toFixed(2)}ms (${analysis.size} bytes, ${analysis.isLarge ? 'large' : 'small'} file)`);
+  const validateContent = useCallback(
+    (jsonContent: string) => {
+      // Skip validation if content hasn't changed
+      if (jsonContent === lastValidatedContent) {
+        return;
       }
-    } catch (error) {
-      console.error('Validation error:', error);
-      setErrors([{
-        line: 1,
-        column: 1,
-        message: (error as Error).message,
-        severity: 'error' as const
-      }]);
-    } finally {
-      setIsValidating(false);
-    }
-  }, [lastValidatedContent, analyzeContent]);
+
+      setIsValidating(true);
+      validationTimerRef.current = performance.now();
+
+      try {
+        const validationErrors = ValidationService.validateJson(jsonContent);
+        setErrors(validationErrors);
+        setLastValidatedContent(jsonContent);
+
+        // Record validation time for performance monitoring
+        const duration = performance.now() - (validationTimerRef.current || 0);
+        setValidationTime(duration);
+
+        // Log performance in development
+        if (import.meta.env.DEV) {
+          const analysis = analyzeContent(jsonContent);
+          console.log(
+            `JSON Validation: ${duration.toFixed(2)}ms (${analysis.size} bytes, ${analysis.isLarge ? 'large' : 'small'} file)`
+          );
+        }
+      } catch (error) {
+        console.error('Validation error:', error);
+        setErrors([
+          {
+            line: 1,
+            column: 1,
+            message: (error as Error).message,
+            severity: 'error' as const,
+          },
+        ]);
+      } finally {
+        setIsValidating(false);
+      }
+    },
+    [lastValidatedContent, analyzeContent]
+  );
 
   // Create debounced validation with dynamic delay based on content size
-  const createDebouncedValidate = useCallback((jsonContent: string) => {
-    const analysis = analyzeContent(jsonContent);
-    const delay = customDebounceDelay || analysis.recommendedDebounceDelay;
-    
-    return debounce(validateContent, delay);
-  }, [validateContent, analyzeContent, customDebounceDelay]);
+  const createDebouncedValidate = useCallback(
+    (jsonContent: string) => {
+      const analysis = analyzeContent(jsonContent);
+      const delay = customDebounceDelay || analysis.recommendedDebounceDelay;
+
+      return debounce(validateContent, delay);
+    },
+    [validateContent, analyzeContent, customDebounceDelay]
+  );
 
   const debouncedValidateRef = useRef(createDebouncedValidate(content));
 
@@ -88,7 +106,7 @@ const useJsonValidation = (content: string, options: UseJsonValidationOptions = 
   useEffect(() => {
     const currentAnalysis = analyzeContent(content);
     const previousAnalysis = analyzeContent(lastValidatedContent);
-    
+
     // Recreate debounced function if file size category changed
     if (currentAnalysis.isLarge !== previousAnalysis.isLarge) {
       debouncedValidateRef.current = createDebouncedValidate(content);
@@ -128,11 +146,13 @@ const useJsonValidation = (content: string, options: UseJsonValidationOptions = 
       isLargeFile: analysis.isLarge,
       validationTime,
       lastValidationTime: validationTime,
-      recommendedOptimizations: analysis.isLarge ? [
-        'Consider disabling real-time validation for large files',
-        'Use manual validation instead',
-        'Split large JSON into smaller files if possible'
-      ] : []
+      recommendedOptimizations: analysis.isLarge
+        ? [
+            'Consider disabling real-time validation for large files',
+            'Use manual validation instead',
+            'Split large JSON into smaller files if possible',
+          ]
+        : [],
     };
   }, [content, analyzeContent, validationTime]);
 
@@ -144,7 +164,7 @@ const useJsonValidation = (content: string, options: UseJsonValidationOptions = 
     validateImmediate,
     getErrorSummary,
     getPerformanceMetrics,
-    validationTime
+    validationTime,
   };
 };
 

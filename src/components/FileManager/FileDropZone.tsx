@@ -14,7 +14,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   onError,
   theme,
   disabled = false,
-  children
+  children,
 }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [dragCounter, setDragCounter] = useState(0);
@@ -23,10 +23,11 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
     // Check file type
     const validTypes = ['application/json', 'text/plain'];
     const validExtensions = ['.json', '.txt'];
-    
-    const isValidType = validTypes.includes(file.type) || 
-                       validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
-    
+
+    const isValidType =
+      validTypes.includes(file.type) ||
+      validExtensions.some((ext) => file.name.toLowerCase().endsWith(ext));
+
     if (!isValidType) {
       onError('Please select a JSON or text file');
       return false;
@@ -60,7 +61,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         name: file.name,
         size: file.size,
         lastModified: new Date(file.lastModified),
-        content
+        content,
       };
       onFileDrop(fileInfo);
     } catch (error) {
@@ -68,73 +69,86 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
     }
   };
 
-  const handleDragEnter = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (disabled) return;
-    
-    setDragCounter(prev => prev + 1);
-    
-    if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-      setIsDragOver(true);
-    }
-  }, [disabled]);
+  const handleDragEnter = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-  const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (disabled) return;
-    
-    setDragCounter(prev => {
-      const newCounter = prev - 1;
-      if (newCounter === 0) {
-        setIsDragOver(false);
+      if (disabled) return;
+
+      setDragCounter((prev) => prev + 1);
+
+      if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
+        setIsDragOver(true);
       }
-      return newCounter;
-    });
-  }, [disabled]);
+    },
+    [disabled]
+  );
 
-  const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (disabled) return;
-    
-    // Set the dropEffect to indicate this is a copy operation
-    e.dataTransfer.dropEffect = 'copy';
-  }, [disabled]);
+  const handleDragLeave = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
 
-  const handleDrop = useCallback(async (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    
-    if (disabled) return;
-    
-    setIsDragOver(false);
-    setDragCounter(0);
-    
-    const files = Array.from(e.dataTransfer.files);
-    
-    if (files.length === 0) {
-      onError('No files were dropped');
-      return;
-    }
-    
-    if (files.length > 1) {
-      onError('Please drop only one file at a time');
-      return;
-    }
-    
-    await handleFile(files[0]);
-  }, [disabled, onError]);
+      if (disabled) return;
+
+      setDragCounter((prev) => {
+        const newCounter = prev - 1;
+        if (newCounter === 0) {
+          setIsDragOver(false);
+        }
+        return newCounter;
+      });
+    },
+    [disabled]
+  );
+
+  const handleDragOver = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (disabled) return;
+
+      // Set the dropEffect to indicate this is a copy operation
+      e.dataTransfer.dropEffect = 'copy';
+    },
+    [disabled]
+  );
+
+  const handleDrop = useCallback(
+    async (e: React.DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (disabled) return;
+
+      setIsDragOver(false);
+      setDragCounter(0);
+
+      const files = Array.from(e.dataTransfer.files);
+
+      if (files.length === 0) {
+        onError('No files were dropped');
+        return;
+      }
+
+      if (files.length > 1) {
+        onError('Please drop only one file at a time');
+        return;
+      }
+
+      await handleFile(files[0]);
+    },
+    [disabled, onError]
+  );
 
   const overlayClass = `
     absolute inset-0 z-10 flex items-center justify-center
-    ${theme === 'dark' 
-      ? 'bg-gray-900/80 border-blue-400' 
-      : 'bg-white/80 border-blue-500'
+    ${
+      theme === 'dark'
+        ? 'bg-gray-900/80 border-blue-400'
+        : 'bg-white/80 border-blue-500'
     }
     border-2 border-dashed rounded-lg transition-all duration-200
     ${isDragOver ? 'opacity-100' : 'opacity-0 pointer-events-none'}
@@ -142,9 +156,10 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
 
   const dropMessageClass = `
     px-6 py-4 rounded-lg text-center
-    ${theme === 'dark' 
-      ? 'bg-gray-800 text-gray-200 border-gray-600' 
-      : 'bg-white text-gray-700 border-gray-300'
+    ${
+      theme === 'dark'
+        ? 'bg-gray-800 text-gray-200 border-gray-600'
+        : 'bg-white text-gray-700 border-gray-300'
     }
     border shadow-lg
   `;
@@ -158,7 +173,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       onDrop={handleDrop}
     >
       {children}
-      
+
       {/* Drag overlay */}
       <div className={overlayClass}>
         <div className={dropMessageClass}>

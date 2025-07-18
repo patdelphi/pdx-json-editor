@@ -6,7 +6,7 @@ import useJsonValidation from '../useJsonValidation';
 vi.mock('../../services/validationService', () => {
   const mockValidateJson = vi.fn();
   const mockGetErrorSummary = vi.fn();
-  
+
   return {
     ValidationService: {
       validateJson: mockValidateJson,
@@ -210,7 +210,7 @@ describe('useJsonValidation', () => {
 
   it('should handle validation state correctly', async () => {
     const content = '{"test": "value"}';
-    
+
     // Mock validation to be synchronous but check the state
     mockValidateJson.mockReturnValue([]);
 
@@ -226,7 +226,9 @@ describe('useJsonValidation', () => {
   });
 
   it('should maintain function stability across re-renders', () => {
-    const { result, rerender } = renderHook(() => useJsonValidation('{"test": "value"}'));
+    const { result, rerender } = renderHook(() =>
+      useJsonValidation('{"test": "value"}')
+    );
 
     const initialValidate = result.current.validate;
     const initialGetErrorSummary = result.current.getErrorSummary;
