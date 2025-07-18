@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './App.css';
 import JsonEditor from './components/Editor/JsonEditor';
 import { SettingsPanel } from './components/Settings';
@@ -9,6 +9,7 @@ import { ErrorBoundary, ToastContainer, Modal } from './components/UI';
 import useToast from './hooks/useToast';
 import useModal from './hooks/useModal';
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
+import { configureMonacoEditor, forceEnableMinimap } from './utils/monacoConfig';
 import type {
   EditorSettings,
   JsonError,
@@ -28,6 +29,13 @@ if (process.env.NODE_ENV === 'development') {
     }
   };
   importModalTest();
+}
+
+// 配置 Monaco Editor
+try {
+  configureMonacoEditor();
+} catch (error) {
+  console.error('Error configuring Monaco Editor:', error);
 }
 
 function App() {
@@ -64,6 +72,16 @@ function App() {
     showWarning,
     showConfirm,
   } = useModal();
+  
+  // 在编辑器引用可用时强制启用缩略图
+  useEffect(() => {
+    if (editorRef.current) {
+      const editor = editorRef.current.getEditor();
+      if (editor) {
+        forceEnableMinimap(editor);
+      }
+    }
+  }, [editorRef.current]);
 
   // 移除useEffect，改为直接在导航函数中处理
 
@@ -104,7 +122,16 @@ function App() {
   };
 
   const handleSettingsChange = (newSettings: Partial<EditorSettings>) => {
-    setSettings((prev) => ({ ...prev, ...newSettings }));
+    // 更新设置并确保立即保存到本地存储
+    const updatedSettings = { ...settings, ...newSettings };
+    setSettings(updatedSettings);
+    
+    // 确保设置立即保存到本地存储
+    try {
+      localStorage.setItem('json-editor-settings', JSON.stringify(updatedSettings));
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+    }
   };
 
   const toggleSettings = () => {
@@ -526,6 +553,43 @@ function App() {
             </h1>
           </div>
           <div className="ml-auto flex items-center space-x-3">
+            <button 
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gray-700 hover:bg-gray-600 text-gray-200 hover:text-white border border-gray-600 hover:border-gray-500 hover:shadow-md" 
+              onClick={() => {
+                // 手动切换缩略图
+                if (editorRef.current) {
+                  const editor = editorRef.current.getEditor();
+                  if (editor) {
+                    const currentOptions = editor.getOptions();
+                    const minimapEnabled = currentOptions.get(58)?.enabled;
+                    
+                    editor.updateOptions({
+                      minimap: { 
+                        enabled: !minimapEnabled,
+                        maxColumn: 120,
+                        renderCharacters: true,
+                        showSlider: 'always',
+                        scale: 1,
+                        side: 'right'
+                      }
+                    });
+                    
+                    // 更新设置
+                    handleSettingsChange({ minimap: !minimapEnabled });
+                    
+                    // 强制刷新布局
+                    setTimeout(() => {
+                      editor.layout();
+                    }, 100);
+                  }
+                }
+              }}
+            >
+              <span className="flex items-center space-x-2">
+                <span>🗺️</span>
+                <span>缩略图</span>
+              </span>
+            </button>
             <button 
               className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gray-700 hover:bg-gray-600 text-gray-200 hover:text-white border border-gray-600 hover:border-gray-500 hover:shadow-md" 
               onClick={toggleTheme}

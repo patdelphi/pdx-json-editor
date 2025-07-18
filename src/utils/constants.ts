@@ -8,7 +8,7 @@ export const DEFAULT_EDITOR_SETTINGS = {
   indentType: 'spaces' as const,
   wordWrap: true,
   lineNumbers: true,
-  minimap: false,
+  minimap: true,
 };
 
 // Default theme

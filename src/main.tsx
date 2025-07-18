@@ -1,6 +1,24 @@
-import { StrictMode, Suspense, lazy } from 'react';
+import { StrictMode, Suspense, lazy, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
+import { configureMonacoEditor } from './utils/monacoConfig';
+
+// 尝试在应用启动时配置 Monaco Editor
+try {
+  // 监听 monaco 加载完成事件
+  window.addEventListener('monaco-ready', () => {
+    configureMonacoEditor();
+    console.log('Monaco Editor configured on ready event');
+  });
+  
+  // 如果 monaco 已经加载，直接配置
+  if (window.monaco) {
+    configureMonacoEditor();
+    console.log('Monaco Editor configured immediately');
+  }
+} catch (error) {
+  console.error('Failed to configure Monaco Editor:', error);
+}
 
 // 使用懒加载导入 App 组件
 const App = lazy(() => import('./App.tsx'));

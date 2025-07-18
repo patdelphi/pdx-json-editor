@@ -1,3 +1,6 @@
+/* 导入Monaco编辑器样式修复 */
+@import './styles/monaco-editor-fix.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -68,14 +71,7 @@ body {
   border-color: #4b5563;
 }
 
-/* Monaco Editor specific styles */
-.monaco-editor {
-  border-radius: 0.5rem;
-}
-
-.monaco-editor .margin {
-  background-color: transparent !important;
-}
+/* Monaco Editor specific styles 已移至 monaco-editor-fix.css */
 
 /* Dark theme support */
 .dark {

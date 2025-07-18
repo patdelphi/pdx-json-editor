@@ -1,0 +1,67 @@
+/* 强制显示缩略图的样式 */
+
+/* 确保缩略图容器可见 */
+.monaco-editor .minimap {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 64px !important;
+  position: absolute !important;
+  right: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  height: 100% !important;
+  z-index: 10 !important;
+  background-color: rgba(0, 0, 0, 0.03) !important;
+}
+
+/* 确保缩略图内容可见 */
+.monaco-editor .minimap-slider {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 0.4 !important;
+  width: 8px !important;
+  position: absolute !important;
+  right: 0 !important;
+  border-radius: 4px !important;
+  background-color: rgba(100, 100, 100, 0.4) !important;
+}
+
+.monaco-editor .minimap-slider:hover {
+  opacity: 0.7 !important;
+}
+
+/* 确保编辑器内容区域为缩略图留出空间 */
+.monaco-editor .monaco-scrollable-element {
+  width: calc(100% - 64px) !important;
+}
+
+/* 确保缩略图内容层可见 */
+.monaco-editor .minimap-decorations-layer,
+.monaco-editor .minimap-tokens-layer {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* 确保缩略图在暗色主题下也可见 */
+.monaco-editor.vs-dark .minimap {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+.monaco-editor.vs-dark .minimap-slider {
+  background-color: rgba(200, 200, 200, 0.4) !important;
+}
+
+/* 确保缩略图在高对比度主题下也可见 */
+.monaco-editor.hc-black .minimap,
+.monaco-editor.hc-light .minimap {
+  background-color: transparent !important;
+  border-left: 1px solid rgba(127, 127, 127, 0.5) !important;
+}
+
+.monaco-editor.hc-black .minimap-slider,
+.monaco-editor.hc-light .minimap-slider {
+  background-color: rgba(255, 255, 255, 0.5) !important;
+  border: 1px solid #fff !important;
+}

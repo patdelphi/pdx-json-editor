@@ -1,0 +1,30 @@
+/* Monaco Editor 样式覆盖 */
+
+/* 确保缩略图可见 */
+.monaco-editor .minimap {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 64px !important;
+  right: 0 !important;
+  height: 100% !important;
+  position: absolute !important;
+  z-index: 10 !important;
+}
+
+/* 确保缩略图滑块可见 */
+.monaco-editor .minimap-slider {
+  opacity: 0.4 !important;
+}
+
+.monaco-editor .minimap-slider:hover {
+  opacity: 0.7 !important;
+}
+
+/* 确保缩略图内容可见 */
+.monaco-editor .minimap-decorations-layer,
+.monaco-editor .minimap-tokens-layer {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}

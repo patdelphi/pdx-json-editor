@@ -4,12 +4,14 @@ import {
   useImperativeHandle,
   forwardRef,
   useCallback,
+  useState,
 } from 'react';
 import Editor, { type OnMount, type OnChange } from '@monaco-editor/react';
 import type {
   MonacoEditorProps,
   EditorMethods,
 } from '../../types/editor.types';
+import { forceEnableMinimap } from '../../utils/monacoConfig';
 
 const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
   (
@@ -306,6 +308,23 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
     const handleEditorDidMount: OnMount = (editor, monaco) => {
       editorRef.current = editor;
       monacoRef.current = monaco;
+      
+      // 确保缩略图立即启用
+      editor.updateOptions({
+        minimap: { 
+          enabled: settings.minimap
+        }
+      });
+      
+      // 触发一个自定义事件，通知 Monaco 已加载
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('monaco-ready'));
+      }
+      
+      // 使用我们的自定义函数确保缩略图可见
+      if (settings.minimap) {
+        setTimeout(ensureMinimapVisible, 100);
+      }
 
       // 配置搜索控件，防止自动关闭
       editor.updateOptions({
@@ -516,8 +535,20 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
           insertSpaces: settings.indentType === 'spaces',
           wordWrap: settings.wordWrap ? 'on' : 'off',
           lineNumbers: settings.lineNumbers ? 'on' : 'off',
-          minimap: { enabled: settings.minimap },
+          minimap: { 
+            enabled: settings.minimap,
+            maxColumn: 120,
+            renderCharacters: true,
+            showSlider: 'always',
+            scale: 1,
+            side: 'right'
+          },
         });
+        
+        // 强制刷新编辑器布局以确保缩略图显示
+        setTimeout(() => {
+          editorRef.current.layout();
+        }, 100);
       }
     }, [settings]);
 
@@ -531,7 +562,9 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
       insertSpaces: settings.indentType === 'spaces',
       wordWrap: settings.wordWrap ? 'on' : 'off',
       lineNumbers: settings.lineNumbers ? 'on' : 'off',
-      minimap: { enabled: settings.minimap },
+      minimap: { 
+        enabled: settings.minimap
+      },
       scrollBeyondLastLine: false,
       renderWhitespace: 'selection',
 
@@ -631,8 +664,107 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
       fastScrollSensitivity: 5,
     };
 
+    // 添加一个简化的函数来确保缩略图显示
+    const ensureMinimapVisible = useCallback(() => {
+      if (!editorRef.current) return;
+      
+      const editor = editorRef.current;
+      
+      // 通过API启用缩略图
+      editor.updateOptions({
+        minimap: { 
+          enabled: true
+        }
+      });
+      
+      // 强制刷新布局
+      editor.layout();
+      
+      console.log('Minimap visibility ensured');
+    }, []);
+    
+    // 添加调试函数，用于检查缩略图状态
+    const debugMinimap = () => {
+      if (editorRef.current) {
+        const editor = editorRef.current;
+        const editorElement = editor.getDomNode();
+        
+        if (editorElement) {
+          console.log('Editor DOM node found');
+          
+          // 查找缩略图容器
+          const minimapElements = editorElement.querySelectorAll('.minimap');
+          console.log('Minimap elements found:', minimapElements.length);
+          
+          minimapElements.forEach((el, i) => {
+            console.log(`Minimap ${i} style:`, window.getComputedStyle(el));
+          });
+          
+          // 检查编辑器配置
+          console.log('Editor options:', editor.getOptions());
+          console.log('Minimap enabled:', editor.getOption(58)); // 58 is the ID for minimap options
+          
+          // 尝试强制显示缩略图
+          ensureMinimapVisible();
+        }
+      }
+    };
+    
+    // 在组件挂载后确保编辑器布局正确
+    useEffect(() => {
+      if (editorRef.current) {
+        // 添加窗口大小变化监听器
+        const handleResize = () => {
+          if (editorRef.current) {
+            editorRef.current.layout();
+          }
+        };
+        
+        window.addEventListener('resize', handleResize);
+        
+        return () => {
+          window.removeEventListener('resize', handleResize);
+        };
+      }
+    }, []);
+
+    // 添加一个函数来手动切换缩略图
+    const toggleMinimap = () => {
+      if (editorRef.current) {
+        const currentOptions = editorRef.current.getOptions();
+        const minimapEnabled = currentOptions.get(58)?.enabled;
+        
+        // 切换缩略图状态
+        editorRef.current.updateOptions({
+          minimap: { enabled: !minimapEnabled }
+        });
+        
+        // 强制刷新布局
+        editorRef.current.layout();
+        
+        console.log('Minimap toggled:', !minimapEnabled);
+      }
+    };
+
+    // 添加状态来跟踪缩略图是否可见
+    const [isMinimapVisible, setIsMinimapVisible] = useState(settings.minimap);
+    
+    // 更新缩略图状态的函数
+    const updateMinimapState = useCallback(() => {
+      if (editorRef.current) {
+        const currentOptions = editorRef.current.getOptions();
+        const minimapEnabled = currentOptions.get(58)?.enabled;
+        setIsMinimapVisible(!!minimapEnabled);
+      }
+    }, []);
+    
+    // 在组件挂载和设置更改时更新缩略图状态
+    useEffect(() => {
+      updateMinimapState();
+    }, [settings.minimap, updateMinimapState]);
+
     return (
-      <div className="w-full h-full">
+      <div className="w-full h-full relative">
         <Editor
           value={value}
           onChange={handleEditorChange}
@@ -643,7 +775,23 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
               <div className="text-gray-500">Loading editor...</div>
             </div>
           }
+          className="monaco-editor-container" // 添加自定义类名以便于样式定位
         />
+        
+        {/* 缩略图控制按钮 - 始终显示 */}
+        <div className="absolute top-2 right-2 z-50">
+          <button 
+            onClick={() => {
+              toggleMinimap();
+              setTimeout(updateMinimapState, 100);
+            }}
+            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-500 opacity-70 hover:opacity-100 transition-opacity flex items-center"
+            title={isMinimapVisible ? "隐藏缩略图" : "显示缩略图"}
+          >
+            <span className="mr-1">🗺️</span>
+            {isMinimapVisible ? "隐藏缩略图" : "显示缩略图"}
+          </button>
+        </div>
       </div>
     );
   }
