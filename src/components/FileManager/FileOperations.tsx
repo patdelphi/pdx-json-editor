@@ -73,24 +73,25 @@ const FileOperations: React.FC<FileOperationsProps> = ({
   };
 
   const buttonBaseClass = `
-    px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-2
+    px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2
     ${
       theme === 'dark'
-        ? 'text-gray-300 hover:text-white hover:bg-gray-700 border-gray-600'
-        : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50 border-gray-300'
+        ? 'bg-gray-800/50 hover:bg-gray-700/60 text-gray-300 hover:text-white border-gray-600/50 hover:border-gray-500'
+        : 'bg-white/80 hover:bg-gray-50 text-gray-700 hover:text-gray-900 border-gray-200 hover:border-gray-300'
     }
-    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-    border
+    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-md hover:scale-105'}
+    border backdrop-blur-sm
   `;
 
   const primaryButtonClass = `
-    px-4 py-2 text-sm font-medium rounded-md transition-colors duration-200 flex items-center space-x-2
+    px-4 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 flex items-center space-x-2
     ${
       theme === 'dark'
-        ? 'bg-blue-600 hover:bg-blue-700 text-white'
-        : 'bg-blue-600 hover:bg-blue-700 text-white'
+        ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-blue-500'
+        : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white border-blue-500'
     }
-    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+    ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg hover:scale-105'}
+    border shadow-md
   `;
 
   const dangerButtonClass = `
@@ -158,20 +159,28 @@ const FileOperations: React.FC<FileOperationsProps> = ({
       {currentFile && (
         <div
           className={`
-          px-3 py-2 text-sm rounded-md border
+          px-4 py-2.5 text-sm rounded-lg border backdrop-blur-sm
           ${
             theme === 'dark'
-              ? 'bg-gray-800 border-gray-600 text-gray-300'
-              : 'bg-gray-50 border-gray-300 text-gray-600'
+              ? 'bg-gray-800/60 border-gray-600/50 text-gray-300'
+              : 'bg-white/80 border-gray-200 text-gray-600'
           }
         `}
         >
-          <div className="flex items-center space-x-2">
-            <span className="font-medium">{currentFile.name}</span>
-            <span className="text-xs opacity-75">
-              ({formatFileSize(currentFile.size)})
+          <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
+              <span className="text-blue-500">📄</span>
+              <span className="font-medium">{currentFile.name}</span>
+            </div>
+            <span className="text-xs opacity-75 px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-md">
+              {formatFileSize(currentFile.size)}
             </span>
-            {isDirty && <span className="text-orange-500 text-xs">●</span>}
+            {isDirty && (
+              <div className="flex items-center space-x-1">
+                <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
+                <span className="text-orange-500 text-xs font-medium">未保存</span>
+              </div>
+            )}
           </div>
         </div>
       )}

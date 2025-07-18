@@ -514,19 +514,32 @@ function App() {
 
   return (
     <ErrorBoundary>
-      <div className="h-screen flex flex-col bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+      <div className="h-screen flex flex-col bg-gradient-to-br from-slate-50 to-gray-100 dark:from-gray-900 dark:to-slate-900 text-gray-900 dark:text-gray-100">
         {/* Header */}
-        <header className="h-12 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 flex-shrink-0">
-          <h1 className="text-lg font-semibold">PDX JSON 编辑器</h1>
-          <div className="ml-auto flex items-center space-x-2">
-            <button className="btn-secondary text-sm" onClick={toggleTheme}>
-              {theme === 'light' ? '深色' : '浅色'}
+        <header className="h-14 bg-gray-800 dark:bg-gray-900 backdrop-blur-sm border-b border-gray-700/50 dark:border-gray-600/50 flex items-center px-6 flex-shrink-0 shadow-lg">
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center shadow-md">
+              <span className="text-white text-sm font-bold">J</span>
+            </div>
+            <h1 className="text-xl font-bold text-white">
+              PDX JSON 编辑器
+            </h1>
+          </div>
+          <div className="ml-auto flex items-center space-x-3">
+            <button 
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gray-700 hover:bg-gray-600 text-gray-200 hover:text-white border border-gray-600 hover:border-gray-500 hover:shadow-md" 
+              onClick={toggleTheme}
+            >
+              <span className="flex items-center space-x-2">
+                <span>{theme === 'light' ? '🌙' : '☀️'}</span>
+                <span>{theme === 'light' ? '深色' : '浅色'}</span>
+              </span>
             </button>
           </div>
         </header>
 
         {/* Toolbar */}
-        <div className="h-12 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 flex-shrink-0 relative">
+        <div className="h-14 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200/30 dark:border-gray-700/30 flex items-center px-6 flex-shrink-0 relative shadow-sm">
           <div className="flex items-center space-x-2">
             <FileOperations
               onOpen={handleFileOpen}
@@ -536,19 +549,43 @@ function App() {
               currentFile={currentFile}
               theme={theme}
             />
-            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-            <button className="btn-secondary text-sm" onClick={handleFormat}>
-              格式化
+            <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent dark:via-gray-600"></div>
+            <button 
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 dark:hover:from-blue-800/30 dark:hover:to-indigo-800/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 hover:shadow-md hover:scale-105" 
+              onClick={handleFormat}
+            >
+              <span className="flex items-center space-x-2">
+                <span>✨</span>
+                <span>格式化</span>
+              </span>
             </button>
-            <button className="btn-secondary text-sm" onClick={handleMinify}>
-              压缩
+            <button 
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 dark:hover:from-green-800/30 dark:hover:to-emerald-800/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700/50 hover:shadow-md hover:scale-105" 
+              onClick={handleMinify}
+            >
+              <span className="flex items-center space-x-2">
+                <span>🗜️</span>
+                <span>压缩</span>
+              </span>
             </button>
-            <button className="btn-secondary text-sm" onClick={handleValidate}>
-              验证
+            <button 
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 dark:hover:from-purple-800/30 dark:hover:to-pink-800/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700/50 hover:shadow-md hover:scale-105" 
+              onClick={handleValidate}
+            >
+              <span className="flex items-center space-x-2">
+                <span>✅</span>
+                <span>验证</span>
+              </span>
             </button>
-            <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
-            <button className="btn-secondary text-sm" onClick={toggleSettings}>
-              设置
+            <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent dark:via-gray-600"></div>
+            <button 
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100 dark:from-gray-800/50 dark:to-slate-800/50 dark:hover:from-gray-700/60 dark:hover:to-slate-700/60 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600/50 hover:shadow-md hover:scale-105" 
+              onClick={toggleSettings}
+            >
+              <span className="flex items-center space-x-2">
+                <span>⚙️</span>
+                <span>设置</span>
+              </span>
             </button>
           </div>
 
@@ -570,9 +607,9 @@ function App() {
         </div>
 
         {/* Main Content */}
-        <main className="flex-1 flex overflow-hidden relative">
+        <main className="flex-1 flex overflow-hidden relative bg-gradient-to-br from-white/50 to-gray-50/50 dark:from-gray-900/50 dark:to-slate-900/50">
           {/* Editor Area with File Drop Zone */}
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-6">
             <FileDropZone
               onFileDrop={handleFileOpen}
               onError={handleFileError}
@@ -595,33 +632,44 @@ function App() {
         </main>
 
         {/* Status Bar */}
-        <footer className="h-6 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 flex items-center px-4 text-xs text-gray-600 dark:text-gray-400 flex-shrink-0">
-          <span>
+        <footer className="h-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-t border-gray-200/50 dark:border-gray-700/50 flex items-center px-6 text-sm text-gray-600 dark:text-gray-400 flex-shrink-0 shadow-sm">
+          <div className="flex items-center space-x-1">
             {errors.length === 0 ? (
-              <span className="text-green-600 dark:text-green-400">
-                ✓ JSON 有效
-              </span>
+              <div className="flex items-center space-x-2 px-3 py-1 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 rounded-full border border-green-200 dark:border-green-700/50">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span className="font-medium">JSON 有效</span>
+              </div>
             ) : (
-              <span className="text-red-600 dark:text-red-400">
-                ✗ {errors.length} 个错误
-              </span>
+              <div className="flex items-center space-x-2 px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 rounded-full border border-red-200 dark:border-red-700/50">
+                <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                <span className="font-medium">{errors.length} 个错误</span>
+              </div>
             )}
-          </span>
-          <span className="ml-4">
-            行 {cursorPosition.line}, 列 {cursorPosition.column}
-          </span>
-          {selection.startLine !== selection.endLine ||
-          selection.startColumn !== selection.endColumn ? (
-            <span className="ml-4">
-              (已选择 {Math.abs(selection.endLine - selection.startLine) + 1}{' '}
-              行,{' '}
-              {selection.startLine === selection.endLine
-                ? Math.abs(selection.endColumn - selection.startColumn)
-                : '多个'}{' '}
-              字符)
-            </span>
-          ) : null}
-          <span className="ml-auto">字符数: {content.length}</span>
+          </div>
+          <div className="flex items-center space-x-4 ml-6">
+            <div className="flex items-center space-x-1 px-2 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 rounded-md">
+              <span className="text-xs">📍</span>
+              <span>行 {cursorPosition.line}, 列 {cursorPosition.column}</span>
+            </div>
+            {selection.startLine !== selection.endLine ||
+            selection.startColumn !== selection.endColumn ? (
+              <div className="flex items-center space-x-1 px-2 py-1 bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 rounded-md">
+                <span className="text-xs">🎯</span>
+                <span>
+                  已选择 {Math.abs(selection.endLine - selection.startLine) + 1}{' '}
+                  行,{' '}
+                  {selection.startLine === selection.endLine
+                    ? Math.abs(selection.endColumn - selection.startColumn)
+                    : '多个'}{' '}
+                  字符
+                </span>
+              </div>
+            ) : null}
+          </div>
+          <div className="ml-auto flex items-center space-x-1 px-2 py-1 bg-gray-50 dark:bg-gray-800/50 text-gray-600 dark:text-gray-400 rounded-md">
+            <span className="text-xs">📝</span>
+            <span>字符数: {content.length.toLocaleString()}</span>
+          </div>
         </footer>
 
         {/* Settings Panel */}
