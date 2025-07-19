@@ -1,54 +1,76 @@
-// Theme management hook
-import { useState, useEffect, useCallback } from 'react';
-import { StorageService } from '../services/storageService';
+import { useState, useEffect, useCallback } from 'preact/hooks';
+import { updateMonacoTheme } from '../utils/monaco-theme';
+import type { MonacoTheme } from '../types/editor.types';
 
-const useTheme = () => {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light');
+export type Theme = 'light' | 'dark';
 
+function getSystemTheme(): Theme {
+  if (typeof window === 'undefined') return 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function getInitialTheme(): Theme {
+  if (typeof window === 'undefined') return 'light';
+  
+  // Check localStorage first
+  const stored = localStorage.getItem('theme') as Theme | null;
+  if (stored === 'light' || stored === 'dark') {
+    return stored;
+  }
+  
+  // Fall back to system preference
+  return getSystemTheme();
+}
+
+function applyThemeToDOM(theme: Theme) {
+  const root = document.documentElement;
+  
+  // Remove both classes first to ensure clean state
+  root.classList.remove('light', 'dark');
+  
+  // Add the current theme class
+  root.classList.add(theme);
+  
+  // Set data attribute for additional styling hooks
+  root.setAttribute('data-theme', theme);
+}
+
+function getMonacoTheme(theme: Theme): MonacoTheme {
+  return theme === 'dark' ? 'vs-dark' : 'vs';
+}
+
+export function useTheme() {
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+
+  // Apply theme to DOM and Monaco immediately when theme changes
   useEffect(() => {
-    // Load theme from storage
-    const savedTheme = StorageService.getTheme();
-    setTheme(savedTheme);
+    applyThemeToDOM(theme);
+    // Update Monaco theme synchronously
+    const monacoTheme = getMonacoTheme(theme);
+    updateMonacoTheme(monacoTheme);
+  }, [theme]);
 
-    // Apply theme to document
-    if (savedTheme === 'dark') {
-      document.documentElement.classList.add('dark');
+  // Initialize theme on first mount
+  useEffect(() => {
+    const initialTheme = getInitialTheme();
+    if (initialTheme !== theme) {
+      setTheme(initialTheme);
     } else {
-      document.documentElement.classList.remove('dark');
+      // Even if theme is the same, ensure DOM and Monaco are updated
+      applyThemeToDOM(initialTheme);
+      updateMonacoTheme(getMonacoTheme(initialTheme));
     }
   }, []);
 
   const toggleTheme = useCallback(() => {
-    const newTheme = theme === 'light' ? 'dark' : 'light';
+    const newTheme: Theme = theme === 'light' ? 'dark' : 'light';
     setTheme(newTheme);
-    StorageService.saveTheme(newTheme);
-
-    // Apply theme to document
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    localStorage.setItem('theme', newTheme);
+    
+    // Apply changes immediately without waiting for useEffect
+    applyThemeToDOM(newTheme);
+    updateMonacoTheme(getMonacoTheme(newTheme));
   }, [theme]);
 
-  const setThemeMode = useCallback((newTheme: 'light' | 'dark') => {
-    setTheme(newTheme);
-    StorageService.saveTheme(newTheme);
-
-    // Apply theme to document
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, []);
-
-  return {
-    theme,
-    toggleTheme,
-    setTheme: setThemeMode,
-    isDark: theme === 'dark',
-  };
-};
-
-export default useTheme;
+  return { theme, toggleTheme };
+}

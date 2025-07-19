@@ -1,20 +1,22 @@
 <!doctype html>
-<html lang="zh-CN">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="现代化JSON编辑器，提供语法高亮、实时验证、格式化等功能" />
-    <meta name="theme-color" content="#ffffff" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="PDX JSON Editor" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <title>PDX JSON Editor - 现代化JSON编辑工具</title>
-    <!-- Monaco编辑器配置在应用代码中处理 -->
+    <title>PDX JSON Editor</title>
+    <script>
+      // Prevent flash of unstyled content by setting theme immediately
+      (function() {
+        const theme = localStorage.getItem('theme') || 
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        document.documentElement.classList.add(theme);
+        document.documentElement.setAttribute('data-theme', theme);
+      })();
+    </script>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="app"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

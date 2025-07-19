@@ -9,24 +9,21 @@ export default {
       colors: {
         primary: {
           50: '#eff6ff',
-          100: '#dbeafe',
           500: '#3b82f6',
           600: '#2563eb',
           700: '#1d4ed8',
         },
-        dark: {
-          bg: '#1e1e1e',
-          surface: '#252526',
-          text: '#d4d4d4',
-        },
-        light: {
-          bg: '#ffffff',
-          surface: '#fafafa',
-          text: '#333333',
-        }
+        success: '#10b981',
+        warning: '#f59e0b',
+        error: '#ef4444',
+      },
+      fontFamily: {
+        sans: ['Inter', 'Roboto', 'system-ui', 'sans-serif'],
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
   darkMode: 'class',
 }

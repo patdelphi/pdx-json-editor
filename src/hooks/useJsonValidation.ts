@@ -1,171 +1,83 @@
-// JSON validation hook with performance optimizations
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback } from 'preact/hooks';
 import type { JsonError } from '../types/editor.types';
-import { ValidationService } from '../services/validationService';
-import { debounce } from '../utils/helpers';
-import { VALIDATION_SETTINGS } from '../utils/constants';
 
-interface UseJsonValidationOptions {
-  enableRealTimeValidation?: boolean;
-  largeFileThreshold?: number;
-  customDebounceDelay?: number;
-}
-
-const useJsonValidation = (
-  content: string,
-  options: UseJsonValidationOptions = {}
-) => {
-  const {
-    enableRealTimeValidation = true,
-    largeFileThreshold = 1024 * 1024, // 1MB
-    customDebounceDelay,
-  } = options;
-
+export function useJsonValidation() {
   const [errors, setErrors] = useState<JsonError[]>([]);
-  const [isValidating, setIsValidating] = useState(false);
-  const [lastValidatedContent, setLastValidatedContent] = useState('');
-  const [validationTime, setValidationTime] = useState(0);
+  const [isValid, setIsValid] = useState(true);
 
-  const validationTimerRef = useRef<number | null>(null);
-
-  // Analyze content size and determine optimization strategy
-  const analyzeContent = useCallback(
-    (jsonContent: string) => {
-      const size = new Blob([jsonContent]).size;
-      const isLarge = size > largeFileThreshold;
-
-      return {
-        size,
-        isLarge,
-        shouldOptimize: isLarge,
-        recommendedDebounceDelay: isLarge
-          ? VALIDATION_SETTINGS.DEBOUNCE_DELAY * 2
-          : VALIDATION_SETTINGS.DEBOUNCE_DELAY,
-      };
-    },
-    [largeFileThreshold]
-  );
-
-  const validateContent = useCallback(
-    (jsonContent: string) => {
-      // Skip validation if content hasn't changed
-      if (jsonContent === lastValidatedContent) {
-        return;
-      }
-
-      setIsValidating(true);
-      validationTimerRef.current = performance.now();
-
-      try {
-        const validationErrors = ValidationService.validateJson(jsonContent);
-        setErrors(validationErrors);
-        setLastValidatedContent(jsonContent);
-
-        // Record validation time for performance monitoring
-        const duration = performance.now() - (validationTimerRef.current || 0);
-        setValidationTime(duration);
-
-        // Log performance in development
-        if (import.meta.env.DEV) {
-          const analysis = analyzeContent(jsonContent);
-          console.log(
-            `JSON Validation: ${duration.toFixed(2)}ms (${analysis.size} bytes, ${analysis.isLarge ? 'large' : 'small'} file)`
-          );
-        }
-      } catch (error) {
-        console.error('Validation error:', error);
-        setErrors([
-          {
-            line: 1,
-            column: 1,
-            message: (error as Error).message,
-            severity: 'error' as const,
-          },
-        ]);
-      } finally {
-        setIsValidating(false);
-      }
-    },
-    [lastValidatedContent, analyzeContent]
-  );
-
-  // Create debounced validation with dynamic delay based on content size
-  const createDebouncedValidate = useCallback(
-    (jsonContent: string) => {
-      const analysis = analyzeContent(jsonContent);
-      const delay = customDebounceDelay || analysis.recommendedDebounceDelay;
-
-      return debounce(validateContent, delay);
-    },
-    [validateContent, analyzeContent, customDebounceDelay]
-  );
-
-  const debouncedValidateRef = useRef(createDebouncedValidate(content));
-
-  // Update debounced function when content characteristics change significantly
-  useEffect(() => {
-    const currentAnalysis = analyzeContent(content);
-    const previousAnalysis = analyzeContent(lastValidatedContent);
-
-    // Recreate debounced function if file size category changed
-    if (currentAnalysis.isLarge !== previousAnalysis.isLarge) {
-      debouncedValidateRef.current = createDebouncedValidate(content);
-    }
-  }, [content, lastValidatedContent, analyzeContent, createDebouncedValidate]);
-
-  useEffect(() => {
-    if (!enableRealTimeValidation) {
-      return;
+  const validate = useCallback((content: string): JsonError[] => {
+    if (!content.trim()) {
+      const emptyResult: JsonError[] = [];
+      setErrors(emptyResult);
+      setIsValid(true);
+      return emptyResult;
     }
 
-    if (content.trim()) {
-      debouncedValidateRef.current(content);
-    } else {
-      setErrors([]);
-      setLastValidatedContent('');
+    try {
+      JSON.parse(content);
+      const validResult: JsonError[] = [];
+      setErrors(validResult);
+      setIsValid(true);
+      return validResult;
+    } catch (error) {
+      const jsonError = error as SyntaxError;
+      const errorList = parseJsonError(jsonError, content);
+      setErrors(errorList);
+      setIsValid(errorList.length === 0);
+      return errorList;
     }
-  }, [content, enableRealTimeValidation]);
+  }, []);
 
-  const validate = useCallback(() => {
-    validateContent(content);
-    return errors.length === 0;
-  }, [content, validateContent, errors.length]);
+  const parseJsonError = (error: SyntaxError, content: string): JsonError[] => {
+    const message = error.message;
+    
+    // Try to extract position from error message
+    const positionMatch = message.match(/at position (\d+)/);
+    if (positionMatch) {
+      const position = parseInt(positionMatch[1], 10);
+      const { line, column } = getLineAndColumn(content, position);
+      
+      return [{
+        line,
+        column,
+        message: message.replace(/at position \d+/, '').trim(),
+        severity: 'error'
+      }];
+    }
 
-  const validateImmediate = useCallback(() => {
-    validateContent(content);
-  }, [content, validateContent]);
+    // Try to extract line number from error message
+    const lineMatch = message.match(/line (\d+)/);
+    if (lineMatch) {
+      const line = parseInt(lineMatch[1], 10);
+      
+      return [{
+        line,
+        column: 1,
+        message: message,
+        severity: 'error'
+      }];
+    }
 
-  const getErrorSummary = useCallback(() => {
-    return ValidationService.getErrorSummary(errors);
-  }, [errors]);
+    // Fallback: return error without specific position
+    return [{
+      line: 1,
+      column: 1,
+      message: message,
+      severity: 'error'
+    }];
+  };
 
-  const getPerformanceMetrics = useCallback(() => {
-    const analysis = analyzeContent(content);
-    return {
-      contentSize: analysis.size,
-      isLargeFile: analysis.isLarge,
-      validationTime,
-      lastValidationTime: validationTime,
-      recommendedOptimizations: analysis.isLarge
-        ? [
-            'Consider disabling real-time validation for large files',
-            'Use manual validation instead',
-            'Split large JSON into smaller files if possible',
-          ]
-        : [],
-    };
-  }, [content, analyzeContent, validationTime]);
+  const getLineAndColumn = (content: string, position: number): { line: number; column: number } => {
+    const lines = content.substring(0, position).split('\n');
+    const line = lines.length;
+    const column = lines[lines.length - 1].length + 1;
+    
+    return { line, column };
+  };
 
   return {
     errors,
-    isValidating,
-    isValid: errors.length === 0,
-    validate,
-    validateImmediate,
-    getErrorSummary,
-    getPerformanceMetrics,
-    validationTime,
+    isValid,
+    validate
   };
-};
-
-export default useJsonValidation;
+}

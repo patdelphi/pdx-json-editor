@@ -1,41 +1,9 @@
-import { StrictMode, Suspense, lazy } from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css';
-import { configureMonaco } from './utils/monacoConfig';
+import { render } from 'preact'
+import './index.css'
+import { App } from './App.tsx'
+import { initializeTheme } from './utils/theme'
 
-// Monaco Editor 配置将在编辑器挂载时进行，不需要在这里配置
+// Initialize theme before rendering to prevent flash
+initializeTheme();
 
-// 使用懒加载导入 App 组件
-const App = lazy(() => import('./App.tsx'));
-
-// 创建加载中组件
-const LoadingFallback = () => (
-  <div className="h-screen flex items-center justify-center bg-white dark:bg-gray-900">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
-      <p className="mt-4 text-gray-700 dark:text-gray-300">加载中...</p>
-    </div>
-  </div>
-);
-
-// 注册 Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/sw.js')
-      .then((registration) => {
-        console.log('SW registered: ', registration);
-      })
-      .catch((registrationError) => {
-        console.log('SW registration failed: ', registrationError);
-      });
-  });
-}
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <Suspense fallback={<LoadingFallback />}>
-      <App />
-    </Suspense>
-  </StrictMode>
-);
+render(<App />, document.getElementById('app')!)

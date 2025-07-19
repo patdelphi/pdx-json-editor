@@ -1,4 +1,4 @@
-// Editor component exports
-export { default as JsonEditor } from './JsonEditor';
-export { default as EditorToolbar } from './EditorToolbar';
-export { default as StatusBar } from './StatusBar';
+export { JsonEditor } from './JsonEditor';
+export { EditorToolbar } from './EditorToolbar';
+export { StatusBar } from './StatusBar';
+export { EditorContainer } from './EditorContainer';

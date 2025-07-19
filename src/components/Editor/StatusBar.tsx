@@ -1,141 +1,59 @@
-import React from 'react';
-import type {
-  JsonError,
-  CursorPosition,
-  Selection,
-} from '../../types/editor.types';
-
 interface StatusBarProps {
-  errors: JsonError[];
-  cursorPosition: CursorPosition;
-  selection: Selection | null;
-  characterCount: number;
-  wordCount: number;
+  line?: number;
+  column?: number;
   fileSize?: number;
-  isModified: boolean;
-  theme: 'light' | 'dark';
+  errorCount?: number;
+  warningCount?: number;
 }
 
-const StatusBar: React.FC<StatusBarProps> = ({
-  errors,
-  cursorPosition,
-  selection,
-  characterCount,
-  wordCount,
-  fileSize,
-  isModified,
-  theme,
-}) => {
-  const hasSelection =
-    selection &&
-    (selection.startLine !== selection.endLine ||
-      selection.startColumn !== selection.endColumn);
-
-  const getValidationStatus = () => {
-    if (errors.length === 0) {
-      return {
-        text: 'Valid JSON',
-        className: 'text-green-600 dark:text-green-400',
-      };
-    }
-
-    const errorCount = errors.filter((e) => e.severity === 'error').length;
-    const warningCount = errors.filter((e) => e.severity === 'warning').length;
-
-    if (errorCount > 0) {
-      return {
-        text: `${errorCount} error${errorCount > 1 ? 's' : ''}${warningCount > 0 ? `, ${warningCount} warning${warningCount > 1 ? 's' : ''}` : ''}`,
-        className: 'text-red-600 dark:text-red-400',
-      };
-    } else {
-      return {
-        text: `${warningCount} warning${warningCount > 1 ? 's' : ''}`,
-        className: 'text-yellow-600 dark:text-yellow-400',
-      };
-    }
+export function StatusBar({ 
+  line = 1, 
+  column = 1, 
+  fileSize = 0, 
+  errorCount = 0, 
+  warningCount = 0 
+}: StatusBarProps) {
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
   };
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  };
-
-  const getSelectionInfo = () => {
-    if (!hasSelection) return null;
-
-    const lines = Math.abs(selection!.endLine - selection!.startLine) + 1;
-    const chars =
-      selection!.endLine === selection!.startLine
-        ? Math.abs(selection!.endColumn - selection!.startColumn)
-        : 0; // For multi-line selections, character count is more complex
-
-    if (lines === 1) {
-      return `${chars} chars selected`;
-    } else {
-      return `${lines} lines selected`;
-    }
-  };
-
-  const validationStatus = getValidationStatus();
 
   return (
-    <div
-      className={`
-      h-6 px-3 flex items-center justify-between text-xs border-t
-      ${
-        theme === 'dark'
-          ? 'bg-gray-800 border-gray-700 text-gray-300'
-          : 'bg-gray-100 border-gray-200 text-gray-600'
-      }
-    `}
-    >
-      {/* Left section - Cursor position and selection */}
-      <div className="flex items-center space-x-4">
-        <span>
-          Ln {cursorPosition.line}, Col {cursorPosition.column}
+    <div className="flex items-center justify-between px-4 py-1 text-sm w-full max-w-full bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 overflow-hidden">
+      <div className="flex items-center gap-4 min-w-0 flex-1">
+        <span className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
+          Ln {line}, Col {column}
         </span>
-        {hasSelection && (
-          <span className="text-blue-600 dark:text-blue-400">
-            {getSelectionInfo()}
-          </span>
+        
+        {(errorCount > 0 || warningCount > 0) && (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {errorCount > 0 && (
+              <span className="flex items-center gap-1 text-red-600 dark:text-red-400 whitespace-nowrap">
+                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {errorCount}
+              </span>
+            )}
+            
+            {warningCount > 0 && (
+              <span className="flex items-center gap-1 text-yellow-600 dark:text-yellow-400 whitespace-nowrap">
+                <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {warningCount}
+              </span>
+            )}
+          </div>
         )}
       </div>
-
-      {/* Center section - Document stats */}
-      <div className="flex items-center space-x-4">
-        <span>{characterCount.toLocaleString()} chars</span>
-        <span>{wordCount.toLocaleString()} words</span>
-        {fileSize !== undefined && <span>{formatFileSize(fileSize)}</span>}
-        {isModified && (
-          <span className="text-orange-600 dark:text-orange-400">Modified</span>
-        )}
-      </div>
-
-      {/* Right section - Validation status */}
-      <div className="flex items-center space-x-2">
-        <span className={validationStatus.className}>
-          {validationStatus.text}
-        </span>
-        {errors.length > 0 && (
-          <button
-            className="text-xs px-2 py-0.5 rounded bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
-            onClick={() => {
-              // Scroll to first error
-              const firstError = errors[0];
-              const event = new CustomEvent('goto-line', {
-                detail: { line: firstError.line, column: firstError.column },
-              });
-              window.dispatchEvent(event);
-            }}
-            title="Go to first error"
-          >
-            Go to error
-          </button>
-        )}
+      
+      <div className="text-gray-600 dark:text-gray-400 flex-shrink-0 whitespace-nowrap">
+        {formatFileSize(fileSize)}
       </div>
     </div>
   );
-};
-
-export default StatusBar;
+}
