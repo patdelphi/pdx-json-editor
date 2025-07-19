@@ -1,5 +1,7 @@
 /* 导入Monaco编辑器样式修复 */
 @import './styles/monaco-editor-fix.css';
+@import './styles/minimap-fix.css';
+@import './styles/force-minimap.css';
 
 @tailwind base;
 @tailwind components;

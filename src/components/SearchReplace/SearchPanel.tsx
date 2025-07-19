@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Z_INDEX from '../../constants/zIndex';
+import SearchIcon from './SearchIcon';
+import ReplaceIcon from './ReplaceIcon';
 
 interface SearchPanelProps {
   isVisible: boolean;
@@ -107,7 +109,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
   };
 
   const inputClass = `
-    w-full px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 backdrop-blur-sm
+    w-full px-3 text-sm border focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all duration-200 backdrop-blur-sm
     ${
       theme === 'dark'
         ? 'bg-gray-800/80 text-gray-200 border-gray-600/50 focus:border-blue-500/50 placeholder-gray-400'
@@ -116,7 +118,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
   `;
 
   const buttonClass = `
-    px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 backdrop-blur-sm
+    px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 backdrop-blur-sm
     ${
       theme === 'dark'
         ? 'bg-gray-700/60 hover:bg-gray-600/70 text-gray-200 border-gray-600/50 hover:border-gray-500'
@@ -126,7 +128,7 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
   `;
 
   const optionButtonClass = (active: boolean) => `
-    px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 border backdrop-blur-sm
+    px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 border backdrop-blur-sm
     ${
       theme === 'dark'
         ? active
@@ -137,6 +139,15 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
           : 'bg-white/80 text-gray-700 border-gray-300/50 hover:bg-gray-50 hover:border-gray-400'
     }
     ${active ? '' : 'hover:shadow-md hover:scale-105'}
+  `;
+
+  const iconContainerClass = `
+    flex items-center justify-center px-3 border
+    ${
+      theme === 'dark'
+        ? 'bg-gray-700 text-gray-300 border-gray-600'
+        : 'bg-gray-200 text-gray-600 border-gray-300'
+    }
   `;
 
   return (
@@ -162,10 +173,10 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
       }}
     >
       <div className="flex items-center space-x-2">
-        {/* 搜索输入框 */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span className="text-gray-400 text-sm">🔍</span>
+        {/* 搜索图标和输入框 */}
+        <div className="flex items-center">
+          <div className={`${iconContainerClass} rounded-l-lg border-r-0 h-10`}>
+            <SearchIcon className="text-gray-500 dark:text-gray-300" />
           </div>
           <input
             ref={searchInputRef}
@@ -174,8 +185,8 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="搜索..."
-            className={`${inputClass} pl-10`}
-            style={{ width: '180px' }}
+            className={`${inputClass} rounded-l-none rounded-r-lg h-10`}
+            style={{ width: '160px' }}
           />
         </div>
 
@@ -237,16 +248,16 @@ const SearchPanel: React.FC<SearchPanelProps> = ({
         {/* 替换输入框和按钮 */}
         {showReplace && (
           <div className="flex items-center space-x-2 ml-2 pl-2 border-l border-gray-300 dark:border-gray-600">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-400 text-sm">🔄</span>
+            <div className="flex items-center">
+              <div className={`${iconContainerClass} rounded-l-lg border-r-0 h-10`}>
+                <ReplaceIcon className="text-gray-500 dark:text-gray-300" />
               </div>
               <input
                 type="text"
                 value={replaceText}
                 onChange={(e) => setReplaceText(e.target.value)}
                 placeholder="替换为..."
-                className={`${inputClass} pl-10`}
+                className={`${inputClass} rounded-l-none rounded-r-lg h-10`}
                 style={{ width: '140px' }}
               />
             </div>

@@ -1,3 +1,5 @@
+import * as monaco from 'monaco-editor';
+
 // Core editor types
 export interface EditorState {
   content: string;
@@ -32,6 +34,13 @@ export interface EditorSettings {
   wordWrap: boolean;
   lineNumbers: boolean;
   minimap: boolean;
+  // 新增设置
+  foldingEnabled?: boolean;
+  linkDetection?: boolean;
+  hoverEnabled?: boolean;
+  schemaValidation?: boolean;
+  formatOnPaste?: boolean;
+  formatOnType?: boolean;
 }
 
 // Global application state
@@ -100,52 +109,17 @@ export interface EditorMethods {
   find: () => void;
   replace: () => void;
   gotoLine: (line: number, column?: number) => void;
-  getSelection: () => any;
+  getSelection: () => monaco.Selection | null;
   getSelectedText: () => string;
   insertText: (text: string) => void;
   canUndo: () => boolean;
   canRedo: () => boolean;
   focus: () => void;
-  getEditor: () => IStandaloneCodeEditor;
-  getMonaco: () => any;
-}
-
-// Monaco Editor interfaces
-export interface IStandaloneCodeEditor {
-  getAction: (id: string) => IEditorAction | null;
-  getActions: () => IEditorAction[];
-  trigger: (source: string, handlerId: string, payload?: any) => void;
-  focus: () => void;
-  getModel: () => any;
-  getSelection: () => any;
-  executeEdits: (source: string, edits: any[], endCursorState?: any) => boolean;
-  revealLineInCenter: (lineNumber: number) => void;
-  setPosition: (position: { lineNumber: number; column: number }) => void;
-  updateOptions: (options: any) => void;
-  onDidChangeCursorPosition: (listener: (e: any) => void) => {
-    dispose: () => void;
-  };
-  onDidChangeCursorSelection: (listener: (e: any) => void) => {
-    dispose: () => void;
-  };
-  onDidBlurEditorWidget: (listener: () => void) => { dispose: () => void };
-  addCommand: (keybinding: number, handler: () => void) => void;
-  getContribution: (id: string) => IEditorContribution;
-}
-
-export interface IEditorAction {
-  id: string;
-  label: string;
-  run: () => Promise<void>;
-}
-
-export interface IEditorContribution {
-  getId: () => string;
-  getState?: () => any;
-  focus?: () => void;
-  start?: (options: any) => void;
-  replace?: () => void;
-  replaceAll?: () => void;
+  getEditor: () => monaco.editor.IStandaloneCodeEditor;
+  getMonaco: () => typeof monaco;
+  // 新增方法
+  toggleFolding?: () => void;
+  showDiffEditor?: (originalContent: string) => void;
 }
 
 // Cursor and selection types
@@ -177,6 +151,7 @@ export interface FileOperationsProps {
   onNew: () => void;
   isDirty: boolean;
   currentFile: FileInfo | null;
+  theme?: 'light' | 'dark';
 }
 
 export interface StatusBarProps {
@@ -227,6 +202,28 @@ export interface SearchPanelProps {
   searchResults: SearchResult[];
   currentResultIndex: number;
   theme: 'light' | 'dark';
+}
+
+// Monaco配置选项接口
+export interface MonacoConfigOptions {
+  theme: 'light' | 'dark';
+  minimap: boolean;
+  wordWrap: boolean;
+  lineNumbers: boolean;
+  indentSize: 2 | 4;
+  indentType: 'spaces' | 'tabs';
+  foldingEnabled?: boolean;
+  linkDetection?: boolean;
+  hoverEnabled?: boolean;
+  formatOnPaste?: boolean;
+  formatOnType?: boolean;
+}
+
+// JSON Schema接口
+export interface JsonSchemaConfig {
+  uri: string;
+  fileMatch?: string[];
+  schema: any;
 }
 
 // Utility types

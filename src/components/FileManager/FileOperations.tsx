@@ -122,6 +122,7 @@ const FileOperations: React.FC<FileOperationsProps> = ({
         className={buttonBaseClass}
         disabled={disabled}
         title="创建新文件 (Ctrl+N)"
+        style={{ marginRight: '16px' }}
       >
         <span>📄</span>
         <span>新建</span>
@@ -133,6 +134,7 @@ const FileOperations: React.FC<FileOperationsProps> = ({
         className={buttonBaseClass}
         disabled={disabled}
         title="打开文件 (Ctrl+O)"
+        style={{ marginRight: '16px' }}
       >
         <span>📁</span>
         <span>打开</span>
@@ -144,6 +146,7 @@ const FileOperations: React.FC<FileOperationsProps> = ({
         className={isDirty ? primaryButtonClass : buttonBaseClass}
         disabled={disabled}
         title="保存文件 (Ctrl+S)"
+        style={{ marginRight: '16px' }}
       >
         <span>💾</span>
         <span>保存</span>

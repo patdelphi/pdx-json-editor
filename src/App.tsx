@@ -1,15 +1,26 @@
 import { useState, useRef, useEffect } from 'react';
 import './App.css';
-import JsonEditor from './components/Editor/JsonEditor';
+import './styles/editor.css';
+import ResponsiveEditor from './components/Editor/ResponsiveEditor';
 import { SettingsPanel } from './components/Settings';
 import { FileOperations, FileDropZone } from './components/FileManager';
-import { SearchPanel } from './components/SearchReplace';
+import { SearchPanel, ToolbarSearchPanel } from './components/SearchReplace';
 import { ErrorBoundary, ToastContainer, Modal } from './components/UI';
 // import { ErrorService } from './services/errorService';
 import useToast from './hooks/useToast';
 import useModal from './hooks/useModal';
 import useKeyboardShortcuts from './hooks/useKeyboardShortcuts';
-import { configureMonacoEditor, forceEnableMinimap } from './utils/monacoConfig';
+import { configureMonaco, registerJsonSchema } from './utils/monacoConfig';
+import useMonacoSearch from './hooks/useMonacoSearch';
+import { getAllSchemas } from './utils/jsonSchemas';
+import { registerAllProviders } from './utils/monacoProviders';
+import { 
+  isLargeFile, 
+  optimizedFormatJson, 
+  optimizedMinifyJson,
+  LARGE_FILE_WARNING_THRESHOLD,
+  LARGE_FILE_ERROR_THRESHOLD
+} from './utils/largeFileHandler';
 import type {
   EditorSettings,
   JsonError,
@@ -31,12 +42,7 @@ if (process.env.NODE_ENV === 'development') {
   importModalTest();
 }
 
-// 配置 Monaco Editor
-try {
-  configureMonacoEditor();
-} catch (error) {
-  console.error('Error configuring Monaco Editor:', error);
-}
+// Monaco Editor 配置将在编辑器挂载时进行
 
 function App() {
   const [content, setContent] = useState(
@@ -73,12 +79,21 @@ function App() {
     showConfirm,
   } = useModal();
   
-  // 在编辑器引用可用时强制启用缩略图
+  // 在编辑器挂载时配置Monaco
   useEffect(() => {
-    if (editorRef.current) {
-      const editor = editorRef.current.getEditor();
-      if (editor) {
-        forceEnableMinimap(editor);
+    if (editorRef.current && editorRef.current.getMonaco) {
+      const monaco = editorRef.current.getMonaco();
+      if (monaco) {
+        // 配置Monaco编辑器
+        configureMonaco(monaco);
+        
+        // 注册JSON Schema
+        registerJsonSchema(monaco, getAllSchemas());
+        
+        // 注册悬停提示和链接检测提供程序
+        const providers = registerAllProviders(monaco);
+        
+        console.log('Monaco editor configured with JSON schemas and providers');
       }
     }
   }, [editorRef.current]);
@@ -91,6 +106,9 @@ function App() {
     wordWrap: false,
     lineNumbers: true,
     minimap: true,
+    foldingEnabled: true,
+    formatOnPaste: true,
+    formatOnType: false,
   });
 
   const handleContentChange = (value: string) => {
@@ -140,6 +158,45 @@ function App() {
 
   // File operations handlers
   const handleFileOpen = (file: FileInfo) => {
+    // 检查文件大小
+    if (isLargeFile(file.content, LARGE_FILE_ERROR_THRESHOLD)) {
+      showError(
+        '文件过大',
+        `文件大小超过 ${Math.round(LARGE_FILE_ERROR_THRESHOLD / 1024 / 1024)}MB，可能导致性能问题。请尝试使用其他工具打开此文件。`
+      );
+      return;
+    }
+    
+    // 检查是否是大文件（但未超过错误阈值）
+    if (isLargeFile(file.content, LARGE_FILE_WARNING_THRESHOLD)) {
+      showWarning(
+        '大文件警告',
+        `您正在打开一个大型JSON文件（${Math.round(file.content.length / 1024)}KB），这可能导致性能下降。是否继续？`,
+        () => {
+          if (isDirty) {
+            showConfirm(
+              '未保存的更改',
+              '您有未保存的更改。是否要放弃这些更改？',
+              () => {
+                setCurrentFile(file);
+                setContent(file.content);
+                setOriginalContent(file.content);
+                setIsDirty(false);
+              }
+            );
+            return;
+          }
+    
+          setCurrentFile(file);
+          setContent(file.content);
+          setOriginalContent(file.content);
+          setIsDirty(false);
+        }
+      );
+      return;
+    }
+    
+    // 正常打开文件
     if (isDirty) {
       showConfirm(
         '未保存的更改',
@@ -213,25 +270,87 @@ function App() {
   // Format and minify handlers
   const handleFormat = () => {
     try {
-      const parsed = JSON.parse(content);
-      const formatted = JSON.stringify(parsed, null, settings.indentSize);
+      // 保存原始内容用于差异比较
+      const originalJson = content;
+      
+      // 检查是否是大文件
+      if (isLargeFile(content, LARGE_FILE_WARNING_THRESHOLD)) {
+        // 显示警告
+        showWarning(
+          '大文件警告',
+          '您正在格式化一个大型JSON文件，这可能需要一些时间。是否继续？',
+          () => {
+            try {
+              // 使用优化的格式化方法
+              const formatted = optimizedFormatJson(content, settings.indentSize);
+              setContent(formatted);
+              setIsDirty(formatted !== originalContent);
+              showModalSuccess('JSON 格式化成功', '大型JSON文件已成功格式化。');
+            } catch (error) {
+              showError('格式化错误', `无法格式化JSON: ${(error as Error).message}`);
+            }
+          }
+        );
+        return;
+      }
+      
+      // 正常格式化
+      const formatted = JSON.stringify(JSON.parse(content), null, settings.indentSize);
       setContent(formatted);
       setIsDirty(formatted !== originalContent);
-      showModalSuccess('JSON 格式化成功', '您的 JSON 已成功格式化。');
+      
+      // 如果内容有变化，显示差异比较
+      if (formatted !== originalJson && editorRef.current && editorRef.current.showDiffEditor) {
+        editorRef.current.showDiffEditor(originalJson);
+        showModalSuccess('JSON 格式化成功', '已显示格式化前后的差异比较。');
+      } else {
+        showModalSuccess('JSON 格式化成功', '您的 JSON 已成功格式化。');
+      }
     } catch (error) {
-      showError('格式化错误', '无法格式化无效的 JSON。请先修复语法错误。');
+      showError('格式化错误', `无法格式化无效的 JSON: ${(error as Error).message}`);
     }
   };
 
   const handleMinify = () => {
     try {
-      const parsed = JSON.parse(content);
-      const minified = JSON.stringify(parsed);
+      // 保存原始内容用于差异比较
+      const originalJson = content;
+      
+      // 检查是否是大文件
+      if (isLargeFile(content, LARGE_FILE_WARNING_THRESHOLD)) {
+        // 显示警告
+        showWarning(
+          '大文件警告',
+          '您正在压缩一个大型JSON文件，这可能需要一些时间。是否继续？',
+          () => {
+            try {
+              // 使用优化的压缩方法
+              const minified = optimizedMinifyJson(content);
+              setContent(minified);
+              setIsDirty(minified !== originalContent);
+              showModalSuccess('JSON 压缩成功', '大型JSON文件已成功压缩。');
+            } catch (error) {
+              showError('压缩错误', `无法压缩JSON: ${(error as Error).message}`);
+            }
+          }
+        );
+        return;
+      }
+      
+      // 正常压缩
+      const minified = JSON.stringify(JSON.parse(content));
       setContent(minified);
       setIsDirty(minified !== originalContent);
-      showModalSuccess('JSON 压缩成功', '您的 JSON 已成功压缩。');
+      
+      // 如果内容有变化，显示差异比较
+      if (minified !== originalJson && editorRef.current && editorRef.current.showDiffEditor) {
+        editorRef.current.showDiffEditor(originalJson);
+        showModalSuccess('JSON 压缩成功', '已显示压缩前后的差异比较。');
+      } else {
+        showModalSuccess('JSON 压缩成功', '您的 JSON 已成功压缩。');
+      }
     } catch (error) {
-      showError('压缩错误', '无法压缩无效的 JSON。请先修复语法错误。');
+      showError('压缩错误', `无法压缩无效的 JSON: ${(error as Error).message}`);
     }
   };
 
@@ -288,179 +407,54 @@ function App() {
     }
   };
 
-  // 使用Monaco编辑器的搜索功能，但通过自定义搜索面板控制
-  const handleSearch = (query: string, options: any) => {
-    if (editorRef.current && query.trim()) {
-      const editor = editorRef.current.getEditor();
-      if (editor) {
-        // 获取Monaco的搜索控制器
-        const findController = editor.getContribution(
-          'editor.contrib.findController'
-        ) as any;
-        if (findController && typeof findController.getState === 'function') {
-          try {
-            // 设置搜索选项
-            const findState = findController.getState();
-            findState.change(
-              {
-                searchString: query,
-                isRegex: options.useRegex,
-                matchCase: options.caseSensitive,
-                wholeWord: options.wholeWord,
-                searchScope: null,
-                matchesPosition: null,
-                matchesCount: null,
-              },
-              false
-            );
+  // 使用Monaco搜索Hook
+  const { search, replace, replaceAll, findNext, findPrevious } = useMonacoSearch();
 
-            // 执行搜索
-            findController.start({
-              forceRevealReplace: false,
-              seedSearchStringFromSelection: false,
-              seedSearchStringFromGlobalClipboard: false,
-              shouldFocus: 0,
-              shouldAnimate: true,
-              updateSearchScope: false,
-              loop: true,
-            });
-          } catch (e) {
-            console.error('Error in custom search:', e);
-            // 回退到基本搜索方法
-            editor.trigger('keyboard', 'actions.find', {});
-          }
-        } else {
-          // 回退到基本搜索方法
-          editor.trigger('keyboard', 'actions.find', {});
-        }
-      }
+  // 搜索处理函数
+  const handleSearch = (query: string, options: SearchOptions) => {
+    if (editorRef.current) {
+      const editor = editorRef.current.getEditor();
+      search(editor, query, options);
     }
   };
 
-  // 使用Monaco编辑器的替换功能，但通过自定义搜索面板控制
+  // 替换处理函数
   const handleReplace = (
     searchQuery: string,
     replaceText: string,
-    options: any
+    options: SearchOptions
   ) => {
-    if (editorRef.current && searchQuery.trim()) {
+    if (editorRef.current) {
       const editor = editorRef.current.getEditor();
-      if (editor) {
-        // 获取Monaco的搜索控制器
-        const findController = editor.getContribution(
-          'editor.contrib.findController'
-        ) as any;
-        if (findController && typeof findController.getState === 'function') {
-          try {
-            // 设置搜索和替换选项
-            const findState = findController.getState();
-            findState.change(
-              {
-                searchString: searchQuery,
-                replaceString: replaceText,
-                isRegex: options.useRegex,
-                matchCase: options.caseSensitive,
-                wholeWord: options.wholeWord,
-                searchScope: null,
-                matchesPosition: null,
-                matchesCount: null,
-              },
-              false
-            );
-
-            // 执行替换
-            findController.replace && findController.replace();
-          } catch (e) {
-            console.error('Error in custom replace:', e);
-            // 回退到基本替换方法
-            editor.trigger(
-              'keyboard',
-              'editor.action.startFindReplaceAction',
-              {}
-            );
-          }
-        } else {
-          // 回退到基本替换方法
-          editor.trigger(
-            'keyboard',
-            'editor.action.startFindReplaceAction',
-            {}
-          );
-        }
-      }
+      replace(editor, searchQuery, replaceText, options);
     }
   };
 
+  // 全部替换处理函数
   const handleReplaceAll = (
     searchQuery: string,
     replaceText: string,
-    options: any
+    options: SearchOptions
   ) => {
-    if (editorRef.current && searchQuery.trim()) {
+    if (editorRef.current) {
       const editor = editorRef.current.getEditor();
-      if (editor) {
-        // 获取Monaco的搜索控制器
-        const findController = editor.getContribution(
-          'editor.contrib.findController'
-        ) as any;
-        if (findController && typeof findController.getState === 'function') {
-          try {
-            // 设置搜索和替换选项
-            const findState = findController.getState();
-            findState.change(
-              {
-                searchString: searchQuery,
-                replaceString: replaceText,
-                isRegex: options.useRegex,
-                matchCase: options.caseSensitive,
-                wholeWord: options.wholeWord,
-                searchScope: null,
-                matchesPosition: null,
-                matchesCount: null,
-              },
-              false
-            );
-
-            // 执行全部替换
-            findController.replaceAll && findController.replaceAll();
-          } catch (e) {
-            console.error('Error in custom replace all:', e);
-            // 回退到基本替换方法
-            editor.trigger(
-              'keyboard',
-              'editor.action.startFindReplaceAction',
-              {}
-            );
-          }
-        } else {
-          // 回退到基本替换方法
-          editor.trigger(
-            'keyboard',
-            'editor.action.startFindReplaceAction',
-            {}
-          );
-        }
-      }
+      replaceAll(editor, searchQuery, replaceText, options);
     }
   };
 
+  // 查找下一个处理函数
   const handleFindNext = () => {
-    // 使用Monaco编辑器内置的查找下一个功能
     if (editorRef.current) {
       const editor = editorRef.current.getEditor();
-      if (editor) {
-        editor.trigger('keyboard', 'editor.action.nextMatchFindAction', {});
-      }
+      findNext(editor);
     }
   };
 
+  // 查找上一个处理函数
   const handleFindPrevious = () => {
-    // 使用Monaco编辑器内置的查找上一个功能
     if (editorRef.current) {
       const editor = editorRef.current.getEditor();
-      if (editor) {
-        editor.trigger('keyboard', 'editor.action.previousMatchFindAction', {});
-      }
+      findPrevious(editor);
     }
   };
 
@@ -554,40 +548,16 @@ function App() {
           </div>
           <div className="ml-auto flex items-center space-x-3">
             <button 
-              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gray-700 hover:bg-gray-600 text-gray-200 hover:text-white border border-gray-600 hover:border-gray-500 hover:shadow-md" 
+              className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-blue-700 hover:bg-blue-600 text-white hover:text-white border border-blue-600 hover:border-blue-500 hover:shadow-md" 
               onClick={() => {
-                // 手动切换缩略图
-                if (editorRef.current) {
-                  const editor = editorRef.current.getEditor();
-                  if (editor) {
-                    const currentOptions = editor.getOptions();
-                    const minimapEnabled = currentOptions.get(58)?.enabled;
-                    
-                    editor.updateOptions({
-                      minimap: { 
-                        enabled: !minimapEnabled,
-                        maxColumn: 120,
-                        renderCharacters: true,
-                        showSlider: 'always',
-                        scale: 1,
-                        side: 'right'
-                      }
-                    });
-                    
-                    // 更新设置
-                    handleSettingsChange({ minimap: !minimapEnabled });
-                    
-                    // 强制刷新布局
-                    setTimeout(() => {
-                      editor.layout();
-                    }, 100);
-                  }
-                }
+                // 切换缩略图设置
+                handleSettingsChange({ minimap: !settings.minimap });
+                showModalSuccess('设置已更新', `缩略图已${!settings.minimap ? '启用' : '禁用'}`);
               }}
             >
               <span className="flex items-center space-x-2">
                 <span>🗺️</span>
-                <span>缩略图</span>
+                <span>{settings.minimap ? '隐藏缩略图' : '显示缩略图'}</span>
               </span>
             </button>
             <button 
@@ -604,7 +574,7 @@ function App() {
 
         {/* Toolbar */}
         <div className="h-14 bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm border-b border-gray-200/30 dark:border-gray-700/30 flex items-center px-6 flex-shrink-0 relative shadow-sm">
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center">
             <FileOperations
               onOpen={handleFileOpen}
               onSave={handleFileSave}
@@ -613,10 +583,23 @@ function App() {
               currentFile={currentFile}
               theme={theme}
             />
-            <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent dark:via-gray-600"></div>
+            
+            {/* 添加工具栏搜索面板 */}
+            <ToolbarSearchPanel
+              isVisible={true}
+              onSearch={handleSearch}
+              onReplace={handleReplace}
+              onReplaceAll={handleReplaceAll}
+              onFindNext={handleFindNext}
+              onFindPrevious={handleFindPrevious}
+              theme={theme}
+            />
+            
+            <div className="w-px h-10 bg-gradient-to-b from-transparent via-gray-300 to-transparent dark:via-gray-600" style={{ margin: '0 16px' }}></div>
             <button 
               className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100 dark:from-blue-900/20 dark:to-indigo-900/20 dark:hover:from-blue-800/30 dark:hover:to-indigo-800/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-700/50 hover:shadow-md hover:scale-105" 
               onClick={handleFormat}
+              style={{ marginRight: '16px' }}
             >
               <span className="flex items-center space-x-2">
                 <span>✨</span>
@@ -626,6 +609,7 @@ function App() {
             <button 
               className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-green-50 to-emerald-50 hover:from-green-100 hover:to-emerald-100 dark:from-green-900/20 dark:to-emerald-900/20 dark:hover:from-green-800/30 dark:hover:to-emerald-800/30 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-700/50 hover:shadow-md hover:scale-105" 
               onClick={handleMinify}
+              style={{ marginRight: '16px' }}
             >
               <span className="flex items-center space-x-2">
                 <span>🗜️</span>
@@ -635,38 +619,24 @@ function App() {
             <button 
               className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-purple-50 to-pink-50 hover:from-purple-100 hover:to-pink-100 dark:from-purple-900/20 dark:to-pink-900/20 dark:hover:from-purple-800/30 dark:hover:to-pink-800/30 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-700/50 hover:shadow-md hover:scale-105" 
               onClick={handleValidate}
+              style={{ marginRight: '16px' }}
             >
               <span className="flex items-center space-x-2">
                 <span>✅</span>
                 <span>验证</span>
               </span>
             </button>
-            <div className="w-px h-8 bg-gradient-to-b from-transparent via-gray-300 to-transparent dark:via-gray-600"></div>
+            <div className="w-px h-10 bg-gradient-to-b from-transparent via-gray-300 to-transparent dark:via-gray-600" style={{ margin: '0 16px' }}></div>
             <button 
               className="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 bg-gradient-to-r from-gray-50 to-slate-50 hover:from-gray-100 hover:to-slate-100 dark:from-gray-800/50 dark:to-slate-800/50 dark:hover:from-gray-700/60 dark:hover:to-slate-700/60 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600/50 hover:shadow-md hover:scale-105" 
               onClick={toggleSettings}
+              style={{ marginRight: '16px' }}
             >
               <span className="flex items-center space-x-2">
                 <span>⚙️</span>
                 <span>设置</span>
               </span>
             </button>
-          </div>
-
-          {/* 固定在工具栏最右侧的搜索面板 */}
-          <div className="ml-auto">
-            <SearchPanel
-              isVisible={true}
-              onClose={() => {}}
-              onSearch={handleSearch}
-              onReplace={handleReplace}
-              onReplaceAll={handleReplaceAll}
-              onFindNext={handleFindNext}
-              onFindPrevious={handleFindPrevious}
-              searchResults={[]}
-              currentResultIndex={0}
-              theme={theme}
-            />
           </div>
         </div>
 
@@ -679,8 +649,8 @@ function App() {
               onError={handleFileError}
               theme={theme}
             >
-              <div className="editor-container h-full">
-                <JsonEditor
+              <div className="editor-container h-full force-minimap">
+                <ResponsiveEditor
                   ref={editorRef}
                   value={content}
                   onChange={handleContentChange}

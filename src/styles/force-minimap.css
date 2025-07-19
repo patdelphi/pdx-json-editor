@@ -1,4 +1,4 @@
-/* 全局缩略图修复样式 */
+/* 强制显示Monaco编辑器缩略图的样式 */
 
 /* 确保缩略图容器可见 */
 .monaco-editor .minimap {
@@ -44,4 +44,28 @@
 
 .monaco-editor.vs-dark .minimap-slider {
   background-color: rgba(200, 200, 200, 0.4) !important;
+}
+
+/* 确保缩略图在编辑器右侧显示 */
+.monaco-editor .overflow-guard {
+  position: relative !important;
+}
+
+/* 确保编辑器内容区域不会被缩略图覆盖 */
+.monaco-editor .editor-scrollable {
+  width: calc(100% - 64px) !important;
+}
+
+/* 强制显示缩略图的特殊类 */
+.monaco-editor.show-minimap .minimap {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+}
+
+/* 添加一个全局类，可以应用到编辑器容器上 */
+.force-minimap .monaco-editor .minimap {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }

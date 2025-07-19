@@ -16,14 +16,25 @@
   background-color: transparent !important;
 }
 
-/* 缩略图样式 - 更温和的方式 */
+/* 缩略图样式 - 强制显示 */
 .monaco-editor .minimap {
-  display: block;
-  visibility: visible;
-  opacity: 1;
-  width: 64px;
-  right: 0;
-  position: absolute;
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  width: 64px !important;
+  right: 0 !important;
+  position: absolute !important;
+  z-index: 10 !important;
+}
+
+/* 确保缩略图内容可见 */
+.monaco-editor .minimap-slider {
+  opacity: 0.5 !important;
+  background: rgba(100, 100, 100, 0.5) !important;
+}
+
+.monaco-editor .minimap-slider:hover {
+  opacity: 0.8 !important;
 }
 
 /* 确保编辑器内容区域正确显示 */
@@ -32,20 +43,26 @@
   height: 100%;
 }
 
-/* 避免使用强制性的 !important，除非绝对必要 */
-.monaco-editor .minimap-slider {
-  opacity: 0.4;
-}
-
-.monaco-editor .minimap-slider:hover {
-  opacity: 0.7;
-}
-
 /* 暗色主题适配 */
 .monaco-editor.vs-dark .minimap {
-  background-color: rgba(255, 255, 255, 0.03);
+  background-color: rgba(30, 30, 30, 0.6) !important;
 }
 
 .monaco-editor.vs-dark .minimap-slider {
-  background-color: rgba(200, 200, 200, 0.4);
+  background-color: rgba(200, 200, 200, 0.4) !important;
+}
+
+/* 确保缩略图内容渲染 */
+.monaco-editor .minimap-decorations-layer,
+.monaco-editor .minimap-tokens-layer {
+  display: block !important;
+  visibility: visible !important;
+}
+
+/* 修复缩略图渲染区域 */
+.monaco-editor canvas.minimap-decorations-layer,
+.monaco-editor canvas.minimap-tokens-layer {
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
 }

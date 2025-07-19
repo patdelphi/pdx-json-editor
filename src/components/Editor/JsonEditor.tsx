@@ -7,11 +7,17 @@ import {
   useState,
 } from 'react';
 import Editor, { type OnMount, type OnChange } from '@monaco-editor/react';
+import * as monaco from 'monaco-editor';
 import type {
   MonacoEditorProps,
   EditorMethods,
 } from '../../types/editor.types';
-import { forceEnableMinimap } from '../../utils/monacoConfig';
+import { applyEditorOptions, registerJsonSchema } from '../../utils/monacoConfig';
+import FoldingControls from './FoldingControls';
+import SchemaSelector from './SchemaSelector';
+import DiffEditor from './DiffEditor';
+import { JsonSchemaConfig } from '../../types/editor.types';
+import useEditorLayout from '../../hooks/useEditorLayout';
 
 const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
   (
@@ -26,31 +32,39 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
     },
     ref
   ) => {
-    const editorRef = useRef<any>(null);
-    const monacoRef = useRef<any>(null);
+    // 编辑器引用
+    const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+    const monacoRef = useRef<typeof monaco | null>(null);
+    
+    // 差异编辑器状态
+    const [showDiff, setShowDiff] = useState(false);
+    const [originalContent, setOriginalContent] = useState('');
+    
+    // 使用布局Hook
+    const { forceLayout } = useEditorLayout(editorRef);
 
     // Editor methods that can be called from parent components
     const formatDocument = useCallback(() => {
       if (editorRef.current) {
-        editorRef.current.trigger('editor', 'editor.action.formatDocument', {});
+        editorRef.current.getAction('editor.action.formatDocument')?.run();
       }
     }, []);
 
     const undo = useCallback(() => {
       if (editorRef.current) {
-        editorRef.current.trigger('editor', 'undo', {});
+        editorRef.current.getAction('undo')?.run();
       }
     }, []);
 
     const redo = useCallback(() => {
       if (editorRef.current) {
-        editorRef.current.trigger('editor', 'redo', {});
+        editorRef.current.getAction('redo')?.run();
       }
     }, []);
 
     const selectAll = useCallback(() => {
       if (editorRef.current) {
-        editorRef.current.trigger('editor', 'editor.action.selectAll', {});
+        editorRef.current.getAction('editor.action.selectAll')?.run();
       }
     }, []);
 
@@ -59,73 +73,19 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
         try {
           // 确保编辑器获得焦点
           editorRef.current.focus();
-
-          // 使用Monaco编辑器的内置命令
-          const editor = editorRef.current;
-          const monaco = monacoRef.current;
-
-          // 方法1: 使用actions.find命令ID (这是Monaco推荐的方式)
-          try {
-            editor.trigger('keyboard', 'actions.find', null);
-            return;
-          } catch (e) {
-            console.log('Method 1 failed:', e);
-          }
-
-          // 方法2: 使用editor.action.startFindAction命令ID (备用方式)
-          try {
-            editor.trigger('keyboard', 'editor.action.startFindAction', null);
-            return;
-          } catch (e) {
-            console.log('Method 2 failed:', e);
-          }
-
-          // 方法3: 使用编辑器的内置操作
-          try {
-            // Use getAction for specific actions instead of getActions
-            const actions = [];
-            const findAction1 = (editor as any).getAction('actions.find');
-            const findAction2 = (editor as any).getAction(
-              'editor.action.startFindAction'
-            );
-            if (findAction1) actions.push(findAction1);
-            if (findAction2) actions.push(findAction2);
-
-            // Try to find any action with 'find' in its ID
-            const findAction = actions.find(
-              (a: { id: string; run: () => void }) =>
-                a.id === 'actions.find' ||
-                a.id === 'editor.action.startFindAction' ||
-                a.id.toLowerCase().includes('find')
-            );
-            if (findAction) {
-              findAction.run();
+          
+          // 使用标准API，按优先级尝试不同的操作
+          const actions = [
+            'actions.find',
+            'editor.action.startFindAction'
+          ];
+          
+          for (const actionId of actions) {
+            const action = editorRef.current.getAction(actionId);
+            if (action) {
+              action.run();
               return;
             }
-          } catch (e) {
-            console.log('Method 3 failed:', e);
-          }
-
-          // 方法4: 使用Monaco的键盘命令
-          try {
-            if (monaco) {
-              editor.trigger(
-                'keyboard',
-                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF,
-                null
-              );
-              return;
-            }
-          } catch (e) {
-            console.log('Method 4 failed:', e);
-          }
-
-          // 方法5: 使用浏览器的原生搜索 (最后的备选方案)
-          try {
-            // Use window.find as a fallback, but need to declare it properly for TypeScript
-            (window as any).find();
-          } catch (e) {
-            console.log('Method 5 failed:', e);
           }
         } catch (error) {
           console.error('Error in find function:', error);
@@ -138,71 +98,19 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
         try {
           // 确保编辑器获得焦点
           editorRef.current.focus();
-
-          // 使用Monaco编辑器的内置命令
-          const editor = editorRef.current;
-          const monaco = monacoRef.current;
-
-          // 方法1: 使用editor.action.startFindReplaceAction命令ID (主要方式)
-          try {
-            editor.trigger(
-              'keyboard',
-              'editor.action.startFindReplaceAction',
-              null
-            );
-            return;
-          } catch (e) {
-            console.log('Method 1 failed:', e);
-          }
-
-          // 方法2: 使用actions.findWithReplace命令ID (备用方式)
-          try {
-            editor.trigger('keyboard', 'actions.findWithReplace', null);
-            return;
-          } catch (e) {
-            console.log('Method 2 failed:', e);
-          }
-
-          // 方法3: 使用编辑器的内置操作
-          try {
-            // Use getAction for specific actions instead of getActions
-            const actions = [];
-            const replaceAction1 = (editor as any).getAction(
-              'editor.action.startFindReplaceAction'
-            );
-            const replaceAction2 = (editor as any).getAction(
-              'actions.findWithReplace'
-            );
-            if (replaceAction1) actions.push(replaceAction1);
-            if (replaceAction2) actions.push(replaceAction2);
-
-            // Try to find any action with 'replace' in its ID
-            const replaceAction = actions.find(
-              (a: { id: string; run: () => void }) =>
-                a.id === 'editor.action.startFindReplaceAction' ||
-                a.id === 'actions.findWithReplace' ||
-                a.id.toLowerCase().includes('replace')
-            );
-            if (replaceAction) {
-              replaceAction.run();
+          
+          // 使用标准API，按优先级尝试不同的操作
+          const actions = [
+            'editor.action.startFindReplaceAction',
+            'actions.findWithReplace'
+          ];
+          
+          for (const actionId of actions) {
+            const action = editorRef.current.getAction(actionId);
+            if (action) {
+              action.run();
               return;
             }
-          } catch (e) {
-            console.log('Method 3 failed:', e);
-          }
-
-          // 方法4: 使用Monaco的键盘命令
-          try {
-            if (monaco) {
-              editor.trigger(
-                'keyboard',
-                monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyH,
-                null
-              );
-              return;
-            }
-          } catch (e) {
-            console.log('Method 4 failed:', e);
           }
         } catch (error) {
           console.error('Error in replace function:', error);
@@ -240,7 +148,7 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
     }, []);
 
     const insertText = useCallback((text: string) => {
-      if (editorRef.current) {
+      if (editorRef.current && monacoRef.current) {
         const selection = editorRef.current.getSelection();
         const range = selection || new monacoRef.current.Range(1, 1, 1, 1);
         editorRef.current.executeEdits('insert-text', [
@@ -269,6 +177,35 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
       return false;
     }, []);
 
+    // 新增：代码折叠功能
+    const toggleFolding = useCallback(() => {
+      if (editorRef.current) {
+        const foldAction = editorRef.current.getAction('editor.foldAll');
+        const unfoldAction = editorRef.current.getAction('editor.unfoldAll');
+        
+        if (foldAction && unfoldAction) {
+          // 检查当前折叠状态并执行相反操作
+          const model = editorRef.current.getModel();
+          if (model) {
+            const foldingRanges = (model as any).foldingRanges;
+            const hasFoldedRanges = foldingRanges && foldingRanges.some((r: any) => r.isCollapsed);
+            
+            if (hasFoldedRanges) {
+              unfoldAction.run();
+            } else {
+              foldAction.run();
+            }
+          }
+        }
+      }
+    }, []);
+    
+    // 新增：显示差异编辑器
+    const showDiffEditor = useCallback((originalContent: string) => {
+      setOriginalContent(originalContent);
+      setShowDiff(true);
+    }, []);
+
     // Expose methods to parent components
     useImperativeHandle(
       ref,
@@ -285,9 +222,11 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
         insertText,
         canUndo,
         canRedo,
+        toggleFolding,
+        showDiffEditor,
         focus: () => editorRef.current?.focus(),
-        getEditor: () => editorRef.current,
-        getMonaco: () => monacoRef.current,
+        getEditor: () => editorRef.current!,
+        getMonaco: () => monacoRef.current!,
       }),
       [
         formatDocument,
@@ -302,6 +241,8 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
         insertText,
         canUndo,
         canRedo,
+        toggleFolding,
+        showDiffEditor,
       ]
     );
 
@@ -309,45 +250,31 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
       editorRef.current = editor;
       monacoRef.current = monaco;
       
-      // 确保缩略图立即启用
-      editor.updateOptions({
-        minimap: { 
-          enabled: settings.minimap
-        }
-      });
-      
       // 触发一个自定义事件，通知 Monaco 已加载
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('monaco-ready'));
       }
-      
-      // 使用我们的自定义函数确保缩略图可见
-      if (settings.minimap) {
-        setTimeout(ensureMinimapVisible, 100);
-      }
 
-      // 配置搜索控件，防止自动关闭
-      editor.updateOptions({
-        find: {
-          addExtraSpaceOnTop: true,
-          autoFindInSelection: 'never',
-          seedSearchStringFromSelection: 'always',
-          loop: true,
-          // Removed closeOnFocusLost as it's not in IEditorFindOptions
-        },
+      // 应用编辑器选项
+      applyEditorOptions(editor, {
+        theme: theme,
+        minimap: settings.minimap,
+        wordWrap: settings.wordWrap,
+        lineNumbers: settings.lineNumbers,
+        indentSize: settings.indentSize,
+        indentType: settings.indentType,
       });
 
-      // Configure JSON language settings with enhanced validation
+      // 配置JSON语言设置 - 基本验证
+      // 注意：详细的Schema配置在App.tsx中通过registerJsonSchema处理
       monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
         validate: true,
         allowComments: false,
-        schemas: [],
-        enableSchemaRequest: false,
+        enableSchemaRequest: true,
         schemaValidation: 'error',
-        schemaRequest: 'error',
       });
 
-      // Enhanced bracket matching configuration
+      // 括号匹配配置
       monaco.languages.setLanguageConfiguration('json', {
         brackets: [
           ['{', '}'],
@@ -372,7 +299,7 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
       ) as any;
       if (findController && typeof findController.getState === 'function') {
         // 监听搜索控制器状态变化
-        editor.onDidBlurEditorWidget(() => {
+        const blurDisposable = editor.onDidBlurEditorWidget(() => {
           // 当编辑器失去焦点时，尝试保持搜索窗口打开
           setTimeout(() => {
             try {
@@ -388,63 +315,30 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
         });
       }
 
-      // Add keyboard shortcut for search (Ctrl+F)
+      // 添加键盘快捷键，使用标准命令ID
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyF, () => {
-        // This will open the search widget
-        // Use getAction for each action ID instead of getActions
-        const actions = [];
-        const findAction1 = editor.getAction('actions.find');
-        const findAction2 = editor.getAction('editor.action.startFindAction');
-        if (findAction1) actions.push(findAction1);
-        if (findAction2) actions.push(findAction2);
-
-        // Try to find the search action
-        const findAction = actions.find(
-          (a: { id: string; run: () => void }) =>
-            a.id === 'actions.find' || a.id === 'editor.action.startFindAction'
-        );
-
-        if (findAction) {
-          findAction.run();
+        // 尝试使用标准API
+        const action = editor.getAction('actions.find');
+        if (action) {
+          action.run();
         } else {
-          // Fallback to trigger method
-          editor.trigger('keyboard', 'actions.find', null);
+          find();
         }
       });
 
-      // Add keyboard shortcut for replace (Ctrl+H)
       editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyH, () => {
-        // This will open the replace widget
-        // Use getAction for each action ID instead of getActions
-        const actions = [];
-        const replaceAction1 = editor.getAction(
-          'editor.action.startFindReplaceAction'
-        );
-        const replaceAction2 = editor.getAction('actions.findWithReplace');
-        if (replaceAction1) actions.push(replaceAction1);
-        if (replaceAction2) actions.push(replaceAction2);
-
-        // Try to find the replace action
-        const replaceAction = actions.find(
-          (a: { id: string; run: () => void }) =>
-            a.id === 'editor.action.startFindReplaceAction'
-        );
-
-        if (replaceAction) {
-          replaceAction.run();
+        // 尝试使用标准API
+        const action = editor.getAction('editor.action.startFindReplaceAction');
+        if (action) {
+          action.run();
         } else {
-          // Fallback to trigger method
-          editor.trigger(
-            'keyboard',
-            'editor.action.startFindReplaceAction',
-            null
-          );
+          replace();
         }
       });
 
       const model = editor.getModel();
       if (model) {
-        // Set up validation change listener with enhanced error reporting
+        // 设置验证变更监听器
         const markersDisposable = monaco.editor.onDidChangeMarkers((uris) => {
           const editorUri = model.uri;
           if (uris.find((uri) => uri.toString() === editorUri.toString())) {
@@ -464,7 +358,7 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
           }
         });
 
-        // Set up cursor position change listener
+        // 设置光标位置变更监听器
         const cursorDisposable = editor.onDidChangeCursorPosition((e) => {
           if (onCursorPositionChange) {
             onCursorPositionChange({
@@ -474,7 +368,7 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
           }
         });
 
-        // Set up selection change listener
+        // 设置选择变更监听器
         const selectionDisposable = editor.onDidChangeCursorSelection((e) => {
           if (onSelectionChange) {
             onSelectionChange({
@@ -486,32 +380,26 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
           }
         });
 
-        // Set up content change listener for undo/redo state
+        // 设置内容变更监听器
         const contentDisposable = model.onDidChangeContent(() => {
-          // This will trigger validation automatically
-          // Additional logic can be added here for undo/redo state tracking
+          // 这将自动触发验证
         });
 
-        // Enhanced keyboard shortcuts
+        // 增强的键盘快捷键
         editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyD, () => {
-          // Duplicate line
-          editor.trigger('keyboard', 'editor.action.copyLinesDownAction', {});
+          // 复制行
+          editor.getAction('editor.action.copyLinesDownAction')?.run();
         });
 
         editor.addCommand(
           monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyK,
           () => {
-            // Delete line
-            editor.trigger('keyboard', 'editor.action.deleteLines', {});
+            // 删除行
+            editor.getAction('editor.action.deleteLines')?.run();
           }
         );
 
-        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash, () => {
-          // Toggle line comment (though JSON doesn't support comments, this is for future extensibility)
-          editor.trigger('keyboard', 'editor.action.commentLine', {});
-        });
-
-        // Clean up on unmount
+        // 清理函数
         return () => {
           markersDisposable.dispose();
           cursorDisposable.dispose();
@@ -527,32 +415,24 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
       }
     };
 
-    // Update editor options when settings change
+    // 当设置变更时更新编辑器选项
     useEffect(() => {
       if (editorRef.current) {
-        editorRef.current.updateOptions({
-          tabSize: settings.indentSize,
-          insertSpaces: settings.indentType === 'spaces',
-          wordWrap: settings.wordWrap ? 'on' : 'off',
-          lineNumbers: settings.lineNumbers ? 'on' : 'off',
-          minimap: { 
-            enabled: settings.minimap,
-            maxColumn: 120,
-            renderCharacters: true,
-            showSlider: 'always',
-            scale: 1,
-            side: 'right'
-          },
+        applyEditorOptions(editorRef.current, {
+          theme: theme,
+          minimap: settings.minimap,
+          wordWrap: settings.wordWrap,
+          lineNumbers: settings.lineNumbers,
+          indentSize: settings.indentSize,
+          indentType: settings.indentType,
         });
-        
-        // 强制刷新编辑器布局以确保缩略图显示
-        setTimeout(() => {
-          editorRef.current.layout();
-        }, 100);
       }
-    }, [settings]);
+    }, [settings, theme]);
+    
+    // 布局由useEditorLayout处理，不需要额外的resize监听
 
-    const editorOptions: any = {
+    // 编辑器选项
+    const editorOptions = {
       language: 'json',
       theme: theme === 'dark' ? 'vs-dark' : 'vs',
       automaticLayout: true,
@@ -563,19 +443,24 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
       wordWrap: settings.wordWrap ? 'on' : 'off',
       lineNumbers: settings.lineNumbers ? 'on' : 'off',
       minimap: { 
-        enabled: settings.minimap
+        enabled: settings.minimap,
+        maxColumn: 120,
+        renderCharacters: true,
+        showSlider: 'always',
+        scale: 1,
+        side: 'right',
       },
       scrollBeyondLastLine: false,
       renderWhitespace: 'selection',
 
-      // Enhanced bracket and matching features
+      // 括号和匹配功能
       bracketPairColorization: { enabled: true },
       matchBrackets: 'always',
       showFoldingControls: 'always',
       foldingStrategy: 'indentation',
       foldingHighlight: true,
 
-      // Enhanced auto-completion and suggestions
+      // 自动完成和建议
       autoClosingBrackets: 'always',
       autoClosingQuotes: 'always',
       autoClosingDelete: 'always',
@@ -585,34 +470,10 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
       formatOnPaste: true,
       formatOnType: true,
 
-      // Enhanced IntelliSense
+      // 智能感知
       suggest: {
         showKeywords: true,
         showSnippets: true,
-        showFunctions: true,
-        showConstructors: true,
-        showFields: true,
-        showVariables: true,
-        showClasses: true,
-        showStructs: true,
-        showInterfaces: true,
-        showModules: true,
-        showProperties: true,
-        showEvents: true,
-        showOperators: true,
-        showUnits: true,
-        showValues: true,
-        showConstants: true,
-        showEnums: true,
-        showEnumMembers: true,
-        showColors: true,
-        showFiles: true,
-        showReferences: true,
-        showFolders: true,
-        showTypeParameters: true,
-        showIssues: true,
-        showUsers: true,
-        insertMode: 'insert',
         filterGraceful: true,
         snippetsPreventQuickSuggestions: false,
       },
@@ -623,145 +484,55 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
         strings: true,
       },
 
-      // Enhanced editing features
+      // 编辑功能
       multiCursorModifier: 'ctrlCmd',
       multiCursorMergeOverlapping: true,
       multiCursorPaste: 'spread',
 
-      // Find and replace enhancements
+      // 查找和替换
       find: {
         addExtraSpaceOnTop: true,
         autoFindInSelection: 'never',
         seedSearchStringFromSelection: 'always',
         loop: true,
-        // Removed closeOnFocusLost as it's not in IEditorFindOptions
       },
 
-      // Enhanced error and warning display
+      // 错误和警告显示
       renderValidationDecorations: 'on',
       renderLineHighlight: 'all',
-      renderLineHighlightOnlyWhenFocus: false,
 
-      // Undo/Redo enhancements
+      // 撤销/重做
       undoStopOnWordBoundary: true,
 
-      // Performance optimizations
+      // 性能优化
       largeFileOptimizations: true,
+      stickyScroll: { enabled: true },
+      occurrencesHighlight: true,
+      renderFinalNewline: true,
+      renderValidationDecorations: 'on',
 
-      // Accessibility features
+      // 可访问性
       accessibilitySupport: 'auto',
       ariaLabel: 'PDX JSON Editor',
 
-      // Selection and cursor enhancements
+      // 选择和光标
       cursorBlinking: 'blink',
       cursorSmoothCaretAnimation: 'on',
       cursorStyle: 'line',
       cursorWidth: 2,
 
-      // Scrolling enhancements
+      // 滚动
       smoothScrolling: true,
       mouseWheelScrollSensitivity: 1,
       fastScrollSensitivity: 5,
     };
 
-    // 添加一个简化的函数来确保缩略图显示
-    const ensureMinimapVisible = useCallback(() => {
-      if (!editorRef.current) return;
-      
-      const editor = editorRef.current;
-      
-      // 通过API启用缩略图
-      editor.updateOptions({
-        minimap: { 
-          enabled: true
-        }
-      });
-      
-      // 强制刷新布局
-      editor.layout();
-      
-      console.log('Minimap visibility ensured');
-    }, []);
-    
-    // 添加调试函数，用于检查缩略图状态
-    const debugMinimap = () => {
-      if (editorRef.current) {
-        const editor = editorRef.current;
-        const editorElement = editor.getDomNode();
-        
-        if (editorElement) {
-          console.log('Editor DOM node found');
-          
-          // 查找缩略图容器
-          const minimapElements = editorElement.querySelectorAll('.minimap');
-          console.log('Minimap elements found:', minimapElements.length);
-          
-          minimapElements.forEach((el, i) => {
-            console.log(`Minimap ${i} style:`, window.getComputedStyle(el));
-          });
-          
-          // 检查编辑器配置
-          console.log('Editor options:', editor.getOptions());
-          console.log('Minimap enabled:', editor.getOption(58)); // 58 is the ID for minimap options
-          
-          // 尝试强制显示缩略图
-          ensureMinimapVisible();
-        }
+    // 处理Schema选择
+    const handleSchemaSelect = useCallback((schema: JsonSchemaConfig) => {
+      if (monacoRef.current) {
+        registerJsonSchema(monacoRef.current, [schema]);
       }
-    };
-    
-    // 在组件挂载后确保编辑器布局正确
-    useEffect(() => {
-      if (editorRef.current) {
-        // 添加窗口大小变化监听器
-        const handleResize = () => {
-          if (editorRef.current) {
-            editorRef.current.layout();
-          }
-        };
-        
-        window.addEventListener('resize', handleResize);
-        
-        return () => {
-          window.removeEventListener('resize', handleResize);
-        };
-      }
-    }, []);
-
-    // 添加一个函数来手动切换缩略图
-    const toggleMinimap = () => {
-      if (editorRef.current) {
-        const currentOptions = editorRef.current.getOptions();
-        const minimapEnabled = currentOptions.get(58)?.enabled;
-        
-        // 切换缩略图状态
-        editorRef.current.updateOptions({
-          minimap: { enabled: !minimapEnabled }
-        });
-        
-        // 强制刷新布局
-        editorRef.current.layout();
-        
-        console.log('Minimap toggled:', !minimapEnabled);
-      }
-    };
-
-    // 添加状态来跟踪缩略图是否可见
-    const [isMinimapVisible, setIsMinimapVisible] = useState(settings.minimap);
-    
-    // 更新缩略图状态的函数
-    const updateMinimapState = useCallback(() => {
-      if (editorRef.current) {
-        const currentOptions = editorRef.current.getOptions();
-        const minimapEnabled = currentOptions.get(58)?.enabled;
-        setIsMinimapVisible(!!minimapEnabled);
-      }
-    }, []);
-    
-    // 在组件挂载和设置更改时更新缩略图状态
-    useEffect(() => {
-      updateMinimapState();
-    }, [settings.minimap, updateMinimapState]);
+    }, [monacoRef.current]);
 
     return (
       <div className="w-full h-full relative">
@@ -775,23 +546,46 @@ const JsonEditor = forwardRef<EditorMethods, MonacoEditorProps>(
               <div className="text-gray-500">Loading editor...</div>
             </div>
           }
-          className="monaco-editor-container" // 添加自定义类名以便于样式定位
+          className="monaco-editor-container"
         />
         
-        {/* 缩略图控制按钮 - 始终显示 */}
-        <div className="absolute top-2 right-2 z-50">
-          <button 
-            onClick={() => {
-              toggleMinimap();
-              setTimeout(updateMinimapState, 100);
-            }}
-            className="px-2 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-500 opacity-70 hover:opacity-100 transition-opacity flex items-center"
-            title={isMinimapVisible ? "隐藏缩略图" : "显示缩略图"}
+        {/* 折叠控制按钮 */}
+        <FoldingControls editorRef={ref} theme={theme} />
+        
+        {/* 工具栏 */}
+        <div className="absolute top-2 right-2 z-50 flex space-x-2">
+          {/* 差异比较按钮 */}
+          <button
+            onClick={() => showDiffEditor(value)}
+            className={`px-2 py-1 text-xs rounded hover:opacity-100 transition-opacity flex items-center ${
+              theme === 'dark'
+                ? 'bg-purple-700 text-white opacity-70 hover:bg-purple-600'
+                : 'bg-purple-600 text-white opacity-70 hover:bg-purple-500'
+            }`}
+            title="与当前内容比较"
           >
-            <span className="mr-1">🗺️</span>
-            {isMinimapVisible ? "隐藏缩略图" : "显示缩略图"}
+            <span className="mr-1">🔄</span>
+            <span>差异比较</span>
           </button>
+          
+          {/* Schema选择器 */}
+          <SchemaSelector 
+            currentFile={null} 
+            onSchemaSelect={handleSchemaSelect} 
+            theme={theme} 
+          />
         </div>
+        
+        {/* 差异编辑器 */}
+        {showDiff && (
+          <DiffEditor
+            original={originalContent}
+            modified={value}
+            language="json"
+            theme={theme}
+            onClose={() => setShowDiff(false)}
+          />
+        )}
       </div>
     );
   }
