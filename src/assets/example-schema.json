@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "配置文件",
+  "description": "应用程序配置文件的 JSON Schema",
+  "type": "object",
+  "required": ["name", "version", "settings"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "应用程序名称"
+    },
+    "version": {
+      "type": "string",
+      "description": "应用程序版本号",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "应用程序描述"
+    },
+    "features": {
+      "type": "array",
+      "description": "功能列表",
+      "items": {
+        "type": "string"
+      }
+    },
+    "settings": {
+      "type": "object",
+      "description": "应用程序设置",
+      "required": ["theme"],
+      "properties": {
+        "theme": {
+          "type": "string",
+          "description": "主题设置",
+          "enum": ["light", "dark", "system"]
+        },
+        "indentation": {
+          "type": "number",
+          "description": "缩进空格数",
+          "enum": [2, 4, 8]
+        },
+        "wordWrap": {
+          "type": "boolean",
+          "description": "是否自动换行"
+        }
+      }
+    }
+  }
+}

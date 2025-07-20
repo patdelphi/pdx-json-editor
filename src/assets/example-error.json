@@ -1,0 +1,44 @@
+{
+  "name": "PDX JSON Editor",
+  "version": "1.0.0",
+  "description": "A lightweight JSON editor with Monaco Editor",
+  "features": [
+    "Syntax highlighting",
+    "Error validation",
+    "Formatting",
+    "Search and replace",
+    "File operations"
+  ],
+  "settings": {
+    "theme": "invalid-theme",
+    "indentation": 3,
+    "wordWrap": true
+  },
+  "compatibility": {
+    "browsers": [
+      {
+        "name": "Chrome",
+        "minVersion": 80
+      },
+      {
+        "name": "Firefox",
+        "minVersion": 72
+      },
+      {
+        "name": "Safari",
+        "minVersion": 13
+      },
+      {
+        "name": "Edge",
+        "minVersion": 80
+      }
+    ],
+    "platforms": ["desktop", "tablet", "mobile"]
+  },
+  "author": {
+    "name": "PDX Team",
+    "email": "contact@example.com",
+    "website": "https://example.com"
+  },
+  "license": "MIT"
+}
