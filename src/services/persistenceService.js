@@ -10,7 +10,7 @@ const STORAGE_KEYS = {
   EDITOR_CONTENT: 'pdx-json-editor-content',
   EDITOR_FILE: 'pdx-json-editor-file',
   EDITOR_SETTINGS: 'pdx-json-editor-settings',
-  EDITOR_HISTORY: 'pdx-json-editor-history',
+  EDITOR_HISTORY: 'pdx-json-editor-recent-files', // Changed to match StateService
   EDITOR_THEME: 'pdx-json-editor-theme',
   EDITOR_SCHEMAS: 'pdx-json-editor-schemas'
 };
@@ -215,21 +215,42 @@ export class PersistenceService {
   static addFileToHistory(fileInfo) {
     try {
       if (!fileInfo || !fileInfo.name) {
+        console.warn('添加文件到历史记录失败: 无效的文件信息');
         return false;
       }
       
+      console.log('添加文件到历史记录:', fileInfo.name);
+      
       // 加载现有历史记录
       const historyStr = localStorage.getItem(STORAGE_KEYS.EDITOR_HISTORY);
-      const history = historyStr ? JSON.parse(historyStr) : [];
+      let history = [];
+      
+      try {
+        if (historyStr) {
+          history = JSON.parse(historyStr);
+          if (!Array.isArray(history)) {
+            console.warn('历史记录格式不正确，重置为空数组');
+            history = [];
+          }
+        }
+      } catch (e) {
+        console.error('解析历史记录失败:', e);
+        history = [];
+      }
       
       // 创建文件记录
       const fileRecord = {
         name: fileInfo.name,
-        path: fileInfo.path,
+        path: fileInfo.path || '',
         lastModified: fileInfo.lastModified || Date.now(),
-        size: fileInfo.size,
+        size: fileInfo.size || 0,
         timestamp: Date.now()
       };
+      
+      // 对于小文件（小于500KB），保存内容以便直接打开
+      if (fileInfo.content && fileInfo.size && fileInfo.size < 500 * 1024) {
+        fileRecord.content = fileInfo.content;
+      }
       
       // 检查是否已存在
       const existingIndex = history.findIndex(item => 
@@ -239,9 +260,11 @@ export class PersistenceService {
       if (existingIndex !== -1) {
         // 更新现有记录
         history[existingIndex] = fileRecord;
+        console.log('更新现有记录:', fileRecord.name);
       } else {
         // 添加新记录
         history.unshift(fileRecord);
+        console.log('添加新记录:', fileRecord.name);
         
         // 限制历史记录大小
         if (history.length > MAX_HISTORY_SIZE) {
@@ -250,10 +273,19 @@ export class PersistenceService {
       }
       
       // 保存历史记录
-      localStorage.setItem(STORAGE_KEYS.EDITOR_HISTORY, JSON.stringify(history));
+      const historyJson = JSON.stringify(history);
+      localStorage.setItem(STORAGE_KEYS.EDITOR_HISTORY, historyJson);
+      console.log('保存历史记录成功, 当前记录数:', history.length);
+      
+      // 触发存储事件，以便其他组件可以更新
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: STORAGE_KEYS.EDITOR_HISTORY,
+        newValue: historyJson
+      }));
       
       return true;
     } catch (error) {
+      console.error('添加文件到历史记录失败:', error);
       errorService.handleError(
         new FileOperationError(
           '添加文件到历史记录失败',
@@ -268,13 +300,33 @@ export class PersistenceService {
   
   /**
    * 获取文件历史记录
-   * @returns {Array|null} - 文件历史记录
+   * @returns {Array} - 文件历史记录
    */
   static getFileHistory() {
     try {
+      console.log('获取文件历史记录');
       const historyStr = localStorage.getItem(STORAGE_KEYS.EDITOR_HISTORY);
-      return historyStr ? JSON.parse(historyStr) : [];
+      console.log('历史记录原始数据:', historyStr);
+      
+      if (!historyStr) {
+        console.log('没有找到历史记录');
+        return [];
+      }
+      
+      try {
+        const history = JSON.parse(historyStr);
+        if (!Array.isArray(history)) {
+          console.warn('历史记录格式不正确，应为数组');
+          return [];
+        }
+        console.log('历史记录解析成功, 记录数:', history.length);
+        return history;
+      } catch (parseError) {
+        console.error('解析历史记录失败:', parseError);
+        return [];
+      }
     } catch (error) {
+      console.error('获取文件历史记录失败:', error);
       errorService.handleError(
         new FileOperationError(
           '获取文件历史记录失败',

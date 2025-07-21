@@ -1,9 +1,9 @@
-import { useState, useRef, useCallback } from 'preact/hooks';
+import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 import { Header } from '../components/Header';
 import { JsonEditor } from '../components/JsonEditor';
 import { TouchEnabledJsonEditor } from '../components/TouchEnabledJsonEditor';
-import { SidePanel } from '../components/SidePanel';
+// SidePanel 已移除
 import { FileDropZone } from '../components/FileDropZone';
 import { UnsavedChangesDialog } from '../components/UnsavedChangesDialog';
 import { LargeFileWarning } from '../components/LargeFileWarning';
@@ -73,6 +73,37 @@ export function MainLayout({
   
   // 使用beforeunload钩子
   useBeforeUnload(isDirty);
+  
+  // 监听触发文件选择对话框和设置当前文件的事件
+  useEffect(() => {
+    const handleTriggerFileOpen = () => {
+      console.log('收到触发文件选择对话框事件');
+      if (fileInputRef.current) {
+        fileInputRef.current.click();
+      }
+    };
+    
+    const handleSetCurrentFile = (event) => {
+      console.log('收到设置当前文件事件:', event.detail);
+      if (event.detail) {
+        // 设置编辑器内容
+        setEditorContent(event.detail.content || '');
+        
+        // 如果有文件操作钩子，更新当前文件
+        if (setContent) {
+          setContent(event.detail.content || '');
+        }
+      }
+    };
+    
+    window.addEventListener('triggerFileOpen', handleTriggerFileOpen);
+    window.addEventListener('setCurrentFile', handleSetCurrentFile);
+    
+    return () => {
+      window.removeEventListener('triggerFileOpen', handleTriggerFileOpen);
+      window.removeEventListener('setCurrentFile', handleSetCurrentFile);
+    };
+  }, [setContent]);
   
   // 处理未保存更改检查
   const checkUnsavedChanges = useCallback((operation) => {
@@ -210,7 +241,7 @@ export function MainLayout({
             isDirty={isDirty}
           />
         }
-        sidebar={<SidePanel />}
+        sidebar={null}
         content={
           <TouchEnabledJsonEditor 
             onSettingsClick={onSettingsClick}

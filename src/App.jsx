@@ -27,8 +27,10 @@ export function App() {
   const [diffViewerOpen, setDiffViewerOpen] = useState(false);
   const [errorDialogOpen, setErrorDialogOpen] = useState(false);
   
+  // 最近文件功能已移除
+  
   // 错误通知状态
-  const [errorAlert, setErrorAlert] = useState({ open: false, message: '', severity: 'error' });
+  const [errorAlert, setErrorAlert] = useState({ open: false, message: '', severity: 'error', action: null });
   
   // 当前大文件
   const [currentLargeFile, setCurrentLargeFile] = useState(null);
@@ -91,17 +93,62 @@ export function App() {
         setLargeFileWarningOpen(true);
       }
     };
+
+    // 最近文件功能已移除
+    
+    // 触发文件选择对话框
+    const triggerFileOpen = () => {
+      // 通过自定义事件通知MainLayout组件打开文件选择对话框
+      window.dispatchEvent(new CustomEvent('triggerFileOpen'));
+      
+      // 同时尝试直接查找文件输入元素（备用方案）
+      setTimeout(() => {
+        const fileInput = document.querySelector('input[type="file"]');
+        if (fileInput) {
+          fileInput.click();
+        } else {
+          console.error('未找到文件输入元素');
+        }
+      }, 100);
+    };
+    
+    // 设置当前文件
+    const setCurrentFile = (fileInfo) => {
+      // 这个函数需要在MainLayout组件中实现
+      // 这里只是一个占位符
+      console.log('设置当前文件:', fileInfo);
+      
+      // 尝试通过事件通知MainLayout组件
+      window.dispatchEvent(new CustomEvent('setCurrentFile', { detail: fileInfo }));
+    };
     
     // 将函数添加到全局对象
     if (window.pdxJsonEditor) {
       window.pdxJsonEditor.saveOriginalContent = saveOriginalContent;
       window.pdxJsonEditor.openDiffViewer = openDiffViewer;
       window.pdxJsonEditor.handleLargeFile = handleLargeFile;
+      window.pdxJsonEditor.triggerFileOpen = triggerFileOpen;
+      window.pdxJsonEditor.setCurrentFile = setCurrentFile;
+      
+      // 如果没有定义openFileByPath函数，添加一个基本实现
+      if (!window.pdxJsonEditor.openFileByPath) {
+        window.pdxJsonEditor.openFileByPath = (filePath) => {
+          console.log('尝试打开文件路径:', filePath);
+          // 这里可以添加实际的文件打开逻辑，如果有文件系统API支持
+          // 目前只是记录日志，实际功能需要根据应用环境实现
+        };
+      }
     } else {
       window.pdxJsonEditor = {
         saveOriginalContent,
         openDiffViewer,
-        handleLargeFile
+        handleLargeFile,
+        triggerFileOpen,
+        setCurrentFile,
+        openFileByPath: (filePath) => {
+          console.log('尝试打开文件路径:', filePath);
+          // 这里可以添加实际的文件打开逻辑，如果有文件系统API支持
+        }
       };
     }
     
@@ -111,6 +158,8 @@ export function App() {
         delete window.pdxJsonEditor.saveOriginalContent;
         delete window.pdxJsonEditor.openDiffViewer;
         delete window.pdxJsonEditor.handleLargeFile;
+        delete window.pdxJsonEditor.triggerFileOpen;
+        delete window.pdxJsonEditor.setCurrentFile;
       }
     };
   }, []);
@@ -277,24 +326,27 @@ export function App() {
         )}
         
         {/* 错误通知 */}
-        <FadeTransition in={errorAlert.open}>
-          <Alert 
-            severity={errorAlert.severity}
-            variant="filled"
-            onClose={handleErrorAlertClose}
-            sx={{ 
-              position: 'fixed',
-              bottom: 16,
-              left: '50%',
-              transform: 'translateX(-50%)',
-              zIndex: 9999,
-              minWidth: 300,
-              maxWidth: '90%'
-            }}
-          >
-            {errorAlert.message}
-          </Alert>
-        </FadeTransition>
+        {errorAlert.open && (
+          <FadeTransition in={true}>
+            <Alert 
+              severity={errorAlert.severity}
+              variant="filled"
+              onClose={handleErrorAlertClose}
+              action={errorAlert.action}
+              sx={{ 
+                position: 'fixed',
+                bottom: 16,
+                left: '50%',
+                transform: 'translateX(-50%)',
+                zIndex: 9999,
+                minWidth: 300,
+                maxWidth: '90%'
+              }}
+            >
+              {errorAlert.message}
+            </Alert>
+          </FadeTransition>
+        )}
       </ThemeProvider>
     </ErrorBoundary>
   );

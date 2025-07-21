@@ -82,36 +82,38 @@ export function ResponsiveLayout({ header, sidebar, content, isDirty, onSave }) 
       
       {/* 主要内容区域 */}
       <Box sx={{ display: 'flex', flexGrow: 1, overflow: 'hidden' }}>
-        {/* 侧边栏 */}
-        <Drawer
-          variant={isMobile || isTablet ? 'temporary' : 'permanent'}
-          open={isMobile || isTablet ? drawerOpen : true}
-          onClose={handleDrawerClose}
-          sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            '& .MuiDrawer-paper': {
+        {/* 侧边栏 - 已移除 */}
+        {sidebar && (
+          <Drawer
+            variant={isMobile || isTablet ? 'temporary' : 'permanent'}
+            open={isMobile || isTablet ? drawerOpen : true}
+            onClose={handleDrawerClose}
+            sx={{
               width: drawerWidth,
-              boxSizing: 'border-box',
-            },
-          }}
-          {...sidebarAttrs}
-        >
-          {/* 移动端关闭按钮 */}
-          {(isMobile || isTablet) && (
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
-              <IconButton 
-                onClick={handleDrawerClose}
-                aria-label="关闭侧边栏"
-              >
-                <CloseIcon />
-              </IconButton>
-            </Box>
-          )}
-          
-          {/* 侧边栏内容 */}
-          {sidebar}
-        </Drawer>
+              flexShrink: 0,
+              '& .MuiDrawer-paper': {
+                width: drawerWidth,
+                boxSizing: 'border-box',
+              },
+            }}
+            {...sidebarAttrs}
+          >
+            {/* 移动端关闭按钮 */}
+            {(isMobile || isTablet) && (
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', p: 1 }}>
+                <IconButton 
+                  onClick={handleDrawerClose}
+                  aria-label="关闭侧边栏"
+                >
+                  <CloseIcon />
+                </IconButton>
+              </Box>
+            )}
+            
+            {/* 侧边栏内容 */}
+            {sidebar}
+          </Drawer>
+        )}
         
         {/* 主要内容 */}
         <Box 
@@ -128,8 +130,8 @@ export function ResponsiveLayout({ header, sidebar, content, isDirty, onSave }) 
         >
           {content}
           
-          {/* 移动端菜单按钮 */}
-          {(isMobile || isTablet) && !drawerOpen && (
+          {/* 移动端菜单按钮 - 已移除 */}
+          {sidebar && (isMobile || isTablet) && !drawerOpen && (
             <Fab
               color="primary"
               aria-label="打开侧边栏"

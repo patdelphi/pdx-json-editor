@@ -15,9 +15,17 @@ import { Fade, Grow, Slide, Zoom, Collapse, Box } from '@mui/material';
  * @returns {React.ReactElement} - 淡入淡出过渡组件
  */
 export function FadeTransition({ in: inProp, timeout = 300, children, ...rest }) {
+  // 如果没有子元素，则不渲染任何内容
+  if (!children) {
+    return null;
+  }
+  
+  // 确保子元素被包装在一个div中，以避免直接操作undefined
   return (
     <Fade in={inProp} timeout={timeout} {...rest}>
-      {children}
+      <div style={{ display: 'contents' }}>
+        {children}
+      </div>
     </Fade>
   );
 }
@@ -31,9 +39,15 @@ export function FadeTransition({ in: inProp, timeout = 300, children, ...rest })
  * @returns {React.ReactElement} - 增长过渡组件
  */
 export function GrowTransition({ in: inProp, timeout = 300, children, ...rest }) {
+  if (!children) {
+    return null;
+  }
+  
   return (
     <Grow in={inProp} timeout={timeout} {...rest}>
-      {children}
+      <div style={{ display: 'contents' }}>
+        {children}
+      </div>
     </Grow>
   );
 }
@@ -48,9 +62,15 @@ export function GrowTransition({ in: inProp, timeout = 300, children, ...rest })
  * @returns {React.ReactElement} - 滑动过渡组件
  */
 export function SlideTransition({ in: inProp, timeout = 300, direction = 'down', children, ...rest }) {
+  if (!children) {
+    return null;
+  }
+  
   return (
     <Slide in={inProp} timeout={timeout} direction={direction} {...rest}>
-      {children}
+      <div style={{ display: 'contents' }}>
+        {children}
+      </div>
     </Slide>
   );
 }
@@ -64,9 +84,15 @@ export function SlideTransition({ in: inProp, timeout = 300, direction = 'down',
  * @returns {React.ReactElement} - 缩放过渡组件
  */
 export function ZoomTransition({ in: inProp, timeout = 300, children, ...rest }) {
+  if (!children) {
+    return null;
+  }
+  
   return (
     <Zoom in={inProp} timeout={timeout} {...rest}>
-      {children}
+      <div style={{ display: 'contents' }}>
+        {children}
+      </div>
     </Zoom>
   );
 }
@@ -81,9 +107,15 @@ export function ZoomTransition({ in: inProp, timeout = 300, children, ...rest })
  * @returns {React.ReactElement} - 折叠过渡组件
  */
 export function CollapseTransition({ in: inProp, timeout = 300, orientation = 'vertical', children, ...rest }) {
+  if (!children) {
+    return null;
+  }
+  
   return (
     <Collapse in={inProp} timeout={timeout} orientation={orientation} {...rest}>
-      {children}
+      <div style={{ display: 'contents' }}>
+        {children}
+      </div>
     </Collapse>
   );
 }
@@ -204,6 +236,11 @@ export function PageTransition({
     timeout,
     ...rest
   };
+  
+  // 如果没有子元素，则不渲染任何内容
+  if (!children) {
+    return null;
+  }
   
   switch (type) {
     case 'slide':

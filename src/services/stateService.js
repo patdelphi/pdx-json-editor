@@ -20,7 +20,6 @@ class StateService {
       // 文件状态
       file: {
         currentFile: null,
-        recentFiles: [],
         isLoading: false,
         isLargeFile: false
       },
@@ -155,7 +154,6 @@ class StateService {
       },
       file: {
         currentFile: null,
-        recentFiles: [],
         isLoading: false,
         isLargeFile: false
       },
@@ -190,12 +188,7 @@ class StateService {
         this.setState('settings', { ...this.state.settings, ...settings });
       }
       
-      // 加载最近文件
-      const recentFilesStr = localStorage.getItem('pdx-json-editor-recent-files');
-      if (recentFilesStr) {
-        const recentFiles = JSON.parse(recentFilesStr);
-        this.setState('file.recentFiles', recentFiles);
-      }
+      // 最近文件功能已移除
       
       // 加载主题
       const theme = localStorage.getItem('pdx-json-editor-theme');
@@ -222,8 +215,7 @@ class StateService {
       // 保存设置
       localStorage.setItem('pdx-json-editor-settings', JSON.stringify(this.state.settings));
       
-      // 保存最近文件
-      localStorage.setItem('pdx-json-editor-recent-files', JSON.stringify(this.state.file.recentFiles));
+      // 最近文件功能已移除
       
       // 保存主题
       localStorage.setItem('pdx-json-editor-theme', this.state.settings.theme);

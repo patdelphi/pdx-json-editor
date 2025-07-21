@@ -152,7 +152,14 @@ export function EditorToolbar({
             // 触发Monaco编辑器的原生搜索功能
             if (window.pdxJsonEditor?.getEditorRef?.()) {
               const editor = window.pdxJsonEditor.getEditorRef();
-              editor.getAction('actions.find')?.run();
+              // 使用正确的搜索动作ID
+              const findAction = editor.getAction('actions.find');
+              if (findAction) {
+                findAction.run();
+              } else {
+                // 备用方法：直接触发搜索
+                editor.trigger('keyboard', 'actions.find', null);
+              }
             }
           }}>
             <Search />

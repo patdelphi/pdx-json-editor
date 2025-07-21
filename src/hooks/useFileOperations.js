@@ -140,8 +140,7 @@ export const useFileOperations = ({
       // 保存到本地存储
       PersistenceService.saveEditorContent(fileInfo.content, fileInfo);
       
-      // 添加到文件历史记录
-      PersistenceService.addFileToHistory(fileInfo);
+      // 最近文件功能已移除
       
       onContentChange && onContentChange(fileInfo.content);
     } catch (error) {
@@ -170,8 +169,7 @@ export const useFileOperations = ({
       // 更新本地存储
       PersistenceService.saveEditorContent(currentFile.content, currentFile);
       
-      // 更新文件历史记录
-      PersistenceService.addFileToHistory(currentFile);
+      // 最近文件功能已移除
     } catch (error) {
       onError && onError(error);
     }
@@ -206,8 +204,7 @@ export const useFileOperations = ({
       // 更新本地存储
       PersistenceService.saveEditorContent(currentFile.content, updatedFile);
       
-      // 更新文件历史记录
-      PersistenceService.addFileToHistory(updatedFile);
+      // 最近文件功能已移除
     } catch (error) {
       onError && onError(error);
     }
