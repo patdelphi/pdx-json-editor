@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
 import { Box, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 import { Header } from '../components/Header';
-import { JsonEditor } from '../components/JsonEditor';
 import { TouchEnabledJsonEditor } from '../components/TouchEnabledJsonEditor';
 // SidePanel 已移除
 import { FileDropZone } from '../components/FileDropZone';

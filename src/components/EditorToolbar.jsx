@@ -47,22 +47,34 @@ export function EditorToolbar({
 }) {
   // 处理格式化按钮点击
   const handleFormat = () => {
+    console.log('格式化按钮点击');
     if (window.pdxJsonEditor && window.pdxJsonEditor.formatJson) {
+      console.log('调用 formatJson 函数');
       window.pdxJsonEditor.formatJson();
+    } else {
+      console.error('formatJson 函数不存在');
     }
   };
   
   // 处理压缩按钮点击
   const handleCompress = () => {
+    console.log('压缩按钮点击');
     if (window.pdxJsonEditor && window.pdxJsonEditor.compressJson) {
+      console.log('调用 compressJson 函数');
       window.pdxJsonEditor.compressJson();
+    } else {
+      console.error('compressJson 函数不存在');
     }
   };
   
   // 处理修复按钮点击
   const handleTryFix = () => {
+    console.log('修复按钮点击');
     if (window.pdxJsonEditor && window.pdxJsonEditor.tryFixJson) {
+      console.log('调用 tryFixJson 函数');
       window.pdxJsonEditor.tryFixJson();
+    } else {
+      console.error('tryFixJson 函数不存在');
     }
   };
   

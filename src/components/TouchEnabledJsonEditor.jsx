@@ -11,6 +11,7 @@ import { configureJsonLanguage, configureJsonFolding, getEditorOptions } from '.
 import { useJsonValidation } from '../hooks/useJsonValidation';
 import { useJsonEditor } from '../hooks/useJsonEditor';
 import { useJsonSchema } from '../hooks/useJsonSchema';
+import { formatJson, compressJson, tryFixJson } from '../services/jsonService';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useBreakpoint, useTouchDevice } from '../hooks/useResponsive';
 import { useSwipe, usePinch, useDoubleTap } from '../hooks/useGestures';
@@ -167,42 +168,63 @@ export function TouchEnabledJsonEditor({
   // 格式化JSON
   const handleFormat = useCallback(() => {
     try {
-      const formatted = formatJson();
+      // 直接使用当前编辑器的值进行格式化
+      const currentValue = value || '';
+      const formatted = formatJson(currentValue, indentSize);
+      
       if (externalOnChange) {
         externalOnChange(formatted);
+      } else {
+        setInternalValue(formatted);
       }
       showAlert('JSON已格式化', 'success');
     } catch (err) {
       showAlert(`格式化失败: ${err.message}`, 'error');
     }
-  }, [formatJson, externalOnChange]);
+  }, [value, indentSize, externalOnChange, setInternalValue]);
 
   // 压缩JSON
   const handleCompress = useCallback(() => {
     try {
-      const compressed = compressJson();
+      // 直接使用当前编辑器的值进行压缩
+      const currentValue = value || '';
+      const compressed = compressJson(currentValue);
+      
       if (externalOnChange) {
         externalOnChange(compressed);
+      } else {
+        setInternalValue(compressed);
       }
       showAlert('JSON已压缩', 'success');
     } catch (err) {
       showAlert(`压缩失败: ${err.message}`, 'error');
     }
-  }, [compressJson, externalOnChange]);
+  }, [value, externalOnChange, setInternalValue]);
 
   // 尝试修复JSON
   const handleTryFix = useCallback(() => {
-    const fixed = tryFixJson();
-    if (externalOnChange) {
-      externalOnChange(fixed);
+    try {
+      // 直接使用当前编辑器的值进行修复
+      const currentValue = value || '';
+      const fixed = tryFixJson(currentValue);
+      
+      if (externalOnChange) {
+        externalOnChange(fixed);
+      } else {
+        setInternalValue(fixed);
+      }
+      
+      // 检查修复是否成功
+      try {
+        JSON.parse(fixed);
+        showAlert('JSON已尝试修复', 'success');
+      } catch (parseErr) {
+        showAlert(`修复尝试: ${parseErr.message}`, 'warning');
+      }
+    } catch (err) {
+      showAlert(`修复失败: ${err.message}`, 'error');
     }
-    
-    if (jsonError) {
-      showAlert(`修复尝试: ${jsonError.message}`, 'warning');
-    } else {
-      showAlert('JSON已尝试修复', 'success');
-    }
-  }, [tryFixJson, jsonError, externalOnChange]);
+  }, [value, externalOnChange, setInternalValue]);
   
   // 处理自动检测Schema
   const handleAutoDetectSchema = useCallback(() => {

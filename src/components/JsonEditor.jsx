@@ -129,6 +129,70 @@ export function JsonEditor({
       window.pdxJsonEditor.saveOriginalContent(initialContent);
     }
     
+    // 直接设置格式化、压缩和修复功能
+    window.pdxJsonEditor = window.pdxJsonEditor || {};
+    
+    // 格式化JSON
+    window.pdxJsonEditor.formatJson = () => {
+      try {
+        const value = editor.getValue();
+        const formatted = formatJson(value, indentSize);
+        editor.setValue(formatted);
+        showAlert('JSON已格式化', 'success');
+        return true;
+      } catch (error) {
+        showAlert(`格式化失败: ${error.message}`, 'error');
+        return false;
+      }
+    };
+    
+    // 压缩JSON
+    window.pdxJsonEditor.compressJson = () => {
+      try {
+        const value = editor.getValue();
+        const compressed = compressJson(value);
+        editor.setValue(compressed);
+        showAlert('JSON已压缩', 'success');
+        return true;
+      } catch (error) {
+        showAlert(`压缩失败: ${error.message}`, 'error');
+        return false;
+      }
+    };
+    
+    // 尝试修复JSON
+    window.pdxJsonEditor.tryFixJson = () => {
+      try {
+        const value = editor.getValue();
+        const fixed = tryFixJson(value);
+        editor.setValue(fixed);
+        showAlert('JSON已尝试修复', 'success');
+        return true;
+      } catch (error) {
+        showAlert(`修复失败: ${error.message}`, 'error');
+        return false;
+      }
+    };
+    
+    // 添加编辑器命令
+    editor.addAction({
+      id: 'format-json',
+      label: '格式化JSON',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF
+      ],
+      run: window.pdxJsonEditor.formatJson
+    });
+    
+    editor.addAction({
+      id: 'compress-json',
+      label: '压缩JSON',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyM
+      ],
+      run: window.pdxJsonEditor.compressJson
+    });
+    
     // 尝试自动检测Schema（如果不是大文件）
     if (!performanceMode) {
       setTimeout(() => {
@@ -222,6 +286,7 @@ export function JsonEditor({
 
   // 显示提示信息
   const showAlert = (message, severity) => {
+    console.log(`显示提示: ${message} (${severity})`);
     setAlertMessage(message);
     setAlertSeverity(severity);
     setAlertOpen(true);
@@ -351,9 +416,14 @@ export function JsonEditor({
   // 暴露方法给父组件
   useEffect(() => {
     if (window.pdxJsonEditor) {
-      window.pdxJsonEditor.formatJson = handleFormat;
-      window.pdxJsonEditor.compressJson = handleCompress;
-      window.pdxJsonEditor.tryFixJson = handleTryFix;
+      // 保留可能已经在handleEditorDidMount中设置的格式化、压缩和修复功能
+      const existingFormatJson = window.pdxJsonEditor.formatJson;
+      const existingCompressJson = window.pdxJsonEditor.compressJson;
+      const existingTryFixJson = window.pdxJsonEditor.tryFixJson;
+      
+      window.pdxJsonEditor.formatJson = existingFormatJson || handleFormat;
+      window.pdxJsonEditor.compressJson = existingCompressJson || handleCompress;
+      window.pdxJsonEditor.tryFixJson = existingTryFixJson || handleTryFix;
       window.pdxJsonEditor.applySettings = applySettings;
       window.pdxJsonEditor.getCurrentContent = () => value;
       window.pdxJsonEditor.setContent = handleEditorChange;
@@ -371,6 +441,13 @@ export function JsonEditor({
         getMonacoRef: () => monacoRef.current
       };
     }
+    
+    // 添加调试日志
+    console.log('已设置全局编辑器功能:', {
+      formatJson: !!window.pdxJsonEditor.formatJson,
+      compressJson: !!window.pdxJsonEditor.compressJson,
+      tryFixJson: !!window.pdxJsonEditor.tryFixJson
+    });
     
     return () => {
       if (window.pdxJsonEditor) {
