@@ -1,118 +1,183 @@
-import { Box, Button, Divider, IconButton, Tooltip, useTheme } from '@mui/material';
-import FormatAlignLeftIcon from '@mui/icons-material/FormatAlignLeft';
-import CompressIcon from '@mui/icons-material/Compress';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-import SearchIcon from '@mui/icons-material/Search';
-import SettingsIcon from '@mui/icons-material/Settings';
-import UndoIcon from '@mui/icons-material/Undo';
-import RedoIcon from '@mui/icons-material/Redo';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import ContentPasteIcon from '@mui/icons-material/ContentPaste';
-import ContentCutIcon from '@mui/icons-material/ContentCut';
-import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
+import { Box, Button, Tooltip, IconButton, Divider } from '@mui/material';
+import {
+  FormatIndentIncrease,
+  CompressOutlined,
+  Healing,
+  Search,
+  Settings,
+  Compare,
+  UnfoldLess,
+  UnfoldMore,
+  Keyboard
+} from '@mui/icons-material';
+import { SchemaSelector } from './SchemaSelector';
 
-export function EditorToolbar({ onSearchClick, onSettingsClick, onDiffViewerClick }) {
-  const theme = useTheme();
+/**
+ * 编辑器工具栏组件
+ * 提供格式化、压缩、搜索等功能按钮
+ * 
+ * @param {Object} props - 组件属性
+ * @param {Function} props.onSearchClick - 搜索按钮点击处理函数
+ * @param {Function} props.onSettingsClick - 设置按钮点击处理函数
+ * @param {Function} props.onDiffViewerClick - 差异对比按钮点击处理函数
+ * @param {Function} props.onFoldAllClick - 折叠所有按钮点击处理函数
+ * @param {Function} props.onUnfoldAllClick - 展开所有按钮点击处理函数
+ * @param {Object[]} props.schemas - 可用的Schema列表
+ * @param {string|null} props.selectedSchemaId - 当前选中的Schema ID
+ * @param {Function} props.onSelectSchema - 选择Schema的回调函数
+ * @param {Function} props.onAddSchema - 添加Schema的回调函数
+ * @param {Function} props.onDeleteSchema - 删除Schema的回调函数
+ * @param {Function} props.onUpdateSchema - 更新Schema的回调函数
+ * @param {Function} props.onAutoDetectSchema - 自动检测Schema的回调函数
+ */
+export function EditorToolbar({ 
+  onSearchClick, 
+  onSettingsClick, 
+  onDiffViewerClick,
+  onFoldAllClick,
+  onUnfoldAllClick,
+  onKeyboardShortcutsClick,
+  schemas = [],
+  selectedSchemaId = null,
+  onSelectSchema = () => {},
+  onAddSchema = () => {},
+  onDeleteSchema = () => {},
+  onUpdateSchema = () => {},
+  onAutoDetectSchema = () => {}
+}) {
+  // 处理格式化按钮点击
+  const handleFormat = () => {
+    if (window.pdxJsonEditor && window.pdxJsonEditor.formatJson) {
+      window.pdxJsonEditor.formatJson();
+    }
+  };
+  
+  // 处理压缩按钮点击
+  const handleCompress = () => {
+    if (window.pdxJsonEditor && window.pdxJsonEditor.compressJson) {
+      window.pdxJsonEditor.compressJson();
+    }
+  };
+  
+  // 处理修复按钮点击
+  const handleTryFix = () => {
+    if (window.pdxJsonEditor && window.pdxJsonEditor.tryFixJson) {
+      window.pdxJsonEditor.tryFixJson();
+    }
+  };
   
   return (
-    <Box 
-      sx={{ 
-        display: 'flex', 
-        alignItems: 'center', 
-        padding: 1,
-        borderBottom: `1px solid ${theme.palette.divider}`,
-        overflowX: 'auto',
-        gap: 1
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '4px 8px',
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        backgroundColor: theme => theme.palette.mode === 'dark' ? '#1E1E1E' : '#F9FAFB',
+        overflowX: 'auto'
       }}
     >
-      <Tooltip title="撤销">
-        <IconButton size="small">
-          <UndoIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      {/* 格式化和压缩按钮组 */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Tooltip title="格式化 JSON (Ctrl+Shift+F)">
+          <Button
+            startIcon={<FormatIndentIncrease />}
+            size="small"
+            onClick={handleFormat}
+            sx={{ mr: 1 }}
+          >
+            格式化
+          </Button>
+        </Tooltip>
+        
+        <Tooltip title="压缩 JSON (Ctrl+Shift+M)">
+          <Button
+            startIcon={<CompressOutlined />}
+            size="small"
+            onClick={handleCompress}
+            sx={{ mr: 1 }}
+          >
+            压缩
+          </Button>
+        </Tooltip>
+        
+        <Tooltip title="尝试修复 JSON">
+          <Button
+            startIcon={<Healing />}
+            size="small"
+            onClick={handleTryFix}
+          >
+            修复
+          </Button>
+        </Tooltip>
+      </Box>
       
-      <Tooltip title="重做">
-        <IconButton size="small">
-          <RedoIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
       
-      <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
+      {/* Schema选择器 */}
+      <Box sx={{ flexGrow: 1 }}>
+        <SchemaSelector
+          schemas={schemas}
+          selectedSchemaId={selectedSchemaId}
+          onSelectSchema={onSelectSchema}
+          onAddSchema={onAddSchema}
+          onDeleteSchema={onDeleteSchema}
+          onUpdateSchema={onUpdateSchema}
+          onAutoDetect={onAutoDetectSchema}
+        />
+      </Box>
       
-      <Tooltip title="剪切">
-        <IconButton size="small">
-          <ContentCutIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      <Divider orientation="vertical" flexItem sx={{ mx: 2 }} />
       
-      <Tooltip title="复制">
-        <IconButton size="small">
-          <ContentCopyIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      {/* 折叠控制按钮组 */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+        <Tooltip title="折叠所有">
+          <IconButton size="small" onClick={onFoldAllClick}>
+            <UnfoldLess fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        
+        <Tooltip title="展开所有">
+          <IconButton size="small" onClick={onUnfoldAllClick}>
+            <UnfoldMore fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
       
-      <Tooltip title="粘贴">
-        <IconButton size="small">
-          <ContentPasteIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-      
-      <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-      
-      <Tooltip title="格式化 JSON">
-        <Button 
-          startIcon={<FormatAlignLeftIcon />} 
-          size="small" 
-          variant="outlined"
-          sx={{ minWidth: 'auto' }}
-        >
-          格式化
-        </Button>
-      </Tooltip>
-      
-      <Tooltip title="压缩 JSON">
-        <Button 
-          startIcon={<CompressIcon />} 
-          size="small" 
-          variant="outlined"
-          sx={{ minWidth: 'auto' }}
-        >
-          压缩
-        </Button>
-      </Tooltip>
-      
-      <Tooltip title="验证 JSON">
-        <Button 
-          startIcon={<CheckCircleOutlineIcon />} 
-          size="small" 
-          variant="outlined"
-          sx={{ minWidth: 'auto' }}
-        >
-          验证
-        </Button>
-      </Tooltip>
-      
-      <Divider orientation="vertical" flexItem sx={{ mx: 1 }} />
-      
-      <Tooltip title="差异对比">
-        <IconButton size="small" onClick={onDiffViewerClick}>
-          <CompareArrowsIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-      
-      <Tooltip title="搜索">
-        <IconButton size="small" onClick={onSearchClick}>
-          <SearchIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
-      
-      <Box sx={{ flexGrow: 1 }} />
-      
-      <Tooltip title="设置">
-        <IconButton size="small" onClick={onSettingsClick}>
-          <SettingsIcon fontSize="small" />
-        </IconButton>
-      </Tooltip>
+      {/* 工具按钮组 */}
+      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+        <Tooltip title="搜索 (Ctrl+F)">
+          <IconButton size="small" onClick={onSearchClick}>
+            <Search />
+          </IconButton>
+        </Tooltip>
+        
+        <Tooltip title="差异对比 (Ctrl+Alt+D)">
+          <Button
+            startIcon={<Compare />}
+            size="small"
+            onClick={onDiffViewerClick}
+            color="primary"
+            variant="outlined"
+            sx={{ mx: 1 }}
+          >
+            差异对比
+          </Button>
+        </Tooltip>
+        
+        <Tooltip title="设置">
+          <IconButton size="small" onClick={onSettingsClick}>
+            <Settings />
+          </IconButton>
+        </Tooltip>
+        
+        <Tooltip title="键盘快捷键 (?)">
+          <IconButton size="small" onClick={onKeyboardShortcutsClick}>
+            <Keyboard />
+          </IconButton>
+        </Tooltip>
+      </Box>
     </Box>
   );
 }

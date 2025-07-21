@@ -1,0 +1,102 @@
+/**
+ * 主题CSS变量
+ */
+
+:root {
+  /* 浅色主题默认变量 */
+  --background-color: #FFFFFF;
+  --text-color: #111827;
+  --primary-color: #3B82F6;
+  --secondary-color: #10B981;
+  --border-color: #E5E7EB;
+  --error-color: #EF4444;
+  --warning-color: #F59E0B;
+  --success-color: #10B981;
+  --hover-color: rgba(107, 114, 128, 0.08);
+  --selected-color: rgba(107, 114, 128, 0.16);
+  --disabled-color: rgba(107, 114, 128, 0.38);
+  
+  /* 动画时间 */
+  --transition-time: 0.3s;
+}
+
+/* 深色主题 */
+[data-theme='dark'] {
+  --background-color: #1F2937;
+  --text-color: #F9FAFB;
+  --primary-color: #60A5FA;
+  --secondary-color: #10B981;
+  --border-color: #374151;
+  --error-color: #EF4444;
+  --warning-color: #F59E0B;
+  --success-color: #10B981;
+  --hover-color: rgba(156, 163, 175, 0.08);
+  --selected-color: rgba(156, 163, 175, 0.16);
+  --disabled-color: rgba(156, 163, 175, 0.38);
+}
+
+/* 高对比度主题 */
+[data-theme='highContrast'] {
+  --background-color: #000000;
+  --text-color: #FFFFFF;
+  --primary-color: #FFFFFF;
+  --secondary-color: #FFFF00;
+  --border-color: #FFFFFF;
+  --error-color: #FF0000;
+  --warning-color: #FFFF00;
+  --success-color: #00FF00;
+  --hover-color: rgba(255, 255, 255, 0.2);
+  --selected-color: rgba(255, 255, 255, 0.4);
+  --disabled-color: rgba(255, 255, 255, 0.5);
+}
+
+/* 柔和主题 */
+[data-theme='soft'] {
+  --background-color: #F5F3FF;
+  --text-color: #1F2937;
+  --primary-color: #7C3AED;
+  --secondary-color: #EC4899;
+  --border-color: #E5E7EB;
+  --error-color: #EF4444;
+  --warning-color: #F59E0B;
+  --success-color: #10B981;
+  --hover-color: rgba(124, 58, 237, 0.08);
+  --selected-color: rgba(124, 58, 237, 0.16);
+  --disabled-color: rgba(124, 58, 237, 0.38);
+}
+
+/* 主题切换动画 */
+body {
+  transition: background-color var(--transition-time), color var(--transition-time);
+}
+
+/* 自定义组件样式 */
+.custom-button {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+.custom-input {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
+}
+
+/* 响应式主题 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --background-color: #1F2937;
+    --text-color: #F9FAFB;
+    --primary-color: #60A5FA;
+    --secondary-color: #10B981;
+    --border-color: #374151;
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --transition-time: 0s;
+  }
+}

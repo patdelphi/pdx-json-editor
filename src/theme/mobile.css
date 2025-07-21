@@ -1,0 +1,99 @@
+/**
+ * 移动端样式
+ */
+
+/* 移动设备上增加触控目标大小 */
+@media (max-width: 768px) {
+  /* 按钮增大点击区域 */
+  button, 
+  [role="button"],
+  .MuiIconButton-root,
+  .MuiButton-root {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* 输入框增大点击区域 */
+  input,
+  textarea,
+  select,
+  .MuiInputBase-root {
+    min-height: 44px;
+    font-size: 16px !important; /* 防止iOS缩放 */
+  }
+  
+  /* 增大菜单项点击区域 */
+  .MuiMenuItem-root {
+    min-height: 44px;
+  }
+  
+  /* 增大对话框按钮点击区域 */
+  .MuiDialogActions-root .MuiButton-root {
+    padding: 8px 16px;
+  }
+  
+  /* 移除悬停效果 */
+  .MuiButtonBase-root:hover {
+    background-color: transparent !important;
+  }
+  
+  /* 增大表单控件间距 */
+  .MuiFormControl-root + .MuiFormControl-root {
+    margin-top: 16px;
+  }
+  
+  /* 调整对话框内边距 */
+  .MuiDialogContent-root {
+    padding: 16px !important;
+  }
+  
+  /* 调整工具栏高度 */
+  .MuiToolbar-root.MuiToolbar-dense {
+    min-height: 56px;
+  }
+  
+  /* 调整抽屉宽度 */
+  .MuiDrawer-paper {
+    width: 85% !important;
+  }
+}
+
+/* 横屏模式优化 */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* 减小工具栏高度 */
+  .MuiToolbar-root.MuiToolbar-dense {
+    min-height: 48px;
+  }
+  
+  /* 调整对话框最大高度 */
+  .MuiDialog-paper {
+    max-height: 85vh;
+  }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) {
+  /* 增大滚动条宽度 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  /* 增大滚动条滑块 */
+  ::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+  }
+  
+  /* 移除悬停效果 */
+  *:hover {
+    outline: none !important;
+  }
+}
+
+/* 减少动画 */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001s !important;
+    transition-duration: 0.001s !important;
+  }
+}

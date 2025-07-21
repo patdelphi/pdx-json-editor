@@ -1,32 +1,29 @@
-import { useState, useEffect } from 'preact/hooks';
-import { createTheme, ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
-import { lightTheme, darkTheme } from '../theme';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material/styles';
+import { ThemeContextProvider, useTheme } from '../theme/ThemeContext.jsx';
 
+/**
+ * 主题提供者组件
+ * 提供主题状态和MUI主题提供者
+ */
 export function ThemeProvider({ children }) {
-  const [mode, setMode] = useState('light');
-  const theme = mode === 'light' ? lightTheme : darkTheme;
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem('themeMode');
-    if (savedMode) {
-      setMode(savedMode);
-    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setMode('dark');
-    }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem('themeMode', mode);
-  }, [mode]);
-
-  const toggleTheme = () => {
-    setMode(prevMode => prevMode === 'light' ? 'dark' : 'light');
-  };
-
-  const muiTheme = createTheme(theme);
-
   return (
-    <MuiThemeProvider theme={muiTheme}>
+    <ThemeContextProvider>
+      <ThemedContent>
+        {children}
+      </ThemedContent>
+    </ThemeContextProvider>
+  );
+}
+
+/**
+ * 主题内容组件
+ * 使用主题上下文提供MUI主题
+ */
+function ThemedContent({ children }) {
+  const { theme } = useTheme();
+  
+  return (
+    <MuiThemeProvider theme={theme}>
       {children}
     </MuiThemeProvider>
   );

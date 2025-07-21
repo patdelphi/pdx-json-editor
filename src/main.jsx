@@ -1,10 +1,6 @@
 import { render } from 'preact';
 import { App } from './App';
-import { ThemeProvider } from './components/ThemeProvider';
+import './theme/theme.css';
+import './theme/mobile.css';
 
-render(
-  <ThemeProvider>
-    <App />
-  </ThemeProvider>,
-  document.getElementById('app')
-);
+render(<App />, document.getElementById('app'));
