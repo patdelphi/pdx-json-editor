@@ -52,12 +52,20 @@ export const useSearch = (text, onTextChange) => {
     if (!text || !searchText) {
       setSearchResults([]);
       setCurrentMatchIndex(-1);
-      return;
+      return [];
     }
     
-    const results = searchInText(text, searchText, searchOptions);
-    setSearchResults(results);
-    setCurrentMatchIndex(results.length > 0 ? 0 : -1);
+    try {
+      const results = searchInText(text, searchText, searchOptions);
+      setSearchResults(results);
+      setCurrentMatchIndex(results.length > 0 ? 0 : -1);
+      return results;
+    } catch (error) {
+      console.error('搜索错误:', error);
+      setSearchResults([]);
+      setCurrentMatchIndex(-1);
+      return [];
+    }
   }, [text, searchText, searchOptions]);
   
   // 当搜索文本或选项变化时执行搜索
@@ -114,20 +122,30 @@ export const useSearch = (text, onTextChange) => {
   // 替换所有匹配项
   const replaceAll = useCallback(() => {
     if (searchResults.length === 0 || !onTextChange) {
-      return;
+      return 0;
     }
     
-    const { text: newText, replacedCount } = replaceInText(
-      text,
-      searchText,
-      replaceText,
-      searchOptions,
-      true
-    );
-    
-    onTextChange(newText);
-    
-    return replacedCount;
+    try {
+      const { text: newText, replacedCount } = replaceInText(
+        text,
+        searchText,
+        replaceText,
+        searchOptions,
+        true
+      );
+      
+      onTextChange(newText);
+      
+      // 重新执行搜索以更新匹配项
+      setTimeout(() => {
+        performSearch();
+      }, 0);
+      
+      return replacedCount;
+    } catch (error) {
+      console.error('替换错误:', error);
+      return 0;
+    }
   }, [text, searchText, replaceText, searchOptions, searchResults, onTextChange]);
   
   // 高亮当前匹配项

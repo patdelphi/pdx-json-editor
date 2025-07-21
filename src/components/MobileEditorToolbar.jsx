@@ -88,7 +88,14 @@ export function MobileEditorToolbar({
     { icon: <FormatIndentIncreaseIcon />, name: '格式化', onClick: handleFormat },
     { icon: <CompressOutlinedIcon />, name: '压缩', onClick: handleCompress },
     { icon: <HealingIcon />, name: '修复', onClick: handleTryFix },
-    { icon: <SearchIcon />, name: '搜索', onClick: () => { onSearchClick(); setSpeedDialOpen(false); } },
+    { icon: <SearchIcon />, name: '搜索', onClick: () => { 
+      // 触发Monaco编辑器的原生搜索功能
+      if (window.pdxJsonEditor?.getEditorRef?.()) {
+        const editor = window.pdxJsonEditor.getEditorRef();
+        editor.getAction('actions.find')?.run();
+      }
+      setSpeedDialOpen(false); 
+    } },
     { icon: <CompareIcon />, name: '差异对比', onClick: () => { onDiffViewerClick(); setSpeedDialOpen(false); } },
     { icon: <SchemaIcon />, name: 'Schema', onClick: () => { onSchemaClick(); setSpeedDialOpen(false); } }
   ];

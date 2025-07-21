@@ -148,7 +148,13 @@ export function EditorToolbar({
       {/* 工具按钮组 */}
       <Box sx={{ display: 'flex', alignItems: 'center' }}>
         <Tooltip title="搜索 (Ctrl+F)">
-          <IconButton size="small" onClick={onSearchClick}>
+          <IconButton size="small" onClick={() => {
+            // 触发Monaco编辑器的原生搜索功能
+            if (window.pdxJsonEditor?.getEditorRef?.()) {
+              const editor = window.pdxJsonEditor.getEditorRef();
+              editor.getAction('actions.find')?.run();
+            }
+          }}>
             <Search />
           </IconButton>
         </Tooltip>

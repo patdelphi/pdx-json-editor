@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'preact/hooks';
 import { CssBaseline, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import { ThemeProvider } from './components/ThemeProvider';
 import { MainLayout } from './layouts/MainLayout';
-import { SearchPanel } from './components/SearchPanel';
+
 import { SettingsDialog } from './components/SettingsDialog';
 import { FileDropZone } from './components/FileDropZone';
 import { ErrorDisplay } from './components/ErrorDisplay';
@@ -21,7 +21,7 @@ import {
 } from './components/design';
 
 export function App() {
-  const [searchOpen, setSearchOpen] = useState(false);
+
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [largeFileWarningOpen, setLargeFileWarningOpen] = useState(false);
   const [diffViewerOpen, setDiffViewerOpen] = useState(false);
@@ -115,9 +115,7 @@ export function App() {
     };
   }, []);
 
-  const toggleSearch = () => {
-    setSearchOpen(!searchOpen);
-  };
+
 
   const toggleSettings = () => {
     setSettingsOpen(!settingsOpen);
@@ -230,21 +228,13 @@ export function App() {
         <CssBaseline />
         <PageTransition type="fade">
           <MainLayout 
-            onSearchClick={toggleSearch}
             onSettingsClick={toggleSettings}
             onDiffViewerClick={toggleDiffViewer}
             onErrorClick={toggleErrorDialog}
           />
         </PageTransition>
         
-        <SearchPanel 
-          open={searchOpen} 
-          onClose={toggleSearch}
-          text={window.pdxJsonEditor?.getCurrentContent?.() || ''}
-          onTextChange={(newText) => window.pdxJsonEditor?.setContent?.(newText)}
-          editorRef={window.pdxJsonEditor?.getEditorRef?.()}
-          monacoRef={window.pdxJsonEditor?.getMonacoRef?.()}
-        />
+
         <SettingsDialog open={settingsOpen} onClose={toggleSettings} />
         <FileDropZone 
           onFileDrop={handleFileDrop} 

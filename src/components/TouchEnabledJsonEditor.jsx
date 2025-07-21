@@ -39,7 +39,6 @@ const DEFAULT_JSON = `{
 }`;
 
 export function TouchEnabledJsonEditor({ 
-  onSearchClick,
   onSettingsClick,
   onDiffViewerClick,
   value: externalValue,
@@ -274,7 +273,12 @@ export function TouchEnabledJsonEditor({
   const { showHelp, setShowHelp, toggleHelp } = useKeyboardShortcuts({
     format: handleFormat,
     compress: handleCompress,
-    search: onSearchClick,
+    search: () => {
+      // 触发Monaco编辑器的原生搜索功能
+      if (editorRef.current) {
+        editorRef.current.getAction('actions.find')?.run();
+      }
+    },
     save: () => window.pdxJsonEditor?.saveFile?.(),
     new: () => window.pdxJsonEditor?.newFile?.(),
     open: () => window.pdxJsonEditor?.openFile?.(),
@@ -476,7 +480,7 @@ export function TouchEnabledJsonEditor({
         <EditorToolbar 
           onFoldAllClick={handleFoldAll}
           onUnfoldAllClick={handleUnfoldAll}
-          onSearchClick={onSearchClick}
+
           onSettingsClick={onSettingsClick}
           onDiffViewerClick={onDiffViewerClick}
           onKeyboardShortcutsClick={toggleHelp}
@@ -494,7 +498,7 @@ export function TouchEnabledJsonEditor({
       <MobileEditorToolbar
         onFoldAllClick={handleFoldAll}
         onUnfoldAllClick={handleUnfoldAll}
-        onSearchClick={onSearchClick}
+
         onSettingsClick={onSettingsClick}
         onDiffViewerClick={onDiffViewerClick}
         onSchemaClick={handleSchemaDialogOpen}

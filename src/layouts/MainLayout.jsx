@@ -12,7 +12,6 @@ import { useFileOperations } from '../hooks/useFileOperations';
 import { useBeforeUnload } from '../hooks/useBeforeUnload';
 
 export function MainLayout({ 
-  onSearchClick,
   onSettingsClick,
   onDiffViewerClick,
   onErrorClick
@@ -214,7 +213,6 @@ export function MainLayout({
         sidebar={<SidePanel />}
         content={
           <TouchEnabledJsonEditor 
-            onSearchClick={onSearchClick}
             onSettingsClick={onSettingsClick}
             onDiffViewerClick={onDiffViewerClick}
             value={editorContent}
