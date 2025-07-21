@@ -108,6 +108,43 @@ export function TouchEnabledJsonEditor({
     validate(newValue);
   };
 
+  // 设置编辑器内容
+  const setEditorContent = useCallback((newContent) => {
+    if (editorRef.current) {
+      // 保存当前光标位置
+      const position = editorRef.current.getPosition();
+      
+      // 设置新内容
+      editorRef.current.setValue(newContent);
+      
+      // 尝试恢复光标位置（如果位置仍然有效）
+      try {
+        const model = editorRef.current.getModel();
+        const lineCount = model.getLineCount();
+        const lastLineLength = model.getLineLength(lineCount);
+        
+        if (position && position.lineNumber <= lineCount) {
+          const maxColumn = position.lineNumber === lineCount ? lastLineLength + 1 : model.getLineLength(position.lineNumber) + 1;
+          const newPosition = {
+            lineNumber: position.lineNumber,
+            column: Math.min(position.column, maxColumn)
+          };
+          editorRef.current.setPosition(newPosition);
+        }
+      } catch (err) {
+        // 如果恢复光标位置失败，忽略错误
+        console.warn('无法恢复光标位置:', err);
+      }
+    }
+    
+    // 同时更新React状态
+    if (externalOnChange) {
+      externalOnChange(newContent);
+    } else {
+      setInternalValue(newContent);
+    }
+  }, [externalOnChange, setInternalValue]);
+
   // 处理编辑器挂载
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
@@ -167,52 +204,60 @@ export function TouchEnabledJsonEditor({
 
   // 格式化JSON
   const handleFormat = useCallback(() => {
+    if (!editorRef.current) {
+      showAlert('编辑器未准备就绪', 'error');
+      return;
+    }
+    
     try {
-      // 直接使用当前编辑器的值进行格式化
-      const currentValue = value || '';
+      // 直接从Monaco编辑器获取当前值
+      const currentValue = editorRef.current.getValue();
       const formatted = formatJson(currentValue, indentSize);
       
-      if (externalOnChange) {
-        externalOnChange(formatted);
-      } else {
-        setInternalValue(formatted);
-      }
+      // 使用新的setEditorContent函数
+      setEditorContent(formatted);
+      
       showAlert('JSON已格式化', 'success');
     } catch (err) {
       showAlert(`格式化失败: ${err.message}`, 'error');
     }
-  }, [value, indentSize, externalOnChange, setInternalValue]);
+  }, [indentSize, setEditorContent]);
 
   // 压缩JSON
   const handleCompress = useCallback(() => {
+    if (!editorRef.current) {
+      showAlert('编辑器未准备就绪', 'error');
+      return;
+    }
+    
     try {
-      // 直接使用当前编辑器的值进行压缩
-      const currentValue = value || '';
+      // 直接从Monaco编辑器获取当前值
+      const currentValue = editorRef.current.getValue();
       const compressed = compressJson(currentValue);
       
-      if (externalOnChange) {
-        externalOnChange(compressed);
-      } else {
-        setInternalValue(compressed);
-      }
+      // 使用新的setEditorContent函数
+      setEditorContent(compressed);
+      
       showAlert('JSON已压缩', 'success');
     } catch (err) {
       showAlert(`压缩失败: ${err.message}`, 'error');
     }
-  }, [value, externalOnChange, setInternalValue]);
+  }, [setEditorContent]);
 
   // 尝试修复JSON
   const handleTryFix = useCallback(() => {
+    if (!editorRef.current) {
+      showAlert('编辑器未准备就绪', 'error');
+      return;
+    }
+    
     try {
-      // 直接使用当前编辑器的值进行修复
-      const currentValue = value || '';
+      // 直接从Monaco编辑器获取当前值
+      const currentValue = editorRef.current.getValue();
       const fixed = tryFixJson(currentValue);
       
-      if (externalOnChange) {
-        externalOnChange(fixed);
-      } else {
-        setInternalValue(fixed);
-      }
+      // 使用新的setEditorContent函数
+      setEditorContent(fixed);
       
       // 检查修复是否成功
       try {
@@ -224,7 +269,7 @@ export function TouchEnabledJsonEditor({
     } catch (err) {
       showAlert(`修复失败: ${err.message}`, 'error');
     }
-  }, [value, externalOnChange, setInternalValue]);
+  }, [setEditorContent]);
   
   // 处理自动检测Schema
   const handleAutoDetectSchema = useCallback(() => {
@@ -373,8 +418,8 @@ export function TouchEnabledJsonEditor({
       window.pdxJsonEditor.compressJson = handleCompress;
       window.pdxJsonEditor.tryFixJson = handleTryFix;
       window.pdxJsonEditor.applySettings = applySettings;
-      window.pdxJsonEditor.getCurrentContent = () => value;
-      window.pdxJsonEditor.setContent = handleEditorChange;
+      window.pdxJsonEditor.getCurrentContent = () => editorRef.current ? editorRef.current.getValue() : value;
+      window.pdxJsonEditor.setContent = setEditorContent;
       window.pdxJsonEditor.getEditorRef = () => editorRef.current;
       window.pdxJsonEditor.getMonacoRef = () => monacoRef.current;
     } else {
@@ -383,8 +428,8 @@ export function TouchEnabledJsonEditor({
         compressJson: handleCompress,
         tryFixJson: handleTryFix,
         applySettings: applySettings,
-        getCurrentContent: () => value,
-        setContent: handleEditorChange,
+        getCurrentContent: () => editorRef.current ? editorRef.current.getValue() : value,
+        setContent: setEditorContent,
         getEditorRef: () => editorRef.current,
         getMonacoRef: () => monacoRef.current
       };
@@ -402,7 +447,7 @@ export function TouchEnabledJsonEditor({
         delete window.pdxJsonEditor.getMonacoRef;
       }
     };
-  }, [handleFormat, handleCompress, handleTryFix, applySettings, value, handleEditorChange]);
+  }, [handleFormat, handleCompress, handleTryFix, applySettings, value, setEditorContent]);
   
   // 处理字体缩放
   const handleZoomIn = useCallback(() => {
