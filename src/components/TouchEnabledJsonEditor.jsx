@@ -41,7 +41,6 @@ const DEFAULT_JSON = `{
 
 export function TouchEnabledJsonEditor({ 
   onSettingsClick,
-  onDiffViewerClick,
   value: externalValue,
   onChange: externalOnChange,
   isLoading,
@@ -730,7 +729,6 @@ export function TouchEnabledJsonEditor({
           onUnfoldAllClick={handleUnfoldAll}
 
           onSettingsClick={onSettingsClick}
-          onDiffViewerClick={onDiffViewerClick}
           onKeyboardShortcutsClick={toggleHelp}
           schemas={schemas}
           selectedSchemaId={selectedSchemaId}
@@ -748,7 +746,6 @@ export function TouchEnabledJsonEditor({
         onUnfoldAllClick={handleUnfoldAll}
 
         onSettingsClick={onSettingsClick}
-        onDiffViewerClick={onDiffViewerClick}
         onSchemaClick={handleSchemaDialogOpen}
         onKeyboardShortcutsClick={toggleHelp}
       />

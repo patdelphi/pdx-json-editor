@@ -12,7 +12,6 @@ import { useBeforeUnload } from '../hooks/useBeforeUnload';
 
 export function MainLayout({ 
   onSettingsClick,
-  onDiffViewerClick,
   onErrorClick
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -244,7 +243,6 @@ export function MainLayout({
         content={
           <TouchEnabledJsonEditor 
             onSettingsClick={onSettingsClick}
-            onDiffViewerClick={onDiffViewerClick}
             value={editorContent}
             onChange={handleEditorContentChange}
             isLoading={isLoading}

@@ -33,7 +33,6 @@ import { useBreakpoint } from '../hooks/useResponsive';
  * @param {Function} props.onUnfoldAllClick - 展开所有按钮点击处理函数
  * @param {Function} props.onSearchClick - 搜索按钮点击处理函数
  * @param {Function} props.onSettingsClick - 设置按钮点击处理函数
- * @param {Function} props.onDiffViewerClick - 差异对比按钮点击处理函数
  * @param {Function} props.onSchemaClick - Schema按钮点击处理函数
  */
 export function MobileEditorToolbar({
@@ -41,7 +40,6 @@ export function MobileEditorToolbar({
   onUnfoldAllClick,
   onSearchClick,
   onSettingsClick,
-  onDiffViewerClick,
   onSchemaClick,
   onKeyboardShortcutsClick
 }) {
@@ -96,7 +94,7 @@ export function MobileEditorToolbar({
       }
       setSpeedDialOpen(false); 
     } },
-    { icon: <CompareIcon />, name: '差异对比', onClick: () => { onDiffViewerClick(); setSpeedDialOpen(false); } },
+
     { icon: <SchemaIcon />, name: 'Schema', onClick: () => { onSchemaClick(); setSpeedDialOpen(false); } }
   ];
   
@@ -180,12 +178,7 @@ export function MobileEditorToolbar({
           <ListItemText primary="设置" />
         </MenuItem>
         
-        <MenuItem onClick={() => { onDiffViewerClick(); handleMenuClose(); }}>
-          <ListItemIcon>
-            <CompareIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText primary="差异对比" />
-        </MenuItem>
+
         
         <MenuItem onClick={() => { onKeyboardShortcutsClick(); handleMenuClose(); }}>
           <ListItemIcon>

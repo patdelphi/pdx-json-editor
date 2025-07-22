@@ -278,7 +278,6 @@ export function App() {
         <PageTransition type="fade">
           <MainLayout 
             onSettingsClick={toggleSettings}
-            onDiffViewerClick={toggleDiffViewer}
             onErrorClick={toggleErrorDialog}
           />
         </PageTransition>

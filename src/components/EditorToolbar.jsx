@@ -19,7 +19,6 @@ import { SchemaSelector } from './SchemaSelector';
  * @param {Object} props - 组件属性
  * @param {Function} props.onSearchClick - 搜索按钮点击处理函数
  * @param {Function} props.onSettingsClick - 设置按钮点击处理函数
- * @param {Function} props.onDiffViewerClick - 差异对比按钮点击处理函数
  * @param {Function} props.onFoldAllClick - 折叠所有按钮点击处理函数
  * @param {Function} props.onUnfoldAllClick - 展开所有按钮点击处理函数
  * @param {Object[]} props.schemas - 可用的Schema列表
@@ -33,7 +32,6 @@ import { SchemaSelector } from './SchemaSelector';
 export function EditorToolbar({ 
   onSearchClick, 
   onSettingsClick, 
-  onDiffViewerClick,
   onFoldAllClick,
   onUnfoldAllClick,
   onKeyboardShortcutsClick,
@@ -178,18 +176,7 @@ export function EditorToolbar({
           </IconButton>
         </Tooltip>
         
-        <Tooltip title="差异对比 (Ctrl+Alt+D)">
-          <Button
-            startIcon={<Compare />}
-            size="small"
-            onClick={onDiffViewerClick}
-            color="primary"
-            variant="outlined"
-            sx={{ mx: 1 }}
-          >
-            差异对比
-          </Button>
-        </Tooltip>
+
         
         <Tooltip title="设置">
           <IconButton size="small" onClick={onSettingsClick}>
