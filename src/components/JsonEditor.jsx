@@ -54,6 +54,35 @@ export function JsonEditor({
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
   const [alertSeverity, setAlertSeverity] = useState('success');
+  // 编辑器字体大小
+  const [fontSize, setFontSize] = useState(14);
+  
+  // 显示提示信息
+  const showAlert = (message, severity) => {
+    setAlertMessage(message);
+    setAlertSeverity(severity);
+    setAlertOpen(true);
+  };
+  
+  // 增大字体大小
+  const increaseFontSize = useCallback(() => {
+    if (editorRef.current && monacoRef.current) {
+      const newSize = fontSize + 2;
+      setFontSize(newSize);
+      editorRef.current.updateOptions({ fontSize: newSize });
+      showAlert(`字体大小已增加到 ${newSize}px`, 'info');
+    }
+  }, [fontSize]);
+  
+  // 减小字体大小
+  const decreaseFontSize = useCallback(() => {
+    if (editorRef.current && monacoRef.current) {
+      const newSize = Math.max(8, fontSize - 2); // 最小不低于8px
+      setFontSize(newSize);
+      editorRef.current.updateOptions({ fontSize: newSize });
+      showAlert(`字体大小已减小到 ${newSize}px`, 'info');
+    }
+  }, [fontSize]);
   
   // 使用自定义Hooks
   const { 
@@ -100,6 +129,9 @@ export function JsonEditor({
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
     monacoRef.current = monaco;
+    
+    // 设置初始字体大小
+    editor.updateOptions({ fontSize });
     
     // 配置JSON语言支持
     configureJsonLanguage(monaco);
@@ -474,8 +506,8 @@ export function JsonEditor({
           onSettingsClick={onSettingsClick}
           onDiffViewerClick={onDiffViewerClick}
           onKeyboardShortcutsClick={toggleHelp}
-          onIncreaseFontSize={() => {}}
-          onDecreaseFontSize={() => {}}
+          onIncreaseFontSize={increaseFontSize}
+          onDecreaseFontSize={decreaseFontSize}
           schemas={schemas}
           selectedSchemaId={selectedSchemaId}
           onSelectSchema={setSelectedSchemaId}
