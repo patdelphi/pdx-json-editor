@@ -9,6 +9,7 @@ import { ErrorDisplay } from './components/ErrorDisplay';
 import { LargeFileWarning } from './components/LargeFileWarning';
 import { DiffViewer } from './components/DiffViewer';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { VersionInfo } from './components/VersionInfo';
 import errorService, { ErrorSeverity } from './services/errorService';
 
 // 导入设计系统组件
@@ -366,6 +367,9 @@ export function App() {
             </Alert>
           </FadeTransition>
         )}
+        
+        {/* 版本信息 */}
+        <VersionInfo />
       </ThemeProvider>
     </ErrorBoundary>
   );

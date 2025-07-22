@@ -8,6 +8,12 @@ export default defineConfig({
     ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/` 
     : '/',
   plugins: [preact()],
+  // 允许导入package.json
+  resolve: {
+    alias: {
+      '../../package.json': './package.json'
+    }
+  },
   server: {
     port: 5173,
     open: true
