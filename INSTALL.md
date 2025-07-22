@@ -2,9 +2,10 @@
 
 ## 系统要求
 
-- Node.js 16.0.0 或更高版本
-- npm 7.0.0 或更高版本
+- Node.js 18.0.0 或更高版本
+- npm 9.0.0 或更高版本
 - 现代浏览器（Chrome 60+、Firefox 60+、Safari 12+、Edge 79+）
+- 不再支持Internet Explorer
 
 ## 安装依赖
 
@@ -56,22 +57,23 @@ npm run test:performance
 
 ```bash
 npm install file-saver --save
-```## 最新变
-更
+```## 最新变更
 
-### 2023-07-21 更新
+### 2025-07-22 更新 (v2.0.0)
 
 项目进行了以下重要更新：
 
-1. **界面简化**：移除了侧边栏和最近文件功能，使界面更加简洁
-2. **错误修复**：修复了过渡组件中的错误
-3. **性能优化**：改进了应用性能和内存使用
+1. **性能优化**：大幅改进了大型JSON文件的处理性能和编辑器渲染速度
+2. **用户界面改进**：全新的深色主题支持和优化的工具栏布局
+3. **功能增强**：添加了JSON模式验证和键盘快捷键支持
+4. **技术升级**：升级到最新的Monaco Editor，使用Preact和Vite提高性能
+5. **测试完善**：添加了全面的单元测试、集成测试和性能测试套件
 
 ### 已知问题
 
-- 在某些移动设备上，触摸手势可能不够灵敏
-- 超大文件（>10MB）可能会导致性能问题
-- GitHub Actions 自动部署可能需要额外的权限配置
+- 超大文件（>20MB）可能仍会导致性能问题，建议使用性能模式
+- 某些复杂的JSON Schema验证可能会影响编辑器响应速度
+- 在低端移动设备上，复杂操作可能会有轻微延迟
 
 ## 部署指南
 
@@ -79,7 +81,9 @@ npm install file-saver --save
 
 ### 部署到 GitHub Pages
 
-使用 gh-pages 工具可以轻松部署到 GitHub Pages：
+项目已配置GitHub Actions自动部署工作流，每次推送到main分支时会自动部署到GitHub Pages。
+
+如果需要手动部署，可以使用以下方法：
 
 ```bash
 # 安装 gh-pages 工具
@@ -91,6 +95,13 @@ npm run build
 # 部署到 GitHub Pages
 npx gh-pages -d dist
 ```
+
+或者手动触发GitHub Actions工作流：
+
+1. 访问项目GitHub仓库
+2. 点击"Actions"标签
+3. 选择"Deploy to GitHub Pages"工作流
+4. 点击"Run workflow"按钮
 
 部署完成后，您的应用将可以通过 `https://<username>.github.io/<repository>/` 访问。
 
