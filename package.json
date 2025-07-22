@@ -1,6 +1,6 @@
 {
   "name": "pdx-json-editor",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "A lightweight JSON editor with Monaco Editor",
   "type": "module",
   "scripts": {
@@ -15,7 +15,6 @@
     "test:performance": "jest src/performance.test.js",
     "test:performance:browser": "node performance.js",
     "test:all": "node run-tests.js",
-    "deploy": "node deploy-gh-pages.js",
     "lint": "eslint src --ext js,jsx",
     "format": "prettier --write \"src/**/*.{js,jsx,css,scss}\""
   },
