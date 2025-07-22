@@ -98,18 +98,25 @@ export function App() {
     
     // 触发文件选择对话框
     const triggerFileOpen = () => {
-      // 通过自定义事件通知MainLayout组件打开文件选择对话框
-      window.dispatchEvent(new CustomEvent('triggerFileOpen'));
-      
-      // 同时尝试直接查找文件输入元素（备用方案）
-      setTimeout(() => {
-        const fileInput = document.querySelector('input[type="file"]');
-        if (fileInput) {
-          fileInput.click();
-        } else {
-          console.error('未找到文件输入元素');
-        }
-      }, 100);
+      // 检查是否支持文件系统访问API
+      if ('showOpenFilePicker' in window && window.pdxJsonEditor?.openFileWithPicker) {
+        // 使用文件系统访问API
+        window.pdxJsonEditor.openFileWithPicker();
+      } else {
+        // 回退到传统方式
+        // 通过自定义事件通知MainLayout组件打开文件选择对话框
+        window.dispatchEvent(new CustomEvent('triggerFileOpen'));
+        
+        // 同时尝试直接查找文件输入元素（备用方案）
+        setTimeout(() => {
+          const fileInput = document.querySelector('input[type="file"]');
+          if (fileInput) {
+            fileInput.click();
+          } else {
+            console.error('未找到文件输入元素');
+          }
+        }, 100);
+      }
     };
     
     // 设置当前文件
@@ -130,6 +137,14 @@ export function App() {
       window.pdxJsonEditor.triggerFileOpen = triggerFileOpen;
       window.pdxJsonEditor.setCurrentFile = setCurrentFile;
       
+      // 添加openFileWithPicker函数
+      if (!window.pdxJsonEditor.openFileWithPicker && window.showOpenFilePicker) {
+        window.pdxJsonEditor.openFileWithPicker = () => {
+          // 通过自定义事件通知MainLayout组件使用文件选择器API打开文件
+          window.dispatchEvent(new CustomEvent('useFilePickerAPI'));
+        };
+      }
+      
       // 如果没有定义openFileByPath函数，添加一个基本实现
       if (!window.pdxJsonEditor.openFileByPath) {
         window.pdxJsonEditor.openFileByPath = (filePath) => {
@@ -148,7 +163,12 @@ export function App() {
         openFileByPath: (filePath) => {
           console.log('尝试打开文件路径:', filePath);
           // 这里可以添加实际的文件打开逻辑，如果有文件系统API支持
-        }
+        },
+        // 添加openFileWithPicker函数
+        openFileWithPicker: window.showOpenFilePicker ? () => {
+          // 通过自定义事件通知MainLayout组件使用文件选择器API打开文件
+          window.dispatchEvent(new CustomEvent('useFilePickerAPI'));
+        } : undefined
       };
     }
     

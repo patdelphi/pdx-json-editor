@@ -6,11 +6,13 @@
 import { useState, useCallback, useEffect } from 'preact/hooks';
 import { 
   readFile, 
+  readFileWithPicker,
   saveFile, 
   createNewFile, 
   isJsonFile, 
   isLargeFile,
-  ensureJsonExtension
+  ensureJsonExtension,
+  isFileSystemAccessSupported
 } from '../services/fileService';
 import PersistenceService from '../services/persistenceService';
 import errorService from '../services/errorService';
@@ -151,6 +153,49 @@ export const useFileOperations = ({
   }, [onContentChange, onError, fileSizeLimit, onLargeFile]);
   
   /**
+   * 使用文件选择器打开文件
+   * @returns {Promise<void>}
+   */
+  const openFileWithPicker = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      // 使用文件服务打开文件
+      const result = await readFileWithPicker();
+      if (result) {
+        // 检查文件大小
+        const isLarge = isLargeFile(result.content);
+        // 更新当前文件信息
+        setCurrentFile({
+          name: result.name,
+          path: result.path,
+          content: result.content,
+          handle: result.handle,
+          directoryHandle: result.directoryHandle,
+          isLarge
+        });
+        // 更新原始内容，用于脏检查
+        setOriginalContent(result.content);
+        setIsDirty(false);
+        // 更新本地存储
+        PersistenceService.saveEditorContent(result.content, {
+          name: result.name,
+          path: result.path,
+          handle: result.handle,
+          directoryHandle: result.directoryHandle
+        });
+        // 如果是大文件，触发回调
+        if (isLarge && onLargeFile) {
+          onLargeFile(result.content, result.name);
+        }
+      }
+    } catch (error) {
+      onError && onError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [onError, onLargeFile]);
+  
+  /**
    * 保存当前文件
    * @returns {Promise<void>}
    */
@@ -161,16 +206,39 @@ export const useFileOperations = ({
     }
     
     try {
-      await saveFile(currentFile.content, currentFile.name);
+      // 传递当前文件的句柄，以便保存对话框可以打开在相同目录
+      const saveOptions = {
+        fileHandle: currentFile.handle,
+        directoryHandle: currentFile.directoryHandle
+      };
       
+      const saveResult = await saveFile(currentFile.content, currentFile.name, saveOptions);
+      
+      // 如果用户取消了保存操作，saveResult可能为undefined
+      if (!saveResult) return;
+      
+      // 更新文件信息
+      const updatedFile = {
+        ...currentFile,
+        name: saveResult.name,
+        path: saveResult.path,
+        handle: saveResult.handle,
+        directoryHandle: saveResult.directoryHandle
+      };
+      
+      setCurrentFile(updatedFile);
       setOriginalContent(currentFile.content);
       setIsDirty(false);
       
       // 更新本地存储
-      PersistenceService.saveEditorContent(currentFile.content, currentFile);
+      PersistenceService.saveEditorContent(currentFile.content, updatedFile);
       
       // 最近文件功能已移除
     } catch (error) {
+      // 如果是用户取消操作，不显示错误
+      if (error.message === '用户取消了保存操作') {
+        return;
+      }
       onError && onError(error);
     }
   }, [currentFile, onError]);
@@ -189,12 +257,24 @@ export const useFileOperations = ({
     const safeFilename = ensureJsonExtension(filename);
     
     try {
-      await saveFile(currentFile.content, safeFilename);
+      // 传递当前文件的句柄，以便保存对话框可以打开在相同目录
+      const saveOptions = {
+        fileHandle: currentFile.handle,
+        directoryHandle: currentFile.directoryHandle
+      };
+      
+      const saveResult = await saveFile(currentFile.content, safeFilename, saveOptions);
+      
+      // 如果用户取消了保存操作，saveResult可能为undefined
+      if (!saveResult) return;
       
       // 更新当前文件信息
       const updatedFile = {
         ...currentFile,
-        name: safeFilename
+        name: saveResult.name,
+        path: saveResult.path,
+        handle: saveResult.handle,
+        directoryHandle: saveResult.directoryHandle
       };
       
       setCurrentFile(updatedFile);
@@ -206,6 +286,10 @@ export const useFileOperations = ({
       
       // 最近文件功能已移除
     } catch (error) {
+      // 如果是用户取消操作，不显示错误
+      if (error.message === '用户取消了保存操作') {
+        return;
+      }
       onError && onError(error);
     }
   }, [currentFile, onError]);
@@ -285,6 +369,7 @@ export const useFileOperations = ({
     isDirty,
     isLoading,
     openFile,
+    openFileWithPicker,
     saveCurrentFile,
     saveAs,
     createNew,
@@ -292,6 +377,7 @@ export const useFileOperations = ({
     checkLargeFile,
     isLargeFile: isCurrentFileLarge,
     clearStorage,
-    loadFromStorage
+    loadFromStorage,
+    isFileSystemAccessSupported: isFileSystemAccessSupported()
   };
 };
