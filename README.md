@@ -2,6 +2,10 @@
 
 一个轻量级、高性能的JSON编辑器，基于Monaco Editor构建，提供类似VS Code的编辑体验。
 
+## 在线演示
+
+访问 [https://patdelphi.github.io/pdx-json-editor/](https://patdelphi.github.io/pdx-json-editor/) 体验最新版本。
+
 ## 特性
 
 - 🚀 **高性能**：优化的大文件处理能力，流畅编辑体验
@@ -15,6 +19,7 @@
 - 📂 **文件操作**：打开、保存、新建文件
 - 📋 **拖放支持**：拖放文件到编辑器中打开
 - 🔄 **JSON Schema**：支持JSON Schema验证和自动完成
+- 🔠 **字体调整**：支持动态调整编辑器字体大小
 
 
 ## 快速开始

@@ -2,8 +2,8 @@
 
 ## 系统要求
 
-- Node.js 14.0.0 或更高版本
-- npm 6.0.0 或更高版本
+- Node.js 16.0.0 或更高版本
+- npm 7.0.0 或更高版本
 - 现代浏览器（Chrome 60+、Firefox 60+、Safari 12+、Edge 79+）
 
 ## 安装依赖
@@ -71,10 +71,28 @@ npm install file-saver --save
 
 - 在某些移动设备上，触摸手势可能不够灵敏
 - 超大文件（>10MB）可能会导致性能问题
+- GitHub Actions 自动部署可能需要额外的权限配置
 
 ## 部署指南
 
 构建完成后，您可以将 `dist` 目录中的文件部署到任何静态文件服务器上。例如：
+
+### 部署到 GitHub Pages
+
+使用 gh-pages 工具可以轻松部署到 GitHub Pages：
+
+```bash
+# 安装 gh-pages 工具
+npm install --save-dev gh-pages
+
+# 构建项目
+npm run build
+
+# 部署到 GitHub Pages
+npx gh-pages -d dist
+```
+
+部署完成后，您的应用将可以通过 `https://<username>.github.io/<repository>/` 访问。
 
 ### 使用 Nginx
 
