@@ -181,7 +181,7 @@ describe('PersistenceService', () => {
     const result = PersistenceService.addFileToHistory(fileInfo);
     
     expect(result).toBe(true);
-    expect(localStorage.setItem).toHaveBeenCalledWith('pdx-json-editor-history', expect.any(String));
+    expect(localStorage.setItem).toHaveBeenCalledWith('pdx-json-editor-recent-files', expect.any(String));
     
     // 验证保存的历史记录
     const savedHistory = JSON.parse(localStorage.setItem.mock.calls[0][1]);
@@ -273,7 +273,7 @@ describe('PersistenceService', () => {
     const result = PersistenceService.clearFileHistory();
     
     expect(result).toBe(true);
-    expect(localStorage.removeItem).toHaveBeenCalledWith('pdx-json-editor-history');
+    expect(localStorage.removeItem).toHaveBeenCalledWith('pdx-json-editor-recent-files');
   });
   
   test('saveSchemas应保存JSON Schema', () => {

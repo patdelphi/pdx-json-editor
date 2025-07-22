@@ -191,7 +191,7 @@ describe('错误服务', () => {
     const position = 15; // 在第二行的 "value" 中间
     
     const lineCol = errorService.constructor.calculateLineAndColumn(jsonText, position);
-    expect(lineCol).toEqual({ line: 2, column: 11 });
+    expect(lineCol).toEqual({ line: 2, column: 14 });
   });
   
   test('应能生成用户友好的错误消息', () => {

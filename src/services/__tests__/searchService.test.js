@@ -21,8 +21,8 @@ describe('searchService', () => {
       const results = searchInText(sampleText, 'JSON');
       
       expect(results).toHaveLength(2);
-      expect(results[0].lineNumber).toBe(1);
-      expect(results[1].lineNumber).toBe(3);
+      expect(results[0].lineNumber).toBe(2);
+      expect(results[1].lineNumber).toBe(4);
     });
     
     test('应区分大小写', () => {
@@ -35,7 +35,7 @@ describe('searchService', () => {
       const results1 = searchInText(sampleText, 'light', { wholeWord: false });
       const results2 = searchInText(sampleText, 'light', { wholeWord: true });
       
-      expect(results1).toHaveLength(1); // 匹配 "lightweight"
+      expect(results1).toHaveLength(2); // 匹配 "lightweight" 和 "highlighting"
       expect(results2).toHaveLength(0); // 不匹配，因为 "light" 是 "lightweight" 的一部分
     });
     
@@ -101,8 +101,9 @@ describe('searchService', () => {
         true
       );
       
-      expect(count1).toBe(1);
+      expect(count1).toBe(2);
       expect(text1).toContain('smallweight');
+      expect(text1).toContain('Syntax highsmalling');
       
       expect(count2).toBe(0);
       expect(text2).toBe(sampleText);

@@ -282,4 +282,13 @@ describe('集成测试', () => {
     // 渲染应用
     render(<App />);
     
-    // 等待
+    // 等待组件挂载
+    await new Promise(resolve => setTimeout(resolve, 100));    
+// 模拟点击打开按钮
+    const openButton = screen.getByLabelText('打开');
+    fireEvent.click(openButton);
+    
+    // 验证是否调用了openFile方法
+    expect(window.pdxJsonEditor.openFile).toHaveBeenCalled();
+  });
+});
