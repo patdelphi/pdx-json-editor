@@ -727,9 +727,10 @@ export function TouchEnabledJsonEditor({
         <EditorToolbar 
           onFoldAllClick={handleFoldAll}
           onUnfoldAllClick={handleUnfoldAll}
-
           onSettingsClick={onSettingsClick}
           onKeyboardShortcutsClick={toggleHelp}
+          onIncreaseFontSize={() => {}}
+          onDecreaseFontSize={() => {}}
           schemas={schemas}
           selectedSchemaId={selectedSchemaId}
           onSelectSchema={setSelectedSchemaId}

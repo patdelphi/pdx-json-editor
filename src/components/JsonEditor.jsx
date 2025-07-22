@@ -474,6 +474,8 @@ export function JsonEditor({
           onSettingsClick={onSettingsClick}
           onDiffViewerClick={onDiffViewerClick}
           onKeyboardShortcutsClick={toggleHelp}
+          onIncreaseFontSize={() => {}}
+          onDecreaseFontSize={() => {}}
           schemas={schemas}
           selectedSchemaId={selectedSchemaId}
           onSelectSchema={setSelectedSchemaId}

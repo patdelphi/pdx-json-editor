@@ -157,7 +157,7 @@ export function SchemaSelector({
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <FormControl size="small" sx={{ minWidth: 200, flexGrow: 1 }}>
+      <FormControl size="small" sx={{ minWidth: 150, width: '50%' }}>
         <InputLabel id="schema-select-label">JSON Schema</InputLabel>
         <Select
           labelId="schema-select-label"

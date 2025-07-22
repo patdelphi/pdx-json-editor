@@ -8,7 +8,9 @@ import {
   Compare,
   UnfoldLess,
   UnfoldMore,
-  Keyboard
+  Keyboard,
+  ZoomIn,
+  ZoomOut
 } from '@mui/icons-material';
 import { SchemaSelector } from './SchemaSelector';
 
@@ -21,6 +23,8 @@ import { SchemaSelector } from './SchemaSelector';
  * @param {Function} props.onSettingsClick - 设置按钮点击处理函数
  * @param {Function} props.onFoldAllClick - 折叠所有按钮点击处理函数
  * @param {Function} props.onUnfoldAllClick - 展开所有按钮点击处理函数
+ * @param {Function} props.onIncreaseFontSize - 增大字体按钮点击处理函数
+ * @param {Function} props.onDecreaseFontSize - 减小字体按钮点击处理函数
  * @param {Object[]} props.schemas - 可用的Schema列表
  * @param {string|null} props.selectedSchemaId - 当前选中的Schema ID
  * @param {Function} props.onSelectSchema - 选择Schema的回调函数
@@ -35,6 +39,8 @@ export function EditorToolbar({
   onFoldAllClick,
   onUnfoldAllClick,
   onKeyboardShortcutsClick,
+  onIncreaseFontSize = () => {},
+  onDecreaseFontSize = () => {},
   schemas = [],
   selectedSchemaId = null,
   onSelectSchema = () => {},
@@ -151,6 +157,21 @@ export function EditorToolbar({
         <Tooltip title="展开所有">
           <IconButton size="small" onClick={onUnfoldAllClick}>
             <UnfoldMore fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      
+      {/* 字体大小调整按钮 */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+        <Tooltip title="增大字体">
+          <IconButton size="small" onClick={onIncreaseFontSize}>
+            <ZoomIn fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        
+        <Tooltip title="减小字体">
+          <IconButton size="small" onClick={onDecreaseFontSize}>
+            <ZoomOut fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
