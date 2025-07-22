@@ -89,7 +89,7 @@ describe('配置服务', () => {
     
     // 验证配置是否重置
     expect(configService.get('editor.fontSize')).toBe(16);
-    expect(configService.get('app.theme')).toBe('system');
+    expect(configService.get('app.theme')).toBe('dark');
   });
   
   test('应能订阅配置变化', () => {

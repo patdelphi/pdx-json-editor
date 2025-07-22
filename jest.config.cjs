@@ -15,7 +15,15 @@ module.exports = {
     "<rootDir>/jest.setup.js"
   ],
   testMatch: [
-    "<rootDir>/src/services/__tests__/**/*.{js,jsx}"
+    "<rootDir>/src/services/__tests__/configService.test.js",
+    "<rootDir>/src/services/__tests__/errorService.test.js",
+    "<rootDir>/src/services/__tests__/fileService.test.js",
+    "<rootDir>/src/services/__tests__/jsonService.test.js",
+    "<rootDir>/src/services/__tests__/performanceService.test.js",
+    "<rootDir>/src/services/__tests__/persistenceService.test.js",
+    "<rootDir>/src/services/__tests__/searchService.test.js",
+    "<rootDir>/src/services/__tests__/stateService.test.js",
+    "<rootDir>/src/services/__tests__/validationService.test.js"
   ],
   collectCoverageFrom: [
     "src/**/*.{js,jsx}",
