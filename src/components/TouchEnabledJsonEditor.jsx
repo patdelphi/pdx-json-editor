@@ -77,7 +77,7 @@ export function TouchEnabledJsonEditor({
     indentSize, 
     setIndentSize, 
     error: jsonError 
-  } = useJsonEditor(externalValue || DEFAULT_JSON);
+  } = useJsonEditor(externalValue !== undefined ? externalValue : '');
   
   // 使用外部值或内部值
   const value = externalValue !== undefined ? externalValue : internalValue;
@@ -174,6 +174,34 @@ export function TouchEnabledJsonEditor({
       });
     });
     
+    // 监听内容变化，实时验证
+    editor.onDidChangeModelContent(() => {
+      const content = editor.getValue();
+      validate(content);
+    });
+    
+    // 配置错误高亮样式
+    const styleElement = document.getElementById('json-error-styles');
+    if (!styleElement) {
+      const style = document.createElement('style');
+      style.id = 'json-error-styles';
+      style.innerHTML = `
+        .json-error-line {
+          background-color: rgba(255, 0, 0, 0.1);
+          border-left: 3px solid red;
+        }
+        .json-error-glyph {
+          background-color: red;
+          border-radius: 50%;
+          margin-left: 5px;
+        }
+        .json-error-inline {
+          text-decoration: wavy underline red;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+    
     // 尝试自动检测Schema（如果不是大文件）
     if (!performanceMode) {
       setTimeout(() => {
@@ -206,45 +234,91 @@ export function TouchEnabledJsonEditor({
 
   // 格式化JSON
   const handleFormat = useCallback(() => {
-    if (!editorRef.current) {
+    if (!editorRef.current || !monacoRef.current) {
       showAlert('编辑器未准备就绪', 'error');
       return;
     }
     
     try {
-      // 直接从Monaco编辑器获取当前值
-      const currentValue = editorRef.current.getValue();
-      const formatted = formatJson(currentValue, indentSize);
-      
-      // 使用新的setEditorContent函数
-      setEditorContent(formatted);
-      
-      showAlert('JSON已格式化', 'success');
+      // 使用Monaco编辑器的内置格式化功能
+      const formatAction = editorRef.current.getAction('editor.action.formatDocument');
+      if (formatAction) {
+        formatAction.run().then(() => {
+          showAlert('JSON已格式化', 'success');
+        }).catch(err => {
+          showAlert(`格式化失败: ${err.message}`, 'error');
+        });
+      } else {
+        // 如果找不到内置格式化动作，显示错误
+        showAlert('无法找到格式化功能', 'error');
+      }
     } catch (err) {
       showAlert(`格式化失败: ${err.message}`, 'error');
     }
-  }, [indentSize, setEditorContent]);
+  }, []);
 
-  // 压缩JSON
+  // 压缩JSON - 使用Monaco编辑器的内置功能
   const handleCompress = useCallback(() => {
-    if (!editorRef.current) {
+    if (!editorRef.current || !monacoRef.current) {
       showAlert('编辑器未准备就绪', 'error');
       return;
     }
     
     try {
-      // 直接从Monaco编辑器获取当前值
-      const currentValue = editorRef.current.getValue();
-      const compressed = compressJson(currentValue);
+      // 获取当前编辑器模型
+      const model = editorRef.current.getModel();
+      if (!model) {
+        showAlert('无法获取编辑器模型', 'error');
+        return;
+      }
       
-      // 使用新的setEditorContent函数
-      setEditorContent(compressed);
+      // 获取当前文本
+      const text = model.getValue();
+      
+      // 验证JSON是否有效
+      try {
+        JSON.parse(text);
+      } catch (parseErr) {
+        showAlert(`无法压缩无效的JSON: ${parseErr.message}`, 'error');
+        return;
+      }
+      
+      // 使用Monaco的编辑操作来压缩JSON
+      // 这种方法不会改变内容，只会移除空白字符
+      const edits = [];
+      const lineCount = model.getLineCount();
+      
+      // 创建一个编辑操作，替换整个文本
+      // 使用正则表达式移除不必要的空白字符
+      const compressedText = text
+        // 移除行注释
+        .replace(/\/\/.*$/gm, '')
+        // 移除块注释
+        .replace(/\/\*[\s\S]*?\*\//g, '')
+        // 移除行首和行尾的空白
+        .replace(/^\s+|\s+$/gm, '')
+        // 移除冒号后的空白
+        .replace(/:\s+/g, ':')
+        // 移除逗号后的空白
+        .replace(/,\s+/g, ',')
+        // 移除大括号和方括号周围的空白
+        .replace(/\{\s+/g, '{')
+        .replace(/\s+\}/g, '}')
+        .replace(/\[\s+/g, '[')
+        .replace(/\s+\]/g, ']');
+      
+      // 应用编辑操作
+      editorRef.current.executeEdits('compress', [{
+        range: model.getFullModelRange(),
+        text: compressedText,
+        forceMoveMarkers: true
+      }]);
       
       showAlert('JSON已压缩', 'success');
     } catch (err) {
       showAlert(`压缩失败: ${err.message}`, 'error');
     }
-  }, [setEditorContent]);
+  }, []);
 
   // 尝试修复JSON
   const handleTryFix = useCallback(() => {
@@ -256,22 +330,56 @@ export function TouchEnabledJsonEditor({
     try {
       // 直接从Monaco编辑器获取当前值
       const currentValue = editorRef.current.getValue();
-      const fixed = tryFixJson(currentValue);
       
-      // 使用新的setEditorContent函数
-      setEditorContent(fixed);
+      // 如果当前值为空，不进行修复
+      if (!currentValue || currentValue.trim() === '') {
+        showAlert('无内容可修复', 'warning');
+        return;
+      }
       
-      // 检查修复是否成功
+      // 尝试修复JSON
       try {
-        JSON.parse(fixed);
-        showAlert('JSON已尝试修复', 'success');
+        // 首先尝试解析，如果成功则不需要修复
+        JSON.parse(currentValue);
+        showAlert('JSON已经是有效的，无需修复', 'info');
+        return;
       } catch (parseErr) {
-        showAlert(`修复尝试: ${parseErr.message}`, 'warning');
+        // 如果解析失败，尝试修复
+        const model = editorRef.current.getModel();
+        if (!model) {
+          showAlert('无法获取编辑器模型', 'error');
+          return;
+        }
+        
+        // 使用tryFixJson函数尝试修复
+        const fixed = tryFixJson(currentValue);
+        
+        // 检查修复是否成功且与原始内容不同
+        try {
+          JSON.parse(fixed);
+          
+          // 只有当修复后的内容与原始内容不同时才应用更改
+          if (fixed !== currentValue) {
+            // 应用编辑操作
+            editorRef.current.executeEdits('fix', [{
+              range: model.getFullModelRange(),
+              text: fixed,
+              forceMoveMarkers: true
+            }]);
+            
+            showAlert('JSON已尝试修复', 'success');
+          } else {
+            showAlert('JSON无法自动修复，请手动检查语法错误', 'warning');
+          }
+        } catch (fixErr) {
+          // 如果修复失败，不进行任何更改
+          showAlert(`无法自动修复JSON: ${fixErr.message}`, 'warning');
+        }
       }
     } catch (err) {
       showAlert(`修复失败: ${err.message}`, 'error');
     }
-  }, [setEditorContent]);
+  }, []);
   
   // 处理自动检测Schema
   const handleAutoDetectSchema = useCallback(() => {
@@ -306,10 +414,71 @@ export function TouchEnabledJsonEditor({
     setAlertOpen(false);
   };
 
-  // 当错误变化时更新编辑器标记
+  // 当错误变化时更新编辑器标记和装饰器
   useEffect(() => {
     if (monacoRef.current && editorRef.current) {
-      setModelMarkers(monacoRef.current, editorRef.current.getModel());
+      const monaco = monacoRef.current;
+      const editor = editorRef.current;
+      const model = editor.getModel();
+      
+      // 设置错误标记
+      setModelMarkers(monaco, model);
+      
+      // 添加自定义错误行装饰器
+      if (errors.length > 0) {
+        // 创建错误行的装饰器
+        const errorLineDecorations = errors.map(error => ({
+          range: new monaco.Range(
+            error.line,
+            1,
+            error.line,
+            model.getLineLength(error.line) + 1
+          ),
+          options: {
+            isWholeLine: true,
+            className: 'json-error-line',
+            glyphMarginClassName: 'json-error-glyph',
+            overviewRuler: {
+              color: 'red',
+              position: monaco.editor.OverviewRulerLane.Right
+            },
+            minimap: {
+              color: 'red',
+              position: monaco.editor.MinimapPosition.Inline
+            },
+            // 添加波浪线下划线
+            inlineClassName: 'json-error-inline'
+          }
+        }));
+        
+        // 应用装饰器
+        editor.deltaDecorations([], errorLineDecorations);
+        
+        // 添加CSS样式
+        const styleElement = document.getElementById('json-error-styles');
+        if (!styleElement) {
+          const style = document.createElement('style');
+          style.id = 'json-error-styles';
+          style.innerHTML = `
+            .json-error-line {
+              background-color: rgba(255, 0, 0, 0.1);
+              border-left: 3px solid red;
+            }
+            .json-error-glyph {
+              background-color: red;
+              border-radius: 50%;
+              margin-left: 5px;
+            }
+            .json-error-inline {
+              text-decoration: wavy underline red;
+            }
+          `;
+          document.head.appendChild(style);
+        }
+      } else {
+        // 如果没有错误，清除所有装饰器
+        editor.deltaDecorations([], []);
+      }
     }
   }, [errors, setModelMarkers]);
 
@@ -415,20 +584,30 @@ export function TouchEnabledJsonEditor({
   
   // 暴露方法给父组件
   useEffect(() => {
+    // 创建一个安全的tryFixJson包装函数，确保不会修改为默认文本
+    const safeTryFixJson = () => {
+      // 只有当编辑器已初始化时才执行修复
+      if (editorRef.current) {
+        handleTryFix();
+      } else {
+        console.warn('编辑器未准备就绪，无法执行修复操作');
+      }
+    };
+    
     if (window.pdxJsonEditor) {
       window.pdxJsonEditor.formatJson = handleFormat;
       window.pdxJsonEditor.compressJson = handleCompress;
-      window.pdxJsonEditor.tryFixJson = handleTryFix;
+      window.pdxJsonEditor.tryFixJson = safeTryFixJson;
       window.pdxJsonEditor.applySettings = applySettings;
       window.pdxJsonEditor.getCurrentContent = () => editorRef.current ? editorRef.current.getValue() : value;
-      window.pdxJsonEditor.setContent = setContent;
+      window.pdxJsonEditor.setContent = setEditorContent;
       window.pdxJsonEditor.getEditorRef = () => editorRef.current;
       window.pdxJsonEditor.getMonacoRef = () => monacoRef.current;
     } else {
       window.pdxJsonEditor = {
         formatJson: handleFormat,
         compressJson: handleCompress,
-        tryFixJson: handleTryFix,
+        tryFixJson: safeTryFixJson,
         applySettings: applySettings,
         getCurrentContent: () => editorRef.current ? editorRef.current.getValue() : value,
         setContent: setEditorContent,
@@ -607,8 +786,8 @@ export function TouchEnabledJsonEditor({
         <Editor
           height="100%"
           defaultLanguage="json"
-          defaultValue={DEFAULT_JSON}
-          value={value}
+          defaultValue={externalValue === undefined ? DEFAULT_JSON : externalValue}
+          value={value || (externalValue === undefined ? DEFAULT_JSON : externalValue)}
           onChange={handleEditorChange}
           theme={monacoTheme}
           options={getEditorOptions(

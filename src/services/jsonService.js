@@ -16,7 +16,12 @@ export const formatJson = (jsonString, indentSize = 2) => {
   }
   
   try {
+    // 首先验证JSON是否有效
     const parsed = JSON.parse(jsonString);
+    
+    // 使用JSON.stringify进行格式化
+    // 注意：这可能会改变一些值的表示形式，比如数字、布尔值和null
+    // 但这是标准的JSON格式化行为
     return JSON.stringify(parsed, null, indentSize);
   } catch (error) {
     throw new Error(`无法格式化无效的JSON: ${error.message}`);
@@ -35,8 +40,45 @@ export const compressJson = (jsonString) => {
   }
   
   try {
-    const parsed = JSON.parse(jsonString);
-    return JSON.stringify(parsed);
+    // 首先验证JSON是否有效
+    JSON.parse(jsonString);
+    
+    // 使用更安全的方法压缩JSON
+    // 这个方法会保留所有原始内容，只移除不必要的空白字符
+    let inString = false;  // 是否在字符串内
+    let escaped = false;   // 是否转义
+    let compressed = '';   // 压缩后的结果
+    
+    // 逐字符处理
+    for (let i = 0; i < jsonString.length; i++) {
+      const char = jsonString[i];
+      
+      // 处理字符串内的字符
+      if (inString) {
+        compressed += char;
+        if (escaped) {
+          escaped = false;  // 重置转义状态
+        } else if (char === '\\') {
+          escaped = true;   // 设置转义状态
+        } else if (char === '"') {
+          inString = false; // 字符串结束
+        }
+        continue;
+      }
+      
+      // 处理字符串外的字符
+      if (char === '"') {
+        inString = true;    // 字符串开始
+        compressed += char;
+      } else if (/\s/.test(char)) {
+        // 忽略字符串外的空白字符
+        continue;
+      } else {
+        compressed += char;
+      }
+    }
+    
+    return compressed;
   } catch (error) {
     throw new Error(`无法压缩无效的JSON: ${error.message}`);
   }
@@ -49,7 +91,15 @@ export const compressJson = (jsonString) => {
  */
 export const tryFixJson = (jsonString) => {
   if (!jsonString || jsonString.trim() === '') {
-    return '';
+    return jsonString; // 返回原始字符串，而不是空字符串
+  }
+  
+  // 尝试先解析，如果已经是有效的JSON，则直接返回原始字符串
+  try {
+    JSON.parse(jsonString);
+    return jsonString; // 已经是有效的JSON，无需修复
+  } catch (initialError) {
+    // 继续尝试修复
   }
   
   // 尝试修复常见错误

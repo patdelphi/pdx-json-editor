@@ -38,6 +38,7 @@ export const validateJson = (jsonString) => {
  */
 export const parseJsonError = (error, jsonString) => {
   const message = error.message;
+  const lines = jsonString.split('\n');
   
   // 尝试从错误消息中提取位置信息
   const positionMatch = /at position (\d+)/.exec(message);
@@ -45,9 +46,31 @@ export const parseJsonError = (error, jsonString) => {
     const position = parseInt(positionMatch[1], 10);
     const { line, column } = positionToLineColumn(position, jsonString);
     
+    // 获取错误所在行的内容
+    const lineContent = line <= lines.length ? lines[line - 1] : '';
+    
     return [{
       line,
       column,
+      lineContent,
+      message: message.replace(/^JSON\.parse: /, '').replace(/^Unexpected token /, '意外的标记 '),
+      severity: 'error'
+    }];
+  }
+  
+  // 尝试从错误消息中提取行号和列号
+  const lineColMatch = /at line (\d+) column (\d+)/.exec(message);
+  if (lineColMatch) {
+    const line = parseInt(lineColMatch[1], 10);
+    const column = parseInt(lineColMatch[2], 10);
+    
+    // 获取错误所在行的内容
+    const lineContent = line <= lines.length ? lines[line - 1] : '';
+    
+    return [{
+      line,
+      column,
+      lineContent,
       message: message.replace(/^JSON\.parse: /, '').replace(/^Unexpected token /, '意外的标记 '),
       severity: 'error'
     }];
@@ -57,6 +80,7 @@ export const parseJsonError = (error, jsonString) => {
   return [{
     line: 1,
     column: 1,
+    lineContent: lines.length > 0 ? lines[0] : '',
     message: message.replace(/^JSON\.parse: /, ''),
     severity: 'error'
   }];
@@ -97,14 +121,49 @@ export const markerToJsonError = (marker) => {
  * @returns {Object} - Monaco编辑器的标记
  */
 export const jsonErrorToMarker = (error, modelUri) => {
+  // 获取行内容以确定更准确的错误范围
+  const lineContent = error.lineContent || '';
+  
+  // 计算错误范围
+  let endColumn = error.column + 1;
+  
+  // 如果有行内容，尝试确定更精确的错误范围
+  if (lineContent) {
+    // 对于常见的JSON错误，尝试确定更精确的范围
+    if (error.message.includes('Unexpected token')) {
+      // 从错误位置开始，找到下一个分隔符
+      const separators = [',', '}', ']', '{', '[', ':', '\n'];
+      let nextSeparatorPos = -1;
+      
+      for (const sep of separators) {
+        const pos = lineContent.indexOf(sep, error.column - 1);
+        if (pos !== -1 && (nextSeparatorPos === -1 || pos < nextSeparatorPos)) {
+          nextSeparatorPos = pos;
+        }
+      }
+      
+      if (nextSeparatorPos !== -1) {
+        endColumn = nextSeparatorPos + 1;
+      } else {
+        // 如果找不到分隔符，使用行尾
+        endColumn = lineContent.length + 1;
+      }
+    } else if (error.message.includes('Expected') || error.message.includes('Missing')) {
+      // 对于缺少某些内容的错误，高亮整行
+      endColumn = lineContent.length + 1;
+    }
+  }
+  
   return {
     severity: error.severity === 'error' ? 8 : 4,
     message: error.message,
     startLineNumber: error.line,
     startColumn: error.column,
     endLineNumber: error.line,
-    endColumn: error.column + 1,
+    endColumn: endColumn,
     source: 'PDX JSON Editor',
-    modelUri
+    modelUri,
+    // 添加标签，用于自定义装饰器
+    tags: ['json-error']
   };
 };

@@ -353,7 +353,27 @@ export const getEditorOptions = (darkMode = false, highContrast = false, isLarge
     // 多光标和选择
     multiCursorModifier: 'alt',
     multiCursorMergeOverlapping: true,
-    columnSelection: false
+    columnSelection: false,
+    
+    // 错误装饰器
+    glyphMargin: true, // 启用装订线图标
+    
+    // 标记导航
+    overviewRulerBorder: true,
+    overviewRulerLanes: 3, // 显示所有标记
+    
+    // 行高亮
+    renderLineHighlightOnlyWhenFocus: false,
+    
+    // 错误和警告
+    quickSuggestions: {
+      other: true,
+      comments: false,
+      strings: true
+    },
+    
+    // 启用错误装饰器
+    renderValidationDecorations: 'on'
   };
   
   // 大文件优化选项

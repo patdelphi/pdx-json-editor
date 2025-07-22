@@ -63,7 +63,11 @@ export const useJsonEditor = (initialValue = '') => {
    */
   const fix = useCallback(() => {
     const fixed = tryFixJson(value);
-    setValue(fixed);
+    
+    // 只有当修复后的内容与原始内容不同时才更新值
+    if (fixed !== value) {
+      setValue(fixed);
+    }
     
     // 检查修复是否成功
     try {
