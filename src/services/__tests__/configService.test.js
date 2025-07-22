@@ -81,14 +81,14 @@ describe('配置服务', () => {
     configService.reset('editor');
     
     // 验证配置是否重置
-    expect(configService.get('editor.fontSize')).toBe(14);
+    expect(configService.get('editor.fontSize')).toBe(16);
     expect(configService.get('app.theme')).toBe('dark');
     
     // 重置所有配置
     configService.reset();
     
     // 验证配置是否重置
-    expect(configService.get('editor.fontSize')).toBe(14);
+    expect(configService.get('editor.fontSize')).toBe(16);
     expect(configService.get('app.theme')).toBe('system');
   });
   

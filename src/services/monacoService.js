@@ -45,19 +45,20 @@ export const configureJsonLanguage = (monaco) => {
   });
   
   // 配置JSON自动完成提供程序
-  monaco.languages.registerCompletionItemProvider('json', {
-    triggerCharacters: ['"', ':'],
-    provideCompletionItems: (model, position) => {
-      try {
-        const textUntilPosition = model.getValueInRange({
-          startLineNumber: 1,
-          startColumn: 1,
-          endLineNumber: position.lineNumber,
-          endColumn: position.column
-        });
-        
-        // 检查是否在键位置
-        const isInKey = /"[^"]*$/.test(textUntilPosition);
+  if (typeof monaco.languages.registerCompletionItemProvider === 'function') {
+    monaco.languages.registerCompletionItemProvider('json', {
+      triggerCharacters: ['"', ':'],
+      provideCompletionItems: (model, position) => {
+        try {
+          const textUntilPosition = model.getValueInRange({
+            startLineNumber: 1,
+            startColumn: 1,
+            endLineNumber: position.lineNumber,
+            endColumn: position.column
+          });
+          
+          // 检查是否在键位置
+          const isInKey = /"[^"]*$/.test(textUntilPosition);
         
         // 检查是否在值位置
         const isInValue = /:\s*$/.test(textUntilPosition);
@@ -141,7 +142,8 @@ export const configureJsonLanguage = (monaco) => {
   });
   
   // 注册悬停提示提供程序
-  monaco.languages.registerHoverProvider('json', {
+  if (typeof monaco.languages.registerHoverProvider === 'function') {
+    monaco.languages.registerHoverProvider('json', {
     provideHover: (model, position) => {
       try {
         // 获取当前位置的单词
@@ -225,6 +227,7 @@ export const configureJsonLanguage = (monaco) => {
       }
     }
   });
+  }
 };
 
 /**
@@ -235,7 +238,8 @@ export const configureJsonFolding = (monaco) => {
   if (!monaco) return;
   
   // 注册自定义折叠提供程序
-  monaco.languages.registerFoldingRangeProvider('json', {
+  if (typeof monaco.languages.registerFoldingRangeProvider === 'function') {
+    monaco.languages.registerFoldingRangeProvider('json', {
     provideFoldingRanges: (model) => {
       const ranges = [];
       const text = model.getValue();
@@ -281,6 +285,7 @@ export const configureJsonFolding = (monaco) => {
       return ranges;
     }
   });
+  }
 };
 
 /**

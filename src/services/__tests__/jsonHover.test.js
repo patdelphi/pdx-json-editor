@@ -3,6 +3,9 @@
 
 import { configureJsonLanguage } from '../monacoService';
 
+// 模拟monaco-editor
+jest.mock('monaco-editor');
+
 describe('jsonHover', () => {
   it('should register hover provider for JSON', () => {
     // 创建模拟Monaco对象

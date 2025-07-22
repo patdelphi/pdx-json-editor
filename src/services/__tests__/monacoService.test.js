@@ -3,6 +3,9 @@
 
 import { configureJsonLanguage, getEditorOptions } from '../monacoService';
 
+// 模拟monaco-editor
+jest.mock('monaco-editor');
+
 describe('monacoService', () => {
   describe('configureJsonLanguage', () => {
     it('should configure JSON language support', () => {
