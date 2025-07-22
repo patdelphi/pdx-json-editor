@@ -24,25 +24,27 @@ export const configureJsonLanguage = (monaco) => {
   }
 
   // 配置JSON语言特性
-  monaco.languages.registerDocumentFormattingEditProvider('json', {
-    provideDocumentFormattingEdits: (model) => {
-      try {
-        const text = model.getValue();
-        const parsed = JSON.parse(text);
-        const formatted = JSON.stringify(parsed, null, 2);
-        
-        return [
-          {
-            range: model.getFullModelRange(),
-            text: formatted,
-          },
-        ];
-      } catch (e) {
-        console.error('JSON格式化失败:', e);
-        return [];
+  if (typeof monaco.languages.registerDocumentFormattingEditProvider === 'function') {
+    monaco.languages.registerDocumentFormattingEditProvider('json', {
+      provideDocumentFormattingEdits: (model) => {
+        try {
+          const text = model.getValue();
+          const parsed = JSON.parse(text);
+          const formatted = JSON.stringify(parsed, null, 2);
+          
+          return [
+            {
+              range: model.getFullModelRange(),
+              text: formatted,
+            },
+          ];
+        } catch (e) {
+          console.error('JSON格式化失败:', e);
+          return [];
+        }
       }
-    }
-  });
+    });
+  }
   
   // 配置JSON自动完成提供程序
   if (typeof monaco.languages.registerCompletionItemProvider === 'function') {
@@ -60,173 +62,174 @@ export const configureJsonLanguage = (monaco) => {
           // 检查是否在键位置
           const isInKey = /"[^"]*$/.test(textUntilPosition);
         
-        // 检查是否在值位置
-        const isInValue = /:\s*$/.test(textUntilPosition);
-        
-        // 获取当前行内容
-        const lineContent = model.getLineContent(position.lineNumber);
-        
-        // 获取当前行前面的内容
-        const lineUntilPosition = lineContent.substring(0, position.column - 1);
-        
-        // 创建建议项
-        const suggestions = [];
-        
-        if (isInKey) {
-          // 在键位置提供建议
-          // 这里的建议将由Schema提供，如果有Schema的话
-          // 基本建议
-          suggestions.push({
-            label: '"name"',
-            kind: monaco.languages.CompletionItemKind.Property,
-            insertText: 'name',
-            detail: '常用属性',
-            documentation: '名称属性'
-          });
+          // 检查是否在值位置
+          const isInValue = /:\s*$/.test(textUntilPosition);
           
-          suggestions.push({
-            label: '"description"',
-            kind: monaco.languages.CompletionItemKind.Property,
-            insertText: 'description',
-            detail: '常用属性',
-            documentation: '描述属性'
-          });
+          // 获取当前行内容
+          const lineContent = model.getLineContent(position.lineNumber);
           
-          suggestions.push({
-            label: '"version"',
-            kind: monaco.languages.CompletionItemKind.Property,
-            insertText: 'version',
-            detail: '常用属性',
-            documentation: '版本号属性'
-          });
-        } else if (isInValue) {
-          // 在值位置提供建议
-          // 检查键名
-          const keyMatch = lineUntilPosition.match(/"([^"]+)"\s*:\s*$/);
-          if (keyMatch) {
-            const key = keyMatch[1];
+          // 获取当前行前面的内容
+          const lineUntilPosition = lineContent.substring(0, position.column - 1);
+          
+          // 创建建议项
+          const suggestions = [];
+          
+          if (isInKey) {
+            // 在键位置提供建议
+            // 这里的建议将由Schema提供，如果有Schema的话
+            // 基本建议
+            suggestions.push({
+              label: '"name"',
+              kind: monaco.languages.CompletionItemKind.Property,
+              insertText: 'name',
+              detail: '常用属性',
+              documentation: '名称属性'
+            });
             
-            // 根据键名提供不同的建议
-            if (key === 'type') {
-              ['string', 'number', 'boolean', 'object', 'array', 'null'].forEach(type => {
-                suggestions.push({
-                  label: `"${type}"`,
-                  kind: monaco.languages.CompletionItemKind.Value,
-                  insertText: `"${type}"`,
-                  detail: 'JSON类型',
-                  documentation: `JSON ${type} 类型`
+            suggestions.push({
+              label: '"description"',
+              kind: monaco.languages.CompletionItemKind.Property,
+              insertText: 'description',
+              detail: '常用属性',
+              documentation: '描述属性'
+            });
+            
+            suggestions.push({
+              label: '"version"',
+              kind: monaco.languages.CompletionItemKind.Property,
+              insertText: 'version',
+              detail: '常用属性',
+              documentation: '版本号属性'
+            });
+          } else if (isInValue) {
+            // 在值位置提供建议
+            // 检查键名
+            const keyMatch = lineUntilPosition.match(/"([^"]+)"\s*:\s*$/);
+            if (keyMatch) {
+              const key = keyMatch[1];
+              
+              // 根据键名提供不同的建议
+              if (key === 'type') {
+                ['string', 'number', 'boolean', 'object', 'array', 'null'].forEach(type => {
+                  suggestions.push({
+                    label: `"${type}"`,
+                    kind: monaco.languages.CompletionItemKind.Value,
+                    insertText: `"${type}"`,
+                    detail: 'JSON类型',
+                    documentation: `JSON ${type} 类型`
+                  });
                 });
-              });
-            } else if (key === 'boolean' || key.endsWith('able') || key.startsWith('is') || key.startsWith('has')) {
-              ['true', 'false'].forEach(value => {
-                suggestions.push({
-                  label: value,
-                  kind: monaco.languages.CompletionItemKind.Value,
-                  insertText: value,
-                  detail: '布尔值',
-                  documentation: `布尔值 ${value}`
+              } else if (key === 'boolean' || key.endsWith('able') || key.startsWith('is') || key.startsWith('has')) {
+                ['true', 'false'].forEach(value => {
+                  suggestions.push({
+                    label: value,
+                    kind: monaco.languages.CompletionItemKind.Value,
+                    insertText: value,
+                    detail: '布尔值',
+                    documentation: `布尔值 ${value}`
+                  });
                 });
-              });
+              }
             }
           }
+          
+          return {
+            suggestions
+          };
+        } catch (e) {
+          console.error('提供自动完成建议失败:', e);
+          return { suggestions: [] };
         }
-        
-        return {
-          suggestions
-        };
-      } catch (e) {
-        console.error('提供自动完成建议失败:', e);
-        return { suggestions: [] };
       }
-    }
-  });
+    });
+  }
   
   // 注册悬停提示提供程序
   if (typeof monaco.languages.registerHoverProvider === 'function') {
     monaco.languages.registerHoverProvider('json', {
-    provideHover: (model, position) => {
-      try {
-        // 获取当前位置的单词
-        const wordInfo = model.getWordAtPosition(position);
-        if (!wordInfo) return null;
-        
-        const word = wordInfo.word;
-        const lineContent = model.getLineContent(position.lineNumber);
-        
-        // 检查是否是键
-        const isKey = /"([^"]+)"\s*:/.test(lineContent.substring(0, wordInfo.endColumn));
-        
-        // 检查是否是值
-        const isValue = /:\s*"?([^",}\]]+)"?/.test(lineContent.substring(wordInfo.startColumn - 2));
-        
-        // 获取完整的JSON内容
-        const text = model.getValue();
-        let parsed;
+      provideHover: (model, position) => {
         try {
-          parsed = JSON.parse(text);
-        } catch (e) {
-          // JSON无效，无法提供上下文信息
-          return null;
-        }
-        
-        // 构建悬停内容
-        let contents = [];
-        
-        if (isKey) {
-          // 对于键，显示类型信息
-          contents.push({ value: `**键**: \`${word}\`` });
+          // 获取当前位置的单词
+          const wordInfo = model.getWordAtPosition(position);
+          if (!wordInfo) return null;
           
-          // 尝试获取值的类型
-          const keyMatch = lineContent.match(new RegExp(`"${word}"\\s*:\\s*(.+)`));
-          if (keyMatch) {
-            const valueText = keyMatch[1].trim().replace(/,$/, '');
-            let valueType = 'unknown';
+          const word = wordInfo.word;
+          const lineContent = model.getLineContent(position.lineNumber);
+          
+          // 检查是否是键
+          const isKey = /"([^"]+)"\s*:/.test(lineContent.substring(0, wordInfo.endColumn));
+          
+          // 检查是否是值
+          const isValue = /:\s*"?([^",}\]]+)"?/.test(lineContent.substring(wordInfo.startColumn - 2));
+          
+          // 获取完整的JSON内容
+          const text = model.getValue();
+          let parsed;
+          try {
+            parsed = JSON.parse(text);
+          } catch (e) {
+            // JSON无效，无法提供上下文信息
+            return null;
+          }
+          
+          // 构建悬停内容
+          let contents = [];
+          
+          if (isKey) {
+            // 对于键，显示类型信息
+            contents.push({ value: `**键**: \`${word}\`` });
             
-            if (valueText === 'true' || valueText === 'false') {
+            // 尝试获取值的类型
+            const keyMatch = lineContent.match(new RegExp(`"${word}"\\s*:\\s*(.+)`));
+            if (keyMatch) {
+              const valueText = keyMatch[1].trim().replace(/,$/, '');
+              let valueType = 'unknown';
+              
+              if (valueText === 'true' || valueText === 'false') {
+                valueType = 'boolean';
+              } else if (valueText === 'null') {
+                valueType = 'null';
+              } else if (/^-?\d+(\.\d+)?$/.test(valueText)) {
+                valueType = 'number';
+              } else if (/^".*"$/.test(valueText)) {
+                valueType = 'string';
+              } else if (valueText.startsWith('{')) {
+                valueType = 'object';
+              } else if (valueText.startsWith('[')) {
+                valueType = 'array';
+              }
+              
+              contents.push({ value: `**值类型**: \`${valueType}\`` });
+            }
+          } else if (isValue) {
+            // 对于值，显示类型和值信息
+            let valueType = typeof word;
+            if (word === 'true' || word === 'false') {
               valueType = 'boolean';
-            } else if (valueText === 'null') {
+            } else if (word === 'null') {
               valueType = 'null';
-            } else if (/^-?\d+(\.\d+)?$/.test(valueText)) {
+            } else if (/^-?\d+(\.\d+)?$/.test(word)) {
               valueType = 'number';
-            } else if (/^".*"$/.test(valueText)) {
+            } else {
               valueType = 'string';
-            } else if (valueText.startsWith('{')) {
-              valueType = 'object';
-            } else if (valueText.startsWith('[')) {
-              valueType = 'array';
             }
             
-            contents.push({ value: `**值类型**: \`${valueType}\`` });
-          }
-        } else if (isValue) {
-          // 对于值，显示类型和值信息
-          let valueType = typeof word;
-          if (word === 'true' || word === 'false') {
-            valueType = 'boolean';
-          } else if (word === 'null') {
-            valueType = 'null';
-          } else if (/^-?\d+(\.\d+)?$/.test(word)) {
-            valueType = 'number';
-          } else {
-            valueType = 'string';
+            contents.push({ value: `**值**: \`${word}\`` });
+            contents.push({ value: `**类型**: \`${valueType}\`` });
           }
           
-          contents.push({ value: `**值**: \`${word}\`` });
-          contents.push({ value: `**类型**: \`${valueType}\`` });
+          // 如果没有内容，返回null
+          if (contents.length === 0) return null;
+          
+          return {
+            contents: contents
+          };
+        } catch (e) {
+          console.error('提供悬停信息失败:', e);
+          return null;
         }
-        
-        // 如果没有内容，返回null
-        if (contents.length === 0) return null;
-        
-        return {
-          contents: contents
-        };
-      } catch (e) {
-        console.error('提供悬停信息失败:', e);
-        return null;
       }
-    }
-  });
+    });
   }
 };
 
@@ -240,51 +243,51 @@ export const configureJsonFolding = (monaco) => {
   // 注册自定义折叠提供程序
   if (typeof monaco.languages.registerFoldingRangeProvider === 'function') {
     monaco.languages.registerFoldingRangeProvider('json', {
-    provideFoldingRanges: (model) => {
-      const ranges = [];
-      const text = model.getValue();
-      const lines = text.split('\n');
-      
-      // 跟踪大括号和方括号的位置
-      const stack = [];
-      
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      provideFoldingRanges: (model) => {
+        const ranges = [];
+        const text = model.getValue();
+        const lines = text.split('\n');
         
-        // 检查开始括号
-        if (line.includes('{') || line.includes('[')) {
-          stack.push({
-            type: line.includes('{') ? '{' : '[',
-            startLine: i + 1
-          });
-        }
+        // 跟踪大括号和方括号的位置
+        const stack = [];
         
-        // 检查结束括号
-        if (line.includes('}') || line.includes(']')) {
-          const bracket = line.includes('}') ? '}' : ']';
-          const matchingBracket = bracket === '}' ? '{' : '[';
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
           
-          // 查找匹配的开始括号
-          for (let j = stack.length - 1; j >= 0; j--) {
-            if (stack[j].type === matchingBracket) {
-              // 只有当折叠区域至少有3行时才添加折叠范围
-              if (i + 1 - stack[j].startLine >= 2) {
-                ranges.push({
-                  start: stack[j].startLine,
-                  end: i + 1,
-                  kind: monaco.languages.FoldingRangeKind.Region
-                });
+          // 检查开始括号
+          if (line.includes('{') || line.includes('[')) {
+            stack.push({
+              type: line.includes('{') ? '{' : '[',
+              startLine: i + 1
+            });
+          }
+          
+          // 检查结束括号
+          if (line.includes('}') || line.includes(']')) {
+            const bracket = line.includes('}') ? '}' : ']';
+            const matchingBracket = bracket === '}' ? '{' : '[';
+            
+            // 查找匹配的开始括号
+            for (let j = stack.length - 1; j >= 0; j--) {
+              if (stack[j].type === matchingBracket) {
+                // 只有当折叠区域至少有3行时才添加折叠范围
+                if (i + 1 - stack[j].startLine >= 2) {
+                  ranges.push({
+                    start: stack[j].startLine,
+                    end: i + 1,
+                    kind: monaco.languages.FoldingRangeKind ? monaco.languages.FoldingRangeKind.Region : 'region'
+                  });
+                }
+                stack.splice(j, 1);
+                break;
               }
-              stack.splice(j, 1);
-              break;
             }
           }
         }
+        
+        return ranges;
       }
-      
-      return ranges;
-    }
-  });
+    });
   }
 };
 
