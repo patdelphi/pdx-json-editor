@@ -69,6 +69,18 @@ export const SHORTCUTS = {
     modifier: 'Ctrl',
     description: '展开所有',
     action: 'unfoldAll'
+  },
+  UNDO: {
+    key: 'Z',
+    modifier: 'Ctrl',
+    description: '撤销',
+    action: 'undo'
+  },
+  REDO: {
+    key: 'Y',
+    modifier: 'Ctrl',
+    description: '重做',
+    action: 'redo'
   }
 };
 
@@ -85,6 +97,8 @@ export const SHORTCUTS = {
  * @param {Function} handlers.help - 帮助处理函数
  * @param {Function} handlers.foldAll - 折叠所有处理函数
  * @param {Function} handlers.unfoldAll - 展开所有处理函数
+ * @param {Function} handlers.undo - 撤销处理函数
+ * @param {Function} handlers.redo - 重做处理函数
  * @param {boolean} enabled - 是否启用快捷键
  * @returns {{
  *   showHelp: boolean,
@@ -182,6 +196,18 @@ export const useKeyboardShortcuts = (handlers = {}, enabled = true) => {
       if (event.ctrlKey && event.altKey && event.key.toLowerCase() === 'd') {
         event.preventDefault();
         if (handlers.diff) handlers.diff();
+      }
+      
+      // 撤销: Ctrl+Z (通常由Monaco Editor处理，但我们也可以添加自定义处理)
+      if (event.ctrlKey && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'z') {
+        // 注意：我们不阻止默认行为，因为Monaco Editor已经处理了这个快捷键
+        if (handlers.undo) handlers.undo();
+      }
+      
+      // 重做: Ctrl+Y (通常由Monaco Editor处理，但我们也可以添加自定义处理)
+      if (event.ctrlKey && !event.shiftKey && !event.altKey && event.key.toLowerCase() === 'y') {
+        // 注意：我们不阻止默认行为，因为Monaco Editor已经处理了这个快捷键
+        if (handlers.redo) handlers.redo();
       }
     };
     

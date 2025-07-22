@@ -380,6 +380,20 @@ export function JsonEditor({
     };
   }, [performanceMode]);
   
+  // 处理撤销操作
+  const handleUndo = useCallback(() => {
+    if (editorRef.current) {
+      editorRef.current.trigger('keyboard', 'undo', null);
+    }
+  }, []);
+  
+  // 处理重做操作
+  const handleRedo = useCallback(() => {
+    if (editorRef.current) {
+      editorRef.current.trigger('keyboard', 'redo', null);
+    }
+  }, []);
+
   // 注册键盘快捷键
   const { showHelp, setShowHelp, toggleHelp } = useKeyboardShortcuts({
     format: handleFormat,
@@ -390,7 +404,9 @@ export function JsonEditor({
     open: () => window.pdxJsonEditor?.openFile?.(),
     diff: onDiffViewerClick,
     foldAll: handleFoldAll,
-    unfoldAll: handleUnfoldAll
+    unfoldAll: handleUnfoldAll,
+    undo: handleUndo,
+    redo: handleRedo
   });
 
   // 应用编辑器设置

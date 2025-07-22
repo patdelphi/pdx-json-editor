@@ -22,6 +22,8 @@ import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import SchemaIcon from '@mui/icons-material/Schema';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
+import UndoIcon from '@mui/icons-material/Undo';
+import RedoIcon from '@mui/icons-material/Redo';
 import { useBreakpoint } from '../hooks/useResponsive';
 
 /**
@@ -81,11 +83,31 @@ export function MobileEditorToolbar({
     setSpeedDialOpen(false);
   };
   
+  // 处理撤销操作
+  const handleUndo = () => {
+    if (window.pdxJsonEditor?.getEditorRef?.()) {
+      const editor = window.pdxJsonEditor.getEditorRef();
+      editor.trigger('keyboard', 'undo', null);
+    }
+    setSpeedDialOpen(false);
+  };
+  
+  // 处理重做操作
+  const handleRedo = () => {
+    if (window.pdxJsonEditor?.getEditorRef?.()) {
+      const editor = window.pdxJsonEditor.getEditorRef();
+      editor.trigger('keyboard', 'redo', null);
+    }
+    setSpeedDialOpen(false);
+  };
+
   // SpeedDial操作
   const actions = [
     { icon: <FormatIndentIncreaseIcon />, name: '格式化', onClick: handleFormat },
     { icon: <CompressOutlinedIcon />, name: '压缩', onClick: handleCompress },
     { icon: <HealingIcon />, name: '修复', onClick: handleTryFix },
+    { icon: <UndoIcon />, name: '撤销', onClick: handleUndo },
+    { icon: <RedoIcon />, name: '重做', onClick: handleRedo },
     { icon: <SearchIcon />, name: '搜索', onClick: () => { 
       // 触发Monaco编辑器的原生搜索功能
       if (window.pdxJsonEditor?.getEditorRef?.()) {
@@ -94,7 +116,6 @@ export function MobileEditorToolbar({
       }
       setSpeedDialOpen(false); 
     } },
-
     { icon: <SchemaIcon />, name: 'Schema', onClick: () => { onSchemaClick(); setSpeedDialOpen(false); } }
   ];
   

@@ -10,7 +10,9 @@ import {
   UnfoldMore,
   Keyboard,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
+  Undo,
+  Redo
 } from '@mui/icons-material';
 import { SchemaSelector } from './SchemaSelector';
 
@@ -172,6 +174,31 @@ export function EditorToolbar({
         <Tooltip title="减小字体">
           <IconButton size="small" onClick={onDecreaseFontSize}>
             <ZoomOut fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      
+      {/* 撤销和重做按钮 */}
+      <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+        <Tooltip title="撤销 (Ctrl+Z)">
+          <IconButton size="small" onClick={() => {
+            if (window.pdxJsonEditor?.getEditorRef?.()) {
+              const editor = window.pdxJsonEditor.getEditorRef();
+              editor.trigger('keyboard', 'undo', null);
+            }
+          }}>
+            <Undo fontSize="small" />
+          </IconButton>
+        </Tooltip>
+        
+        <Tooltip title="重做 (Ctrl+Y)">
+          <IconButton size="small" onClick={() => {
+            if (window.pdxJsonEditor?.getEditorRef?.()) {
+              const editor = window.pdxJsonEditor.getEditorRef();
+              editor.trigger('keyboard', 'redo', null);
+            }
+          }}>
+            <Redo fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
