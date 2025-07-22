@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="description" content="PDX JSON Editor - 一个轻量级、高性能的JSON编辑器" />
+  <meta name="theme-color" content="#3B82F6" />
+  <link rel="icon" type="image/svg+xml" href="/pdx-json-editor/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/pdx-json-editor/manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <title>PDX JSON Editor</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+    
+    #app {
+      height: 100%;
+    }
+    
+    .loading-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      background-color: #f9fafb;
+      color: #111827;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      .loading-screen {
+        background-color: #1f2937;
+        color: #f9fafb;
+      }
+    }
+    
+    .loading-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 24px;
+    }
+    
+    .loading-title {
+      font-size: 24px;
+      font-weight: 600;
+      margin-bottom: 16px;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(59, 130, 246, 0.2);
+      border-radius: 50%;
+      border-top-color: #3B82F6;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+  <script type="module" crossorigin src="/pdx-json-editor/assets/index-2a12edf7.js"></script>
+  <link rel="modulepreload" crossorigin href="/pdx-json-editor/assets/mui-98729d60.js">
+  <link rel="stylesheet" href="/pdx-json-editor/assets/index-29ef96be.css">
+</head>
+<body>
+  <div id="app">
+    <div class="loading-screen">
+      <div class="loading-logo">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#3B82F6">
+          <path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h14V5H5zm2 2h10v2H7V7zm0 4h10v2H7v-2zm0 4h7v2H7v-2z"/>
+        </svg>
+      </div>
+      <div class="loading-title">PDX JSON Editor</div>
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+  
+</body>
+</html>

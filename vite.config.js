@@ -3,6 +3,7 @@ import preact from '@preact/preset-vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/pdx-json-editor/',
   plugins: [preact()],
   server: {
     port: 5173,

@@ -15,6 +15,7 @@
     "test:performance": "jest src/performance.test.js",
     "test:performance:browser": "node performance.js",
     "test:all": "node run-tests.js",
+    "deploy": "node deploy-gh-pages.js",
     "lint": "eslint src --ext js,jsx",
     "format": "prettier --write \"src/**/*.{js,jsx,css,scss}\""
   },

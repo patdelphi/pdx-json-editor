@@ -11,7 +11,7 @@ node_modules/
 /performance-report.json
 
 # Production
-/dist
+# /dist - 注释掉，允许提交dist目录用于GitHub Pages
 /build
 
 # Misc
