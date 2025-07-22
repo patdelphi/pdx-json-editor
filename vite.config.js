@@ -3,7 +3,10 @@ import preact from '@preact/preset-vite';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/pdx-json-editor/',
+  // 根据环境设置base路径，在GitHub Pages上使用仓库名作为base
+  base: process.env.GITHUB_REPOSITORY 
+    ? `/${process.env.GITHUB_REPOSITORY.split('/')[1]}/` 
+    : '/',
   plugins: [preact()],
   server: {
     port: 5173,
