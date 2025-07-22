@@ -4,7 +4,7 @@
  */
 
 import { h } from 'preact';
-import { render, fireEvent, screen, act } from '@testing-library/preact';
+import { render, fireEvent, screen, act, waitFor } from '@testing-library/preact';
 import { App } from './App';
 
 // 模拟Monaco Editor
@@ -18,18 +18,33 @@ jest.mock('@monaco-editor/react', () => {
           onMount({
             getValue: () => value || '',
             setValue: (newValue) => onChange && onChange(newValue),
-            getModel: () => ({}),
+            getModel: () => ({
+              getVersionId: () => 1,
+              getValue: () => value || '',
+              getLanguageId: () => 'json'
+            }),
             updateOptions: jest.fn(),
-            onDidChangeCursorPosition: jest.fn(),
+            onDidChangeCursorPosition: jest.fn(() => ({ dispose: jest.fn() })),
+            onDidChangeModelContent: jest.fn(() => ({ dispose: jest.fn() })),
             getAction: () => ({ run: jest.fn() }),
             getVisibleRanges: () => [{ startLineNumber: 1, endLineNumber: 10 }],
             getScrollTop: () => 0,
             setScrollPosition: jest.fn(),
-            getOption: () => 18
+            getOption: () => 18,
+            focus: jest.fn(),
+            layout: jest.fn()
           }, {
-            editor: { EditorOption: { lineHeight: 'lineHeight' } },
+            editor: { 
+              EditorOption: { lineHeight: 'lineHeight' },
+              create: jest.fn()
+            },
             languages: {
-              json: { jsonDefaults: { setDiagnosticsOptions: jest.fn() } },
+              json: { 
+                jsonDefaults: { 
+                  setDiagnosticsOptions: jest.fn(),
+                  setModeConfiguration: jest.fn()
+                } 
+              },
               registerDocumentFormattingEditProvider: jest.fn(),
               registerFoldingRangeProvider: jest.fn()
             }
@@ -45,13 +60,20 @@ jest.mock('@monaco-editor/react', () => {
           onMount({
             getOriginalEditor: () => ({
               getValue: () => original,
-              getModel: () => ({})
+              getModel: () => ({
+                getValue: () => original,
+                getLanguageId: () => 'json'
+              })
             }),
             getModifiedEditor: () => ({
               getValue: () => modified,
-              getModel: () => ({})
+              getModel: () => ({
+                getValue: () => modified,
+                getLanguageId: () => 'json'
+              })
             }),
-            updateOptions: jest.fn()
+            updateOptions: jest.fn(),
+            layout: jest.fn()
           });
         }, 0);
       }
@@ -97,15 +119,6 @@ Object.assign(navigator, {
   }
 });
 
-// 模拟matchMedia
-window.matchMedia = window.matchMedia || function() {
-  return {
-    matches: false,
-    addListener: function() {},
-    removeListener: function() {}
-  };
-};
-
 describe('集成测试', () => {
   beforeEach(() => {
     // 清理localStorage
@@ -123,7 +136,8 @@ describe('集成测试', () => {
       saveFile: jest.fn(),
       saveAsFile: jest.fn(),
       newFile: jest.fn(),
-      openFile: jest.fn()
+      openFile: jest.fn(),
+      handleLargeFile: jest.fn()
     };
   });
   
@@ -138,12 +152,9 @@ describe('集成测试', () => {
     render(<App />);
     
     // 等待编辑器加载
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
-    
-    // 验证主要组件是否存在
-    expect(screen.getByTestId('mock-editor')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByTestId('mock-editor')).toBeInTheDocument();
+    }, { timeout: 1000 });
   });
   
   test('应能打开差异对比视图并保存修改', async () => {
@@ -151,9 +162,9 @@ describe('集成测试', () => {
     render(<App />);
     
     // 等待编辑器加载
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mock-editor')).toBeInTheDocument();
+    }, { timeout: 1000 });
     
     // 模拟点击差异对比按钮
     const diffButton = screen.getByText('差异对比');
@@ -175,15 +186,15 @@ describe('集成测试', () => {
     render(<App />);
     
     // 等待编辑器加载
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mock-editor')).toBeInTheDocument();
+    }, { timeout: 1000 });
     
     // 模拟大文件拖放
     const largeFile = new File(['{"test":"value"}'], 'large.json', { 
-      type: 'application/json',
-      size: 2000000 // 2MB
+      type: 'application/json'
     });
+    Object.defineProperty(largeFile, 'size', { value: 2000000 }); // 2MB
     
     // 手动触发大文件警告
     window.pdxJsonEditor.openFile = jest.fn();
@@ -211,9 +222,9 @@ describe('集成测试', () => {
     render(<App />);
     
     // 等待编辑器加载
-    await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    });
+    await waitFor(() => {
+      expect(screen.getByTestId('mock-editor')).toBeInTheDocument();
+    }, { timeout: 1000 });
     
     // 验证全局对象是否正确设置
     expect(window.pdxJsonEditor.saveOriginalContent).toBeDefined();
@@ -221,13 +232,52 @@ describe('集成测试', () => {
     
     // 验证差异对比功能
     window.pdxJsonEditor.openDiffViewer('{"original":"content"}', '{"modified":"content"}');
-    expect(screen.getByText('差异对比')).toBeInTheDocument();
+    
+    await waitFor(() => {
+      expect(screen.getByText('差异对比')).toBeInTheDocument();
+    });
     
     // 关闭差异对比视图
     const closeButton = screen.getByLabelText('关闭');
     fireEvent.click(closeButton);
     
     // 验证差异对比视图是否关闭
-    expect(screen.queryByText('差异对比')).not.toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByText('差异对比')).not.toBeInTheDocument();
+    });
+  });
+  
+  test('应能处理JSON格式化和压缩', async () => {
+    // 渲染应用
+    render(<App />);
+    
+    // 等待编辑器加载
+    await waitFor(() => {
+      expect(screen.getByTestId('mock-editor')).toBeInTheDocument();
+    }, { timeout: 1000 });
+    
+    // 模拟格式化JSON
+    window.pdxJsonEditor.formatJson.mockImplementation(() => {
+      window.pdxJsonEditor.getCurrentContent.mockReturnValue('{\n  "test": "value"\n}');
+    });
+    
+    // 点击格式化按钮
+    const formatButton = screen.getByText('格式化');
+    fireEvent.click(formatButton);
+    
+    // 验证是否调用了formatJson方法
+    expect(window.pdxJsonEditor.formatJson).toHaveBeenCalled();
+    
+    // 模拟压缩JSON
+    window.pdxJsonEditor.compressJson.mockImplementation(() => {
+      window.pdxJsonEditor.getCurrentContent.mockReturnValue('{"test":"value"}');
+    });
+    
+    // 点击压缩按钮
+    const compressButton = screen.getByText('压缩');
+    fireEvent.click(compressButton);
+    
+    // 验证是否调用了compressJson方法
+    expect(window.pdxJsonEditor.compressJson).toHaveBeenCalled();
   });
 });

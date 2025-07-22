@@ -1,41 +1,29 @@
 /**
- * Monaco Editor Mock
+ * Monaco Editor 模拟模块
+ * 用于在测试环境中模拟Monaco Editor的功能
  */
 
+// 模拟Monaco编辑器API
 const monaco = {
   editor: {
-    create: jest.fn(() => ({
-      getValue: jest.fn(() => '{}'),
-      setValue: jest.fn(),
-      getModel: jest.fn(() => ({
-        getValue: jest.fn(() => '{}'),
-        setValue: jest.fn(),
-        onDidChangeContent: jest.fn(),
-        getLineCount: jest.fn(() => 1),
-        getLineContent: jest.fn(() => '{}')
-      })),
-      updateOptions: jest.fn(),
-      onDidChangeCursorPosition: jest.fn(),
-      getAction: jest.fn(() => ({ run: jest.fn() })),
-      dispose: jest.fn(),
-      focus: jest.fn(),
-      layout: jest.fn()
-    })),
-    createDiffEditor: jest.fn(() => ({
-      getOriginalEditor: jest.fn(() => ({
-        getValue: jest.fn(() => '{}'),
-        setValue: jest.fn()
-      })),
-      getModifiedEditor: jest.fn(() => ({
-        getValue: jest.fn(() => '{}'),
-        setValue: jest.fn()
-      })),
-      dispose: jest.fn(),
-      layout: jest.fn()
-    })),
-    defineTheme: jest.fn(),
-    setTheme: jest.fn(),
-    setModelMarkers: jest.fn()
+    create: jest.fn(),
+    createModel: jest.fn(),
+    createDiffEditor: jest.fn(),
+    EditorOption: {
+      lineHeight: 'lineHeight',
+      fontSize: 'fontSize',
+      fontFamily: 'fontFamily',
+      minimap: 'minimap',
+      wordWrap: 'wordWrap',
+      lineNumbers: 'lineNumbers',
+      renderWhitespace: 'renderWhitespace',
+      tabSize: 'tabSize'
+    },
+    RenderLineNumbersType: {
+      On: 'on',
+      Off: 'off',
+      Relative: 'relative'
+    }
   },
   languages: {
     json: {
@@ -44,22 +32,30 @@ const monaco = {
         setModeConfiguration: jest.fn()
       }
     },
-    registerCompletionItemProvider: jest.fn(),
-    registerHoverProvider: jest.fn(),
     registerDocumentFormattingEditProvider: jest.fn(),
     registerFoldingRangeProvider: jest.fn(),
-    setMonarchTokensProvider: jest.fn(),
-    setLanguageConfiguration: jest.fn()
+    registerCompletionItemProvider: jest.fn()
   },
-  Range: jest.fn(),
-  Position: jest.fn(),
-  Selection: jest.fn(),
+  Range: jest.fn().mockImplementation((startLineNumber, startColumn, endLineNumber, endColumn) => ({
+    startLineNumber,
+    startColumn,
+    endLineNumber,
+    endColumn
+  })),
+  Position: jest.fn().mockImplementation((lineNumber, column) => ({
+    lineNumber,
+    column
+  })),
   MarkerSeverity: {
     Error: 8,
     Warning: 4,
     Info: 2,
     Hint: 1
+  },
+  Uri: {
+    parse: jest.fn(value => ({ path: value }))
   }
 };
 
+// 导出模拟模块
 module.exports = monaco;

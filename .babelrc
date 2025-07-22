@@ -9,5 +9,8 @@
       "pragma": "h",
       "pragmaFrag": "Fragment"
     }]
+  ],
+  "plugins": [
+    "@babel/plugin-transform-modules-commonjs"
   ]
 }
