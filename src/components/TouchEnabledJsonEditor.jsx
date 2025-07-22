@@ -107,6 +107,8 @@ export function TouchEnabledJsonEditor({
     
     validate(newValue);
   };
+  
+  // 这里之前有一个setContent函数，但它与setEditorContent功能重复，已删除
 
   // 设置编辑器内容
   const setEditorContent = useCallback((newContent) => {
@@ -419,7 +421,7 @@ export function TouchEnabledJsonEditor({
       window.pdxJsonEditor.tryFixJson = handleTryFix;
       window.pdxJsonEditor.applySettings = applySettings;
       window.pdxJsonEditor.getCurrentContent = () => editorRef.current ? editorRef.current.getValue() : value;
-      window.pdxJsonEditor.setContent = setEditorContent;
+      window.pdxJsonEditor.setContent = setContent;
       window.pdxJsonEditor.getEditorRef = () => editorRef.current;
       window.pdxJsonEditor.getMonacoRef = () => monacoRef.current;
     } else {
