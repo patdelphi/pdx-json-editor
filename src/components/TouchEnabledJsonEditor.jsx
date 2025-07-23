@@ -98,8 +98,8 @@ export function TouchEnabledJsonEditor({
     error: jsonError 
   } = useJsonEditor(externalValue !== undefined ? externalValue : '');
   
-  // 使用外部值或内部值
-  const value = externalValue !== undefined ? externalValue : internalValue;
+  // 使用外部值或内部值，确保空字符串也会被替换为默认值
+  const value = externalValue !== undefined ? (externalValue || DEFAULT_JSON) : internalValue;
   
   const { errors, validate, isValid, setModelMarkers } = useJsonValidation();
   
@@ -807,8 +807,8 @@ export function TouchEnabledJsonEditor({
         <Editor
           height="100%"
           defaultLanguage="json"
-          defaultValue={externalValue === undefined ? DEFAULT_JSON : externalValue}
-          value={value || (externalValue === undefined ? DEFAULT_JSON : externalValue)}
+          defaultValue={DEFAULT_JSON}
+          value={value || DEFAULT_JSON}
           onChange={handleEditorChange}
           theme={monacoTheme}
           options={getEditorOptions(

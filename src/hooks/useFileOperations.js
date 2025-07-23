@@ -135,16 +135,35 @@ export const useFileOperations = ({
     try {
       const fileInfo = await readFile(file);
       
-      setCurrentFile(fileInfo);
-      setOriginalContent(fileInfo.content);
-      setIsDirty(false);
-      
-      // 保存到本地存储
-      PersistenceService.saveEditorContent(fileInfo.content, fileInfo);
-      
-      // 最近文件功能已移除
-      
-      onContentChange && onContentChange(fileInfo.content);
+      // 验证JSON是否有效
+      try {
+        // 尝试解析JSON以确保它是有效的
+        JSON.parse(fileInfo.content);
+        
+        setCurrentFile(fileInfo);
+        setOriginalContent(fileInfo.content);
+        setIsDirty(false);
+        
+        // 保存到本地存储
+        PersistenceService.saveEditorContent(fileInfo.content, fileInfo);
+        
+        // 最近文件功能已移除
+        
+        onContentChange && onContentChange(fileInfo.content);
+      } catch (jsonError) {
+        // JSON解析失败，但仍然加载文件，并显示错误
+        setCurrentFile(fileInfo);
+        setOriginalContent(fileInfo.content);
+        setIsDirty(false);
+        
+        // 保存到本地存储
+        PersistenceService.saveEditorContent(fileInfo.content, fileInfo);
+        
+        onContentChange && onContentChange(fileInfo.content);
+        
+        // 显示JSON解析错误，但不阻止加载
+        onError && onError(new Error(`JSON解析错误: ${jsonError.message}。文件已加载，但可能需要修复。`));
+      }
     } catch (error) {
       onError && onError(error);
     } finally {
@@ -164,28 +183,64 @@ export const useFileOperations = ({
       if (result) {
         // 检查文件大小
         const isLarge = isLargeFile(result.content);
-        // 更新当前文件信息
-        setCurrentFile({
-          name: result.name,
-          path: result.path,
-          content: result.content,
-          handle: result.handle,
-          directoryHandle: result.directoryHandle,
-          isLarge
-        });
-        // 更新原始内容，用于脏检查
-        setOriginalContent(result.content);
-        setIsDirty(false);
-        // 更新本地存储
-        PersistenceService.saveEditorContent(result.content, {
-          name: result.name,
-          path: result.path,
-          handle: result.handle,
-          directoryHandle: result.directoryHandle
-        });
-        // 如果是大文件，触发回调
-        if (isLarge && onLargeFile) {
-          onLargeFile(result.content, result.name);
+        
+        // 验证JSON是否有效
+        try {
+          // 尝试解析JSON以确保它是有效的
+          JSON.parse(result.content);
+          
+          // 更新当前文件信息
+          setCurrentFile({
+            name: result.name,
+            path: result.path,
+            content: result.content,
+            handle: result.handle,
+            directoryHandle: result.directoryHandle,
+            isLarge
+          });
+          // 更新原始内容，用于脏检查
+          setOriginalContent(result.content);
+          setIsDirty(false);
+          // 更新本地存储
+          PersistenceService.saveEditorContent(result.content, {
+            name: result.name,
+            path: result.path,
+            handle: result.handle,
+            directoryHandle: result.directoryHandle
+          });
+          // 如果是大文件，触发回调
+          if (isLarge && onLargeFile) {
+            onLargeFile(result.content, result.name);
+          }
+          
+          // 通知内容变化
+          onContentChange && onContentChange(result.content);
+        } catch (jsonError) {
+          // JSON解析失败，但仍然加载文件，并显示错误
+          setCurrentFile({
+            name: result.name,
+            path: result.path,
+            content: result.content,
+            handle: result.handle,
+            directoryHandle: result.directoryHandle,
+            isLarge
+          });
+          setOriginalContent(result.content);
+          setIsDirty(false);
+          
+          // 更新本地存储
+          PersistenceService.saveEditorContent(result.content, {
+            name: result.name,
+            path: result.path,
+            handle: result.handle,
+            directoryHandle: result.directoryHandle
+          });
+          
+          // 通知内容变化
+          onContentChange && onContentChange(result.content);
+          
+          // 显示JSON解析错误，但不阻止加载
+          onError && onError(new Error(`JSON解析错误: ${jsonError.message}。文件已加载，但可能需要修复。`));
         }
       }
     } catch (error) {
@@ -193,7 +248,7 @@ export const useFileOperations = ({
     } finally {
       setIsLoading(false);
     }
-  }, [onError, onLargeFile]);
+  }, [onError, onLargeFile, onContentChange]);
   
   /**
    * 保存当前文件

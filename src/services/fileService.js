@@ -30,7 +30,12 @@ export const readFile = (file) => {
     
     reader.onload = (event) => {
       try {
-        const content = event.target.result;
+        let content = event.target.result;
+        
+        // 确保内容不为空
+        if (!content || content.trim() === '') {
+          content = '{}'; // 提供一个默认的空JSON对象
+        }
         
         resolve({
           name: file.name,
@@ -74,7 +79,13 @@ export const readFileWithPicker = async () => {
       // 显示文件选择器
       const [fileHandle] = await window.showOpenFilePicker(options);
       const file = await fileHandle.getFile();
-      const content = await file.text();
+      let content = await file.text();
+      
+      // 确保内容不为空
+      if (!content || content.trim() === '') {
+        content = '{}'; // 提供一个默认的空JSON对象
+      }
+      
       // 尝试获取父目录句柄
       let directoryHandle = null;
       try {
@@ -110,8 +121,15 @@ export const readFileWithPicker = async () => {
         }
         const reader = new FileReader();
         reader.onload = () => {
+          let content = reader.result;
+          
+          // 确保内容不为空
+          if (!content || content.trim() === '') {
+            content = '{}'; // 提供一个默认的空JSON对象
+          }
+          
           resolve({
-            content: reader.result,
+            content,
             name: file.name,
             path: file.name,
             handle: null,

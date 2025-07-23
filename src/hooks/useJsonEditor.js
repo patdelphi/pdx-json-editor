@@ -21,7 +21,9 @@ import { formatJson, compressJson, tryFixJson } from '../services/jsonService';
  * }} - JSON编辑器相关状态和方法
  */
 export const useJsonEditor = (initialValue = '') => {
-  const [value, setValue] = useState(initialValue);
+  // 确保初始值不为空
+  const safeInitialValue = initialValue || '{}';
+  const [value, setValue] = useState(safeInitialValue);
   const [indentSize, setIndentSize] = useState(2);
   const [error, setError] = useState(null);
   
