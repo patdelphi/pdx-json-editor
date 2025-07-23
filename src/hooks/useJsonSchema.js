@@ -72,7 +72,7 @@ export const useJsonSchema = (monaco, jsonContent) => {
   
   // 添加新的Schema
   const addSchema = useCallback((schema) => {
-    const updatedSchemas = addUserSchema(schema);
+    addUserSchema(schema);
     const allSchemas = [...getAllSchemas()];
     setSchemas(allSchemas);
     

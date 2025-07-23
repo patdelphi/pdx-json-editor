@@ -1,13 +1,12 @@
-import { useState, useEffect } from 'preact/hooks';
-import { Box, Drawer, IconButton, Fab, useTheme, Tooltip } from '@mui/material';
+import { useState } from 'preact/hooks';
+import { Box, Drawer, IconButton, Fab, Tooltip } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
-import EditIcon from '@mui/icons-material/Edit';
 import SaveIcon from '@mui/icons-material/Save';
 import { useBreakpoint, useTouchDevice } from '../hooks/useResponsive';
 import { Header } from '../components/Header';
 import { MobileHeader } from '../components/MobileHeader';
-import { ariaAttributes, createMain, createComplementary } from '../utils/accessibilityUtils';
+import { createMain, createComplementary } from '../utils/accessibilityUtils';
 
 /**
  * 响应式布局组件
@@ -24,7 +23,6 @@ export function ResponsiveLayout({ header, sidebar, content, isDirty, onSave }) 
   const { isMobile, isTablet } = useBreakpoint();
   const isTouch = useTouchDevice();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const theme = useTheme();
   
   // 处理抽屉切换
   const handleDrawerToggle = () => {

@@ -6,11 +6,7 @@ import { renderHook, act } from '@testing-library/preact-hooks';
 import { 
   useKeyboardNavigation, 
   useFocusTrap, 
-  useKeyboardShortcutNavigation,
-  useKeyboardNavigationMenu,
-  useKeyboardNavigationDialog,
-  useKeyboardNavigationTabs,
-  useKeyboardNavigationTree
+  useKeyboardShortcutNavigation
 } from '../useKeyboardNavigation';
 
 // 模拟DOM元素

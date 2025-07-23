@@ -9,9 +9,9 @@ jest.mock('../../services/validationService', () => ({
   validateJson: jest.fn((json) => {
     if (json.includes('"name": "test"')) {
       return [];
-    } else {
+    } 
       return [{ line: 1, column: 10, message: 'Invalid JSON', severity: 'error' }];
-    }
+    
   }),
   jsonErrorToMarker: jest.fn((error) => ({
     severity: error.severity === 'error' ? 8 : 4,

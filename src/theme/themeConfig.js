@@ -11,7 +11,8 @@ import {
   transitions, 
   breakpoints, 
   zIndex, 
-  components 
+  components,
+  colors
 } from './designSystem';
 
 // 基础主题配置
@@ -26,8 +27,7 @@ const baseTheme = {
   components
 };
 
-// 导入颜色系统
-import { colors } from './designSystem';
+
 
 // 浅色主题
 export const lightTheme = {

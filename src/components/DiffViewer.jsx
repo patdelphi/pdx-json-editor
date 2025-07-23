@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect } from 'preact/hooks';
-import { Box, Paper, Typography, Divider, IconButton, Button, ToggleButtonGroup, ToggleButton, Tooltip } from '@mui/material';
+import { useState, useRef } from 'preact/hooks';
+import { Box, Typography, IconButton, ToggleButtonGroup, ToggleButton, Tooltip } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import VerticalSplitIcon from '@mui/icons-material/VerticalSplit';
 import HorizontalSplitIcon from '@mui/icons-material/HorizontalSplit';
@@ -8,7 +8,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SaveIcon from '@mui/icons-material/Save';
 import DiffEditor from '@monaco-editor/react';
 import { useTheme } from '../theme/ThemeContext';
-import { ariaAttributes } from '../utils/accessibilityUtils';
+
 import { FadeTransition } from './design';
 
 /**
@@ -31,7 +31,7 @@ export function DiffViewer({
   modifiedTitle = '修改后'
 }) {
   // 使用主题上下文
-  const { themeId, monacoTheme } = useTheme();
+  const { monacoTheme } = useTheme();
   
   // 编辑器引用
   const diffEditorRef = useRef(null);
@@ -77,7 +77,7 @@ export function DiffViewer({
   };
   
   // 显示提示信息
-  const showAlert = (message, severity = 'success') => {
+  const showAlert = (message) => {
     setAlertMessage(message);
     setAlertOpen(true);
     

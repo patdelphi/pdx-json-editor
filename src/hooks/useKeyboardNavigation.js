@@ -125,7 +125,7 @@ export const useKeyboardNavigation = ({
       onEnd: moveLast,
       onEnter: selectCurrent,
       onSpace: selectCurrent,
-      onEscape: onEscape
+      onEscape
     });
     
     handler(event);
@@ -456,7 +456,6 @@ export const useKeyboardNavigationDialog = ({
 export const useKeyboardNavigationTabs = ({
   tablistSelector,
   tabSelector,
-  panelSelector,
   onSelect,
   vertical = false
 }) => {

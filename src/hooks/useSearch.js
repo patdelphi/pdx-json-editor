@@ -41,11 +41,11 @@ export const useSearch = (text, onTextChange) => {
   const [currentMatchIndex, setCurrentMatchIndex] = useState(-1);
   
   // 搜索选项
-  const searchOptions = {
+  const searchOptions = useCallback(() => ({
     caseSensitive,
     wholeWord,
     regex
-  };
+  }), [caseSensitive, wholeWord, regex]);
   
   // 执行搜索
   const performSearch = useCallback(() => {
@@ -56,7 +56,7 @@ export const useSearch = (text, onTextChange) => {
     }
     
     try {
-      const results = searchInText(text, searchText, searchOptions);
+      const results = searchInText(text, searchText, searchOptions());
       setSearchResults(results);
       setCurrentMatchIndex(results.length > 0 ? 0 : -1);
       return results;
@@ -111,7 +111,7 @@ export const useSearch = (text, onTextChange) => {
       text,
       searchText,
       replaceText,
-      searchOptions,
+      searchOptions(),
       false,
       currentMatchIndex
     );
@@ -130,7 +130,7 @@ export const useSearch = (text, onTextChange) => {
         text,
         searchText,
         replaceText,
-        searchOptions,
+        searchOptions(),
         true
       );
       
@@ -146,7 +146,7 @@ export const useSearch = (text, onTextChange) => {
       console.error('替换错误:', error);
       return 0;
     }
-  }, [text, searchText, replaceText, searchOptions, searchResults, onTextChange]);
+  }, [text, searchText, replaceText, searchOptions, searchResults, onTextChange, performSearch]);
   
   // 高亮当前匹配项
   const highlightMatch = useCallback((monaco, editor) => {

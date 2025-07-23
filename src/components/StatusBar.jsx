@@ -1,7 +1,7 @@
 import { Box, Typography, Chip, Tooltip } from '@mui/material';
 import { CheckCircle, Error, Warning } from '@mui/icons-material';
 import { useBreakpoint } from '../hooks/useResponsive';
-import { ariaAttributes, createStatus } from '../utils/accessibilityUtils';
+import { createStatus } from '../utils/accessibilityUtils';
 
 /**
  * 状态栏组件
@@ -26,7 +26,7 @@ export function StatusBar({ isValid = true, errors = [], cursorPosition = { line
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))  } ${  sizes[i]}`;
   };
   
   // 创建状态ARIA属性

@@ -17,7 +17,7 @@ import {
   Button, 
   Alert, 
   FadeTransition, 
-  ZoomTransition,
+  
   PageTransition
 } from './components/design';
 
@@ -131,48 +131,34 @@ export function App() {
     };
     
     // 将函数添加到全局对象
-    if (window.pdxJsonEditor) {
-      window.pdxJsonEditor.saveOriginalContent = saveOriginalContent;
-      window.pdxJsonEditor.openDiffViewer = openDiffViewer;
-      window.pdxJsonEditor.handleLargeFile = handleLargeFile;
-      window.pdxJsonEditor.triggerFileOpen = triggerFileOpen;
-      window.pdxJsonEditor.setCurrentFile = setCurrentFile;
-      
-      // 添加openFileWithPicker函数
-      if (!window.pdxJsonEditor.openFileWithPicker && window.showOpenFilePicker) {
-        window.pdxJsonEditor.openFileWithPicker = () => {
-          // 通过自定义事件通知MainLayout组件使用文件选择器API打开文件
-          window.dispatchEvent(new CustomEvent('useFilePickerAPI'));
-        };
-      }
-      
-      // 如果没有定义openFileByPath函数，添加一个基本实现
-      if (!window.pdxJsonEditor.openFileByPath) {
-        window.pdxJsonEditor.openFileByPath = (filePath) => {
-          console.log('尝试打开文件路径:', filePath);
-          // 这里可以添加实际的文件打开逻辑，如果有文件系统API支持
-          // 目前只是记录日志，实际功能需要根据应用环境实现
-        };
-      }
-    } else {
-      window.pdxJsonEditor = {
-        saveOriginalContent,
-        openDiffViewer,
-        handleLargeFile,
-        triggerFileOpen,
-        setCurrentFile,
-        openFileByPath: (filePath) => {
-          console.log('尝试打开文件路径:', filePath);
-          // 这里可以添加实际的文件打开逻辑，如果有文件系统API支持
-        },
-        // 添加openFileWithPicker函数
-        openFileWithPicker: window.showOpenFilePicker ? () => {
-          // 通过自定义事件通知MainLayout组件使用文件选择器API打开文件
-          window.dispatchEvent(new CustomEvent('useFilePickerAPI'));
-        } : undefined
+    // 确保window.pdxJsonEditor已初始化
+    if (!window.pdxJsonEditor) {
+      window.pdxJsonEditor = {};
+    }
+
+    // 将函数添加到全局对象
+    window.pdxJsonEditor.saveOriginalContent = saveOriginalContent;
+    window.pdxJsonEditor.openDiffViewer = openDiffViewer;
+    window.pdxJsonEditor.handleLargeFile = handleLargeFile;
+    window.pdxJsonEditor.triggerFileOpen = triggerFileOpen;
+    window.pdxJsonEditor.setCurrentFile = setCurrentFile;
+    
+    // 添加openFileWithPicker函数
+    if (!window.pdxJsonEditor.openFileWithPicker && window.showOpenFilePicker) {
+      window.pdxJsonEditor.openFileWithPicker = () => {
+        // 通过自定义事件通知MainLayout组件使用文件选择器API打开文件
+        window.dispatchEvent(new CustomEvent('useFilePickerAPI'));
       };
     }
     
+    // 如果没有定义openFileByPath函数，添加一个基本实现
+    if (!window.pdxJsonEditor.openFileByPath) {
+      window.pdxJsonEditor.openFileByPath = (filePath) => {
+        console.log('尝试打开文件路径:', filePath);
+        // 这里可以添加实际的文件打开逻辑，如果有文件系统API支持
+        // 目前只是记录日志，实际功能需要根据应用环境实现
+      };
+    }
     // 清理函数
     return () => {
       if (window.pdxJsonEditor) {
@@ -191,48 +177,48 @@ export function App() {
     setSettingsOpen(!settingsOpen);
   };
 
-  const toggleLargeFileWarning = () => {
-    setLargeFileWarningOpen(!largeFileWarningOpen);
-  };
+  
 
   const toggleDiffViewer = () => {
-    if (!diffViewerOpen) {
-      // 打开差异对比视图时，获取当前内容作为修改后内容
-      const currentContent = window.pdxJsonEditor?.getCurrentContent?.() || '{\n  "example": "modified content"\n}';
-      
-      // 检查内容大小
-      const contentSize = new Blob([currentContent]).size;
-      if (contentSize > 2 * 1024 * 1024) { // 2MB
-        // 对于大文件，显示警告而不是直接打开差异对比视图
-        setErrorAlert({
-          open: true,
-          message: '文件过大，差异对比可能导致性能问题',
-          severity: 'warning'
-        });
-        return;
-      }
-      
-      // 如果有原始内容，使用它；否则使用格式化后的当前内容作为原始内容
-      let originalContent = originalContentRef.current;
-      if (!originalContent) {
-        try {
-          // 尝试格式化当前内容作为原始内容
-          originalContent = JSON.stringify(JSON.parse(currentContent), null, 2);
-        } catch (e) {
-          // 如果解析失败，使用当前内容
-          originalContent = currentContent;
-        }
-      }
-      
-      setDiffViewerContent({
-        original: originalContent,
-        modified: currentContent,
-        originalTitle: '原始',
-        modifiedTitle: '当前'
+    if (diffViewerOpen) {
+      setDiffViewerOpen(false);
+      return;
+    }
+
+    // 打开差异对比视图时，获取当前内容作为修改后内容
+    const currentContent = window.pdxJsonEditor?.getCurrentContent?.() || '{\n  "example": "modified content"\n}';
+    
+    // 检查内容大小
+    const contentSize = new Blob([currentContent]).size;
+    if (contentSize > 2 * 1024 * 1024) { // 2MB
+      // 对于大文件，显示警告而不是直接打开差异对比视图
+      setErrorAlert({
+        open: true,
+        message: '文件过大，差异对比可能导致性能问题',
+        severity: 'warning'
       });
+      return;
     }
     
-    setDiffViewerOpen(!diffViewerOpen);
+    // 如果有原始内容，使用它；否则使用格式化后的当前内容作为原始内容
+    let originalContent = originalContentRef.current;
+    if (!originalContent) {
+      try {
+        // 尝试格式化当前内容作为原始内容
+        originalContent = JSON.stringify(JSON.parse(currentContent), null, 2);
+      } catch (e) {
+        // 如果解析失败，使用当前内容
+        originalContent = currentContent;
+      }
+    }
+    
+    setDiffViewerContent({
+      original: originalContent,
+      modified: currentContent,
+      originalTitle: '原始',
+      modifiedTitle: '当前'
+    });
+    setDiffViewerOpen(true);
   };
   
   // 保存差异对比结果
@@ -255,11 +241,9 @@ export function App() {
       setCurrentLargeFile(file);
       // 显示大文件警告
       setLargeFileWarningOpen(true);
-    } else {
+    } else if (window.pdxJsonEditor?.openFile) {
       // 如果不是大文件，直接处理
-      if (window.pdxJsonEditor?.openFile) {
-        window.pdxJsonEditor.openFile(file);
-      }
+      window.pdxJsonEditor.openFile(file);
     }
   };
   

@@ -5,7 +5,7 @@ import {
   Healing,
   Search,
   Settings,
-  Compare,
+  
   UnfoldLess,
   UnfoldMore,
   Keyboard,
@@ -36,7 +36,6 @@ import { SchemaSelector } from './SchemaSelector';
  * @param {Function} props.onAutoDetectSchema - 自动检测Schema的回调函数
  */
 export function EditorToolbar({ 
-  onSearchClick, 
   onSettingsClick, 
   onFoldAllClick,
   onUnfoldAllClick,

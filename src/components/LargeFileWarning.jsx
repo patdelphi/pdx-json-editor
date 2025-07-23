@@ -34,7 +34,6 @@ export function LargeFileWarning({
   fileName, 
   onContinue, 
   onCancel,
-  warningThreshold = 5 * 1024 * 1024, // 5MB
   dangerThreshold = 20 * 1024 * 1024  // 20MB
 }) {
   const [rememberChoice, setRememberChoice] = useState(false);

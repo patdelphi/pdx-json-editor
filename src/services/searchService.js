@@ -50,7 +50,7 @@ export function searchInText(text, pattern, options = {}) {
       index: match.index,
       text: match[0],
       line: lineNumber,
-      lineNumber: lineNumber,
+      lineNumber,
       column: columnNumber,
       length: match[0].length
     });

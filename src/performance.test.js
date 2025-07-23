@@ -152,7 +152,7 @@ describe('性能测试', () => {
     const startTime = performance.now();
     
     // 格式化JSON
-    const formatted = JSON.stringify(JSON.parse(content), null, 2);
+    JSON.stringify(JSON.parse(content), null, 2);
     
     // 记录格式化时间
     const formatTime = performance.now() - startTime;
@@ -173,7 +173,7 @@ describe('性能测试', () => {
     const startTime = performance.now();
     
     // 压缩JSON
-    const compressed = JSON.stringify(JSON.parse(content));
+    JSON.stringify(JSON.parse(content));
     
     // 记录压缩时间
     const compressTime = performance.now() - startTime;

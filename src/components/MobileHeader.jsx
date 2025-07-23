@@ -20,7 +20,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { ThemeSelector } from './ThemeSelector';
 import errorService from '../services/errorService';
-import { ariaAttributes, createNavigation, createMenu } from '../utils/accessibilityUtils';
+import { createNavigation, createMenu } from '../utils/accessibilityUtils';
 
 /**
  * 移动端头部组件

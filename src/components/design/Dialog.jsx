@@ -10,7 +10,7 @@ import {
   DialogContentText, 
   DialogActions 
 } from '@mui/material';
-import { ariaAttributes, createDialog } from '../../utils/accessibilityUtils';
+import { createDialog } from '../../utils/accessibilityUtils';
 import { Button } from './Button';
 
 /**

@@ -15,29 +15,7 @@ import {
   createDialog,
   createMenu,
   createTabs,
-  createTree,
-  createList,
-  createTable,
-  createTooltip,
-  createAlert,
-  createStatus,
-  createSearchbox,
-  createCheckbox,
-  createSwitch,
-  createSlider,
-  createButton,
-  createLink,
-  createImage,
-  createSeparator,
-  createRegion,
-  createLandmark,
-  createNavigation,
-  createMain,
-  createContentinfo,
-  createBanner,
-  createComplementary,
-  createForm,
-  createSearch
+  createButton
 } from '../accessibilityUtils';
 
 describe('accessibilityUtils', () => {
@@ -175,7 +153,7 @@ describe('accessibilityUtils', () => {
       
       // 测试未处理的键
       handler({ key: 'A', preventDefault });
-      expect(preventDefault.mock.calls.length).toBe(4); // 仍然是4次，没有增加
+      expect(preventDefault.mock.calls).toHaveLength(4); // 仍然是4次，没有增加
     });
     
     test('应忽略带修饰键的事件', () => {

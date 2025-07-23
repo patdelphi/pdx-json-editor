@@ -3,7 +3,7 @@
  */
 
 import { h } from 'preact';
-import { render, fireEvent, screen } from '@testing-library/preact';
+import { render, screen } from '@testing-library/preact';
 import { TouchEnabledJsonEditor } from '../TouchEnabledJsonEditor';
 import { useBreakpoint, useTouchDevice } from '../../hooks/useResponsive';
 import { useSwipe, usePinch, useDoubleTap } from '../../hooks/useGestures';

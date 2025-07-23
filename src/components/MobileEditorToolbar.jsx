@@ -16,7 +16,7 @@ import CompressOutlinedIcon from '@mui/icons-material/CompressOutlined';
 import HealingIcon from '@mui/icons-material/Healing';
 import SearchIcon from '@mui/icons-material/Search';
 import SettingsIcon from '@mui/icons-material/Settings';
-import CompareIcon from '@mui/icons-material/Compare';
+
 import UnfoldLessIcon from '@mui/icons-material/UnfoldLess';
 import UnfoldMoreIcon from '@mui/icons-material/UnfoldMore';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -40,7 +40,6 @@ import { useBreakpoint } from '../hooks/useResponsive';
 export function MobileEditorToolbar({
   onFoldAllClick,
   onUnfoldAllClick,
-  onSearchClick,
   onSettingsClick,
   onSchemaClick,
   onKeyboardShortcutsClick

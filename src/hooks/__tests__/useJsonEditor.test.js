@@ -6,7 +6,7 @@ import { useJsonEditor } from '../useJsonEditor';
 
 // 模拟jsonService
 jest.mock('../../services/jsonService', () => ({
-  formatJson: jest.fn((json, indent) => {
+  formatJson: jest.fn((json) => {
     if (json === '{"name":"test"}') {
       return '{\n  "name": "test"\n}';
     }

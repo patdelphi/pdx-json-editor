@@ -4,7 +4,7 @@
  */
 
 import { Alert as MuiAlert, AlertTitle } from '@mui/material';
-import { ariaAttributes, createAlert } from '../../utils/accessibilityUtils';
+import { createAlert } from '../../utils/accessibilityUtils';
 
 /**
  * 警告提示组件

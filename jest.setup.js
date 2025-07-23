@@ -45,30 +45,7 @@ global.cancelAnimationFrame = function(id) {
 };
 
 // 模拟localStorage
-const localStorageMock = (() => {
-  let store = {};
-  return {
-    getItem: jest.fn(key => store[key] || null),
-    setItem: jest.fn((key, value) => {
-      store[key] = value.toString();
-    }),
-    removeItem: jest.fn(key => {
-      delete store[key];
-    }),
-    clear: jest.fn(() => {
-      store = {};
-    })
-  };
-})();
 
-Object.defineProperty(window, 'localStorage', {
-  value: localStorageMock
-});
-
-// 模拟sessionStorage
-Object.defineProperty(window, 'sessionStorage', {
-  value: localStorageMock
-});
 
 // 模拟URL.createObjectURL
 URL.createObjectURL = jest.fn(() => 'blob:test');

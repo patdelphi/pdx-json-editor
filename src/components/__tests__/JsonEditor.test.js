@@ -9,7 +9,7 @@ import { JsonEditor } from '../JsonEditor';
 jest.mock('@monaco-editor/react', () => {
   return {
     __esModule: true,
-    default: ({ value, onChange, onMount }) => {
+    default: ({ value }) => {
       return h('div', { 
         'data-testid': 'monaco-editor',
         'data-value': value

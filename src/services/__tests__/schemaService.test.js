@@ -73,7 +73,7 @@ describe('schemaService', () => {
     
     const updatedSchemas = addUserSchema(newSchema);
     
-    expect(updatedSchemas.length).toBe(1);
+    expect(updatedSchemas).toHaveLength(1);
     expect(updatedSchemas[0].name).toBe('New Schema');
     expect(updatedSchemas[0].predefined).toBe(false);
     expect(localStorageMock.setItem).toHaveBeenCalled();
@@ -89,7 +89,7 @@ describe('schemaService', () => {
     
     const updatedSchemas = deleteUserSchema('user-schema-1');
     
-    expect(updatedSchemas.length).toBe(1);
+    expect(updatedSchemas).toHaveLength(1);
     expect(updatedSchemas[0].id).toBe('user-schema-2');
     expect(localStorageMock.setItem).toHaveBeenCalled();
   });
@@ -109,7 +109,7 @@ describe('schemaService', () => {
     
     const updatedSchemas = updateUserSchema('user-schema-1', updatedSchema);
     
-    expect(updatedSchemas.length).toBe(2);
+    expect(updatedSchemas).toHaveLength(2);
     expect(updatedSchemas[0].name).toBe('Updated Schema');
     expect(updatedSchemas[0].uri).toBe('http://example.com/updated');
     expect(updatedSchemas[1].name).toBe('Test Schema 2');
@@ -122,7 +122,7 @@ describe('schemaService', () => {
       name: 'test-package',
       version: '1.0.0',
       dependencies: {
-        'react': '^17.0.0'
+        react: '^17.0.0'
       }
     });
     

@@ -73,7 +73,7 @@ jest.mock('@monaco-editor/react', () => {
 });
 
 // 模拟文件API
-const mockFile = new File(['{"test":"value"}'], 'test.json', { type: 'application/json' });
+
 
 // 模拟localStorage
 const localStorageMock = (() => {

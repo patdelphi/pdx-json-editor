@@ -8,7 +8,7 @@ import { Box, Typography, Button, Paper, Divider } from '@mui/material';
 import ErrorIcon from '@mui/icons-material/Error';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import BugReportIcon from '@mui/icons-material/BugReport';
-import errorService, { ErrorSeverity } from '../services/errorService';
+import errorService from '../services/errorService';
 
 /**
  * 错误边界组件

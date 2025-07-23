@@ -480,7 +480,7 @@ export const createTooltip = (id, tooltipId) => {
  * @param {string} level - 警告级别（error, warning, info）
  * @returns {Object} - ARIA警告属性
  */
-export const createAlert = (message, level = 'info') => {
+export const createAlert = (_message, level = 'info') => {
   const id = createUniqueId('alert');
   
   return {
@@ -495,7 +495,7 @@ export const createAlert = (message, level = 'info') => {
  * @param {string} message - 状态消息
  * @returns {Object} - ARIA状态属性
  */
-export const createStatus = (message) => {
+export const createStatus = (_message) => {
   const id = createUniqueId('status');
   
   return {

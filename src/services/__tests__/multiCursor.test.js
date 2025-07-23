@@ -54,7 +54,7 @@ describe('multiCursor', () => {
           endLineNumber: selection.positionLineNumber,
           endColumn: selection.positionColumn
         },
-        text: text,
+        text,
         forceMoveMarkers: true
       }));
       

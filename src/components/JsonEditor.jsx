@@ -43,11 +43,11 @@ export function JsonEditor({
   // 使用主题上下文
   const { themeId, monacoTheme } = useTheme();
   // 使用响应式Hook
-  const { isMobile, isTablet } = useBreakpoint();
+  const { isMobile } = useBreakpoint();
   // Schema对话框状态
   const [schemaDialogOpen, setSchemaDialogOpen] = useState(false);
   // 性能优化状态
-  const [performanceMode, setPerformanceMode] = useState(isLargeFile);
+  const [performanceMode] = useState(isLargeFile);
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
   const [cursorPosition, setCursorPosition] = useState({ line: 1, column: 1 });
@@ -113,7 +113,7 @@ export function JsonEditor({
   } = useJsonSchema(monacoRef.current, value);
 
   // 处理编辑器内容变化
-  const handleEditorChange = (newValue) => {
+  const handleEditorChange = useCallback((newValue) => {
     if (externalValue === undefined) {
       setInternalValue(newValue);
     }
@@ -123,7 +123,7 @@ export function JsonEditor({
     }
     
     validate(newValue);
-  };
+  }, [externalValue, externalOnChange, setInternalValue, validate]);
 
   // 处理编辑器挂载
   const handleEditorDidMount = (editor, monaco) => {
@@ -143,7 +143,7 @@ export function JsonEditor({
     
     // 初始验证（如果不是大文件）
     if (!performanceMode) {
-      const initialErrors = validate(editor.getValue());
+      validate(editor.getValue());
       setModelMarkers(monaco, editor.getModel());
     }
     
@@ -316,14 +316,6 @@ export function JsonEditor({
     setSchemaDialogOpen(false);
   }, []);
 
-  // 显示提示信息
-  const showAlert = (message, severity) => {
-    console.log(`显示提示: ${message} (${severity})`);
-    setAlertMessage(message);
-    setAlertSeverity(severity);
-    setAlertOpen(true);
-  };
-
   // 关闭提示信息
   const handleAlertClose = () => {
     setAlertOpen(false);
@@ -339,7 +331,6 @@ export function JsonEditor({
   // 当主题或性能模式改变时更新编辑器选项
   useEffect(() => {
     if (editorRef.current && monacoRef.current) {
-      const monaco = monacoRef.current;
       const editor = editorRef.current;
       
       // 更新主题
@@ -482,7 +473,7 @@ export function JsonEditor({
         formatJson: handleFormat,
         compressJson: handleCompress,
         tryFixJson: handleTryFix,
-        applySettings: applySettings,
+        applySettings,
         getCurrentContent: () => value,
         setContent: handleEditorChange,
         getEditorRef: () => editorRef.current,

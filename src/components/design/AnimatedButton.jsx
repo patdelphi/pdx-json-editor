@@ -3,13 +3,9 @@
  * 提供带有动画效果的按钮组件
  */
 
-import { useState } from 'preact/hooks';
 import { Button as MuiButton, Box, CircularProgress } from '@mui/material';
 import { 
-  createButtonClickEffect, 
-  createRippleEffect,
-  pulse,
-  ripple
+  createButtonClickEffect,
 } from '../../utils/animationUtils';
 import { ariaAttributes } from '../../utils/accessibilityUtils';
 
@@ -51,7 +47,6 @@ export function AnimatedButton({
   disabled = false,
   loading = false,
   loadingPosition = 'center',
-  animation = 'ripple',
   onClick,
   startIcon,
   endIcon,
@@ -71,7 +66,7 @@ export function AnimatedButton({
   children,
   ...rest
 }) {
-  const [rippleActive, setRippleActive] = useState(false);
+  
   
   // 创建ARIA属性
   const ariaProps = ariaAttributes({
@@ -84,11 +79,6 @@ export function AnimatedButton({
   
   // 处理点击事件
   const handleClick = (event) => {
-    if (animation === 'ripple') {
-      setRippleActive(true);
-      setTimeout(() => setRippleActive(false), 600);
-    }
-    
     if (onClick) {
       onClick(event);
     }
@@ -113,16 +103,6 @@ export function AnimatedButton({
   
   // 动画样式
   const animationStyle = {};
-  
-  if (animation === 'ripple') {
-    Object.assign(animationStyle, createRippleEffect());
-  } else if (animation === 'pulse') {
-    Object.assign(animationStyle, {
-      '&:hover': {
-        animation: `${pulse} 1s ease-in-out`
-      }
-    });
-  }
   
   // 点击效果
   const clickEffect = createButtonClickEffect();

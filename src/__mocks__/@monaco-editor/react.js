@@ -51,7 +51,7 @@ const mockMonaco = {
 };
 
 // 模拟编辑器组件
-const Editor = ({ value, onChange, onMount }) => {
+const Editor = ({ value, onMount }) => {
   // 模拟编辑器挂载
   if (onMount) {
     setTimeout(() => {

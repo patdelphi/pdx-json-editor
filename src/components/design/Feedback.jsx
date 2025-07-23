@@ -6,14 +6,9 @@
 import { useState, useEffect } from 'preact/hooks';
 import { Box, CircularProgress, LinearProgress, Fade, Grow, Zoom, Collapse } from '@mui/material';
 import { 
-  createAnimation, 
-  fadeIn, 
-  fadeOut, 
-  slideInFromTop, 
-  slideInFromBottom,
+  fadeOut,
   pulse,
   rotate,
-  createLoadingAnimation,
   createSkeletonAnimation
 } from '../../utils/animationUtils';
 

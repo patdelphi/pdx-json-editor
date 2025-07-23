@@ -11,7 +11,6 @@ import { configureJsonLanguage, configureJsonFolding, getEditorOptions } from '.
 import { useJsonValidation } from '../hooks/useJsonValidation';
 import { useJsonEditor } from '../hooks/useJsonEditor';
 import { useJsonSchema } from '../hooks/useJsonSchema';
-import { formatJson, compressJson, tryFixJson } from '../services/jsonService';
 import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 import { useBreakpoint, useTouchDevice } from '../hooks/useResponsive';
 import { useSwipe, usePinch, useDoubleTap } from '../hooks/useGestures';
@@ -49,12 +48,12 @@ export function TouchEnabledJsonEditor({
   // 使用主题上下文
   const { themeId, monacoTheme } = useTheme();
   // 使用响应式Hook
-  const { isMobile, isTablet } = useBreakpoint();
+  const { isMobile } = useBreakpoint();
   const isTouch = useTouchDevice();
   // Schema对话框状态
   const [schemaDialogOpen, setSchemaDialogOpen] = useState(false);
   // 性能优化状态
-  const [performanceMode, setPerformanceMode] = useState(isLargeFile);
+  const [performanceMode] = useState(isLargeFile);
   // 编辑器字体大小
   const [fontSize, setFontSize] = useState(14);
   
@@ -90,12 +89,8 @@ export function TouchEnabledJsonEditor({
   const { 
     value: internalValue, 
     setValue: setInternalValue, 
-    formatJson, 
-    compressJson, 
     tryFixJson, 
-    indentSize, 
-    setIndentSize, 
-    error: jsonError 
+    setIndentSize 
   } = useJsonEditor(externalValue !== undefined ? externalValue : '');
   
   // 使用外部值或内部值，确保空字符串也会被替换为默认值
@@ -175,17 +170,16 @@ export function TouchEnabledJsonEditor({
     editor.updateOptions({ fontSize });
     
     // 配置JSON语言支持
-    configureJsonLanguage(monaco);
+    configureJsonLanguage(editor.monaco);
     
     // 配置JSON折叠（如果不是大文件）
     if (!performanceMode) {
-      configureJsonFolding(monaco);
+      configureJsonFolding(editor.monaco);
     }
     
     // 初始验证（如果不是大文件）
     if (!performanceMode) {
-      const initialErrors = validate(editor.getValue());
-      setModelMarkers(monaco, editor.getModel());
+      validate(editor.getValue());
     }
     
     // 监听光标位置变化
@@ -307,8 +301,7 @@ export function TouchEnabledJsonEditor({
       
       // 使用Monaco的编辑操作来压缩JSON
       // 这种方法不会改变内容，只会移除空白字符
-      const edits = [];
-      const lineCount = model.getLineCount();
+      
       
       // 创建一个编辑操作，替换整个文本
       // 使用正则表达式移除不必要的空白字符
@@ -401,7 +394,7 @@ export function TouchEnabledJsonEditor({
     } catch (err) {
       showAlert(`修复失败: ${err.message}`, 'error');
     }
-  }, []);
+  }, [tryFixJson]);
   
   // 处理自动检测Schema
   const handleAutoDetectSchema = useCallback(() => {
@@ -507,13 +500,12 @@ export function TouchEnabledJsonEditor({
   // 当主题或性能模式改变时更新编辑器选项
   useEffect(() => {
     if (editorRef.current && monacoRef.current) {
-      const monaco = monacoRef.current;
       const editor = editorRef.current;
       
       // 更新主题
       editor.updateOptions({ 
         theme: monacoTheme,
-        fontSize: fontSize,
+        fontSize,
         // 根据性能模式更新其他选项
         ...(performanceMode ? {
           folding: false,
@@ -630,7 +622,7 @@ export function TouchEnabledJsonEditor({
         formatJson: handleFormat,
         compressJson: handleCompress,
         tryFixJson: safeTryFixJson,
-        applySettings: applySettings,
+        applySettings,
         getCurrentContent: () => editorRef.current ? editorRef.current.getValue() : value,
         setContent: setEditorContent,
         getEditorRef: () => editorRef.current,
@@ -682,16 +674,15 @@ export function TouchEnabledJsonEditor({
     handleTouchStart: handlePinchTouchStart, 
     handleTouchMove: handlePinchTouchMove,
     handleTouchEnd: handlePinchTouchEnd,
-    isEnabled: isPinchEnabled
   } = usePinch({
-    onPinchIn: ({ distance }) => {
+    onPinchIn: ({ _distance }) => {
       if (gestureMode === 'zoom') {
-        setFontSize(prev => Math.max(prev - 1, 8));
+        setFontSize(prev => Math.max(0.5, prev - 0.05));
       }
     },
-    onPinchOut: ({ distance }) => {
+    onPinchOut: ({ _distance }) => {
       if (gestureMode === 'zoom') {
-        setFontSize(prev => Math.min(prev + 1, 32));
+        setFontSize(prev => Math.min(2, prev + 0.05));
       }
     }
   });
@@ -700,23 +691,22 @@ export function TouchEnabledJsonEditor({
   const { 
     handleTouchStart: handleSwipeTouchStart, 
     handleTouchEnd: handleSwipeTouchEnd,
-    isEnabled: isSwipeEnabled
   } = useSwipe({
     threshold: 100,
-    onSwipeUp: ({ distance, isQuick }) => {
+    onSwipeUp: ({ _distance, isQuick }) => {
       if (gestureMode === 'scroll' && isQuick && editorRef.current) {
         // 快速向上滑动 - 向上翻页
         const editor = editorRef.current;
         const scrollAmount = Math.floor(editor.getVisibleRanges()[0].endLineNumber - editor.getVisibleRanges()[0].startLineNumber);
-        editor.setScrollPosition({ scrollTop: editor.getScrollTop() - scrollAmount * editor.getOption(monaco.editor.EditorOption.lineHeight) });
+        editor.setScrollPosition({ scrollTop: editor.getScrollTop() - scrollAmount * editor.getOption(monacoRef.current.editor.EditorOption.lineHeight) });
       }
     },
-    onSwipeDown: ({ distance, isQuick }) => {
+    onSwipeDown: ({ _distance, isQuick }) => {
       if (gestureMode === 'scroll' && isQuick && editorRef.current) {
         // 快速向下滑动 - 向下翻页
         const editor = editorRef.current;
         const scrollAmount = Math.floor(editor.getVisibleRanges()[0].endLineNumber - editor.getVisibleRanges()[0].startLineNumber);
-        editor.setScrollPosition({ scrollTop: editor.getScrollTop() + scrollAmount * editor.getOption(monaco.editor.EditorOption.lineHeight) });
+        editor.setScrollPosition({ scrollTop: editor.getScrollTop() + scrollAmount * editor.getOption(monacoRef.current.editor.EditorOption.lineHeight) });
       }
     }
   });

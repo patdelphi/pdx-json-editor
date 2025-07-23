@@ -29,8 +29,7 @@ export const configureJsonLanguage = (monaco) => {
       provideDocumentFormattingEdits: (model) => {
         try {
           const text = model.getValue();
-          const parsed = JSON.parse(text);
-          const formatted = JSON.stringify(parsed, null, 2);
+          const formatted = JSON.stringify(JSON.parse(text), null, 2);
           
           return [
             {
@@ -164,9 +163,8 @@ export const configureJsonLanguage = (monaco) => {
           
           // 获取完整的JSON内容
           const text = model.getValue();
-          let parsed;
           try {
-            parsed = JSON.parse(text);
+            JSON.parse(text);
           } catch (e) {
             // JSON无效，无法提供上下文信息
             return null;
@@ -222,7 +220,7 @@ export const configureJsonLanguage = (monaco) => {
           if (contents.length === 0) return null;
           
           return {
-            contents: contents
+            contents
           };
         } catch (e) {
           console.error('提供悬停信息失败:', e);
@@ -299,14 +297,14 @@ export const configureJsonFolding = (monaco) => {
  * @param {number} fontSize - 字体大小
  * @returns {Object} - 编辑器选项
  */
-export const getEditorOptions = (darkMode = false, highContrast = false, isLargeFile = false, fontSize = 14) => {
+export const getEditorOptions = (darkMode = false, isLargeFile = false, fontSize = 14) => {
   // 基本选项
   const baseOptions = {
     // 基本设置
     language: 'json',
     theme: darkMode ? 'vs-dark' : 'vs-light',
     automaticLayout: true,
-    fontSize: fontSize,
+    fontSize,
 
     // 代码折叠
     folding: true,

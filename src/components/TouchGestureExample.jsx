@@ -2,7 +2,7 @@
  * 触摸手势示例组件
  */
 
-import { useState, useRef } from 'preact/hooks';
+import { useState } from 'preact/hooks';
 import { Box, Typography, Paper, Snackbar, Alert } from '@mui/material';
 import { useSwipe, usePinch, useLongPress, useDoubleTap, useRotate } from '../hooks/useGestures';
 import { useTouchDevice } from '../hooks/useResponsive';

@@ -65,24 +65,20 @@ export const useSwipe = ({
     // 检查是否为快速滑动（小于300毫秒）
     const isQuickSwipe = duration < 300;
     
-    // 检查滑动方向
-    if (Math.abs(distanceX) > Math.abs(distanceY)) {
-      // 水平滑动
-      if (Math.abs(distanceX) > threshold) {
-        if (distanceX > 0 && onSwipeRight) {
-          onSwipeRight({ distance: distanceX, duration, isQuick: isQuickSwipe });
-        } else if (distanceX < 0 && onSwipeLeft) {
-          onSwipeLeft({ distance: Math.abs(distanceX), duration, isQuick: isQuickSwipe });
-        }
+    // 水平滑动
+    if (Math.abs(distanceX) > Math.abs(distanceY) && Math.abs(distanceX) > threshold) {
+      if (distanceX > 0 && onSwipeRight) {
+        onSwipeRight({ distance: distanceX, duration, isQuick: isQuickSwipe });
+      } else if (distanceX < 0 && onSwipeLeft) {
+        onSwipeLeft({ distance: Math.abs(distanceX), duration, isQuick: isQuickSwipe });
       }
-    } else {
-      // 垂直滑动
-      if (Math.abs(distanceY) > threshold) {
-        if (distanceY > 0 && onSwipeDown) {
-          onSwipeDown({ distance: distanceY, duration, isQuick: isQuickSwipe });
-        } else if (distanceY < 0 && onSwipeUp) {
-          onSwipeUp({ distance: Math.abs(distanceY), duration, isQuick: isQuickSwipe });
-        }
+    }
+    // 垂直滑动
+    else if (Math.abs(distanceY) > threshold) {
+      if (distanceY > 0 && onSwipeDown) {
+        onSwipeDown({ distance: distanceY, duration, isQuick: isQuickSwipe });
+      } else if (distanceY < 0 && onSwipeUp) {
+        onSwipeUp({ distance: Math.abs(distanceY), duration, isQuick: isQuickSwipe });
       }
     }
   };

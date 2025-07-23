@@ -3,8 +3,8 @@
  * 测试所有组件和服务的协同工作
  */
 
-import { h } from 'preact';
-import { render, fireEvent, screen, act, waitFor } from '@testing-library/preact';
+
+import { render, fireEvent, screen, waitFor } from '@testing-library/preact';
 import { App } from './App';
 
 // 模拟Monaco Editor
@@ -35,7 +35,7 @@ jest.mock('@monaco-editor/react', () => {
             layout: jest.fn()
           }, {
             editor: { 
-              EditorOption: { lineHeight: 'lineHeight' },
+              EditorOption: { lineHeight: 18 }, // Use a numerical value for lineHeight
               create: jest.fn()
             },
             languages: {
@@ -89,7 +89,7 @@ jest.mock('@monaco-editor/react', () => {
 });
 
 // 模拟文件API
-const mockFile = new File(['{"test":"value"}'], 'test.json', { type: 'application/json' });
+
 
 // 模拟localStorage
 const localStorageMock = (() => {

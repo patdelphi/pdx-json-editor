@@ -35,7 +35,7 @@ describe('useJsonSchema', () => {
     const { result } = renderHook(() => useJsonSchema(mockMonaco, mockJsonContent));
     
     expect(schemaService.getAllSchemas).toHaveBeenCalled();
-    expect(result.current.schemas.length).toBe(3);
+    expect(result.current.schemas).toHaveLength(3);
   });
   
   test('设置selectedSchemaId应配置Monaco编辑器', () => {

@@ -98,7 +98,7 @@ export const readFileWithPicker = async () => {
         name: file.name,
         path: file.name, // Web API不提供完整路径
         handle: fileHandle,
-        directoryHandle: directoryHandle
+        directoryHandle
       };
     } catch (error) {
       // 如果用户取消了操作，不抛出错误
@@ -220,7 +220,7 @@ export const saveFile = async (content, filename, options = {}) => {
         name: fileHandle.name,
         path: await fileHandle.getFile().then(file => file.name),
         handle: fileHandle, // 保存文件句柄以便后续操作
-        directoryHandle: directoryHandle // 保存目录句柄以便后续操作
+        directoryHandle // 保存目录句柄以便后续操作
       };
     } catch (error) {
       // 如果用户取消了操作，不抛出错误

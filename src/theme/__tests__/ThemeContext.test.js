@@ -5,7 +5,6 @@
 import { h } from 'preact';
 import { render, act } from '@testing-library/preact';
 import { ThemeContextProvider, useTheme } from '../ThemeContext';
-import { themes } from '../themeConfig';
 
 // 测试组件
 const TestComponent = ({ onThemeChange }) => {

@@ -1,5 +1,4 @@
 import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
-import { Box, Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 import { Header } from '../components/Header';
 import { TouchEnabledJsonEditor } from '../components/TouchEnabledJsonEditor';
 // SidePanel 已移除
@@ -14,7 +13,6 @@ export function MainLayout({
   onSettingsClick,
   onErrorClick
 }) {
-  const [drawerOpen, setDrawerOpen] = useState(false);
   const [editorContent, setEditorContent] = useState('');
   const [unsavedChangesDialogOpen, setUnsavedChangesDialogOpen] = useState(false);
   const [pendingOperation, setPendingOperation] = useState(null);
@@ -45,7 +43,7 @@ export function MainLayout({
     isLargeFile
   } = useFileOperations({
     onContentChange: setEditorContent,
-    onError: (error) => setErrorMessage(error.message),
+    onError: (error) => onErrorClick(error.message),
     onLargeFile: handleLargeFile
   });
   
@@ -140,7 +138,7 @@ export function MainLayout({
         setPendingOperation(null);
       }
     });
-  }, [currentFile, saveCurrentFile, pendingOperation]);
+  }, [saveCurrentFile, pendingOperation]);
   
   // 处理放弃更改并继续
   const handleDiscardAndContinue = useCallback(() => {
@@ -269,7 +267,7 @@ export function MainLayout({
       {/* 文件拖放区域 */}
       <FileDropZone 
         onFileDrop={openFile}
-        onError={(error) => setErrorMessage(error.message)}
+        onError={(error) => onErrorClick(error.message)}
       />
       
       {/* 另存为对话框已移除，使用系统原生文件选择对话框 */}

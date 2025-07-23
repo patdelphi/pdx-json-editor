@@ -3,7 +3,7 @@
  */
 
 import { h } from 'preact';
-import { render, fireEvent, screen } from '@testing-library/preact';
+import { render, fireEvent } from '@testing-library/preact';
 import { FileDropZone } from '../FileDropZone';
 import * as fileService from '../../services/fileService';
 

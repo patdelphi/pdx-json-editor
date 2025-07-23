@@ -33,7 +33,7 @@ describe('validationService', () => {
       const jsonString = '{"name": "test" o}';
       const errors = parseJsonError(error, jsonString);
       
-      expect(errors.length).toBe(1);
+      expect(errors).toHaveLength(1);
       expect(errors[0].line).toBeDefined();
       expect(errors[0].column).toBeDefined();
       expect(errors[0].message).toBeDefined();

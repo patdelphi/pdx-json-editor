@@ -13,7 +13,7 @@ export function Header({
   onNewFile,
   onOpenFile,
   onSaveFile,
-  onSaveAsFile,
+  
   onErrorClick,
   currentFileName,
   isDirty

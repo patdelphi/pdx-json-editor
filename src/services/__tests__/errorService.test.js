@@ -5,7 +5,6 @@
 import errorService, { 
   AppError, 
   JsonParseError, 
-  FileOperationError, 
   SchemaError,
   ErrorType,
   ErrorSeverity

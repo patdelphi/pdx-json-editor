@@ -160,7 +160,7 @@ export const jsonErrorToMarker = (error, modelUri) => {
     startLineNumber: error.line,
     startColumn: error.column,
     endLineNumber: error.line,
-    endColumn: endColumn,
+    endColumn,
     source: 'PDX JSON Editor',
     modelUri,
     // 添加标签，用于自定义装饰器
